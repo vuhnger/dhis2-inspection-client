@@ -3,10 +3,14 @@ const config = {
     type: 'app',
 
     entryPoints: {
-        app: './src/App.jsx',
+        app: './src/App.tsx',
     },
 
     direction: 'auto',
+
+    offline: {
+        enabled: true,
+    },
 }
 
 module.exports = config
