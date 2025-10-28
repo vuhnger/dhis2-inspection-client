@@ -9,7 +9,7 @@ it('renders without crashing', () => {
     const root = createRoot(div)
 
     root.render(
-        <CustomDataProvider>
+        <CustomDataProvider data={{ me: { name: 'Test User' } }}>
             <App />
         </CustomDataProvider>
     )
