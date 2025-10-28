@@ -1,14 +1,28 @@
-import i18n from '@dhis2/d2-i18n'
 import React from 'react'
+import {
+    Button,
+    InputField,
+    NoticeBox,
+    SingleSelectField,
+    SingleSelectOption,
+    Tag,
+    TextAreaField,
+} from '@dhis2/ui'
+import i18n from '@dhis2/d2-i18n'
 
 import classes from './ToiletCapturePage.module.css'
+import { LEARNER_TO_TOILET_MAX_RATIO } from '../../shared/constants/edutopiaStandards'
+import type { AccessibleOrgUnit } from '../../shared/hooks/useAccessibleOrgUnits'
 
 type ToiletCapturePageProps = {
     inspectorName?: string
+    orgUnits: AccessibleOrgUnit[]
+    orgUnitsLoading?: boolean
 }
 
 type FormState = {
-    schoolName: string
+    orgUnitId: string
+    orgUnitName: string
     inspectionDate: string
     learnerCount: string
     totalToilets: string
@@ -20,11 +34,13 @@ type FormState = {
 
 type StoredDraft = FormState & {
     lastSavedAt?: string | null
+    schoolName?: string
 }
 
 const STORAGE_KEY = 'group16:toiletCapture:draft'
 const DEFAULT_FORM: FormState = {
-    schoolName: '',
+    orgUnitId: '',
+    orgUnitName: '',
     inspectionDate: '',
     learnerCount: '',
     totalToilets: '',
@@ -33,8 +49,6 @@ const DEFAULT_FORM: FormState = {
     accessibleToilets: '',
     notes: '',
 }
-
-const MIN_TOILET_RATIO = 25
 
 const parseNumber = (value: string): number | null => {
     if (!value) {
@@ -67,7 +81,8 @@ const loadDraft = (): { form: FormState; lastSavedAt: string | null } => {
 
         return {
             form: {
-                schoolName: String(rest.schoolName ?? ''),
+                orgUnitId: String(rest.orgUnitId ?? ''),
+                orgUnitName: String(rest.orgUnitName ?? rest.schoolName ?? ''),
                 inspectionDate: String(rest.inspectionDate ?? ''),
                 learnerCount: String(rest.learnerCount ?? ''),
                 totalToilets: String(rest.totalToilets ?? ''),
@@ -84,7 +99,11 @@ const loadDraft = (): { form: FormState; lastSavedAt: string | null } => {
     }
 }
 
-const ToiletCapturePage: React.FC<ToiletCapturePageProps> = ({ inspectorName }) => {
+const ToiletCapturePage: React.FC<ToiletCapturePageProps> = ({
+    inspectorName,
+    orgUnits,
+    orgUnitsLoading = false,
+}) => {
     const draftRef = React.useRef(loadDraft())
     const [form, setForm] = React.useState<FormState>(() => draftRef.current.form)
     const [lastSavedAt, setLastSavedAt] = React.useState<string | null>(
@@ -95,7 +114,7 @@ const ToiletCapturePage: React.FC<ToiletCapturePageProps> = ({ inspectorName }) 
     const [wasSubmitted, setWasSubmitted] = React.useState(false)
 
     const hasHydrated = React.useRef(false)
-    const skipNextPersist = React.useRef(false)
+    const isClearingRef = React.useRef(false)
 
     React.useEffect(() => {
         if (!hasHydrated.current) {
@@ -103,12 +122,26 @@ const ToiletCapturePage: React.FC<ToiletCapturePageProps> = ({ inspectorName }) 
             return
         }
 
-        if (skipNextPersist.current) {
-            skipNextPersist.current = false
+        if (typeof window === 'undefined') {
             return
         }
 
-        if (typeof window === 'undefined') {
+        const isEmptyDraft = Object.values(form).every((value) => value === '')
+
+        if (isEmptyDraft) {
+            try {
+                window.localStorage.removeItem(STORAGE_KEY)
+            } catch (error) {
+                console.warn('Unable to remove empty toilet capture draft', error)
+            }
+
+            setLastSavedAt((previous) => (previous === null ? previous : null))
+            isClearingRef.current = false
+
+            return
+        }
+
+        if (isClearingRef.current) {
             return
         }
 
@@ -131,22 +164,67 @@ const ToiletCapturePage: React.FC<ToiletCapturePageProps> = ({ inspectorName }) 
         }
     }, [form])
 
-    const handleChange = (
-        event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => {
-        const { name, value } = event.target
+    const handleFieldChange = (field: keyof FormState) =>
+        ({ value }: { value?: string }) => {
+            setForm((prev) => ({
+                ...prev,
+                [field]: value ?? '',
+            }))
+        }
+
+    const orgUnitOptions = React.useMemo(
+        () =>
+            orgUnits.map((orgUnit) => ({
+                value: orgUnit.id,
+                label: orgUnit.name,
+            })),
+        [orgUnits]
+    )
+
+    const selectOptions = React.useMemo(() => {
+        if (!form.orgUnitId) {
+            return orgUnitOptions
+        }
+
+        const exists = orgUnitOptions.some((option) => option.value === form.orgUnitId)
+
+        if (exists) {
+            return orgUnitOptions
+        }
+
+        const fallbackLabel = form.orgUnitName
+            ? i18n.t('{{name}} (not in current list)', { name: form.orgUnitName })
+            : i18n.t('Previously selected school ({{id}})', { id: form.orgUnitId })
+
+        return [
+            {
+                value: form.orgUnitId,
+                label: fallbackLabel,
+            },
+            ...orgUnitOptions,
+        ]
+    }, [form.orgUnitId, form.orgUnitName, orgUnitOptions])
+
+    const handleOrgUnitChange = ({
+        selected,
+    }: {
+        selected?: string
+    }) => {
+        const value = selected ?? ''
+        const option = orgUnitOptions.find((item) => item.value === value)
 
         setForm((prev) => ({
             ...prev,
-            [name]: value,
+            orgUnitId: value,
+            orgUnitName: option?.label ?? (value ? prev.orgUnitName : ''),
         }))
     }
 
     const validate = (state: FormState) => {
         const nextErrors: Partial<Record<keyof FormState, string>> = {}
 
-        if (!state.schoolName.trim()) {
-            nextErrors.schoolName = i18n.t('Add the school name')
+        if (!state.orgUnitId) {
+            nextErrors.orgUnitId = i18n.t('Select a school from the list')
         }
 
         if (!state.inspectionDate) {
@@ -201,8 +279,8 @@ const ToiletCapturePage: React.FC<ToiletCapturePageProps> = ({ inspectorName }) 
     }
 
     const handleClearDraft = () => {
-        skipNextPersist.current = true
-        setForm(DEFAULT_FORM)
+        isClearingRef.current = true
+        setForm(() => ({ ...DEFAULT_FORM }))
         setErrors({})
         setWasSubmitted(false)
         setLastSavedAt(null)
@@ -228,7 +306,7 @@ const ToiletCapturePage: React.FC<ToiletCapturePageProps> = ({ inspectorName }) 
             return 'idle'
         }
 
-        return ratio <= MIN_TOILET_RATIO ? 'ok' : 'alert'
+        return ratio <= LEARNER_TO_TOILET_MAX_RATIO ? 'ok' : 'alert'
     }, [ratio])
 
     const ratioMessage = React.useMemo(() => {
@@ -236,10 +314,10 @@ const ToiletCapturePage: React.FC<ToiletCapturePageProps> = ({ inspectorName }) 
             return i18n.t('Add learner and working toilet counts to see the ratio')
         }
 
-        if (ratio <= MIN_TOILET_RATIO) {
+        if (ratio <= LEARNER_TO_TOILET_MAX_RATIO) {
             return i18n.t('Learner-to-toilet ratio {{ratio}} meets the < {{limit}} target.', {
                 ratio,
-                limit: MIN_TOILET_RATIO,
+                limit: LEARNER_TO_TOILET_MAX_RATIO,
             })
         }
 
@@ -247,7 +325,7 @@ const ToiletCapturePage: React.FC<ToiletCapturePageProps> = ({ inspectorName }) 
             'Learner-to-toilet ratio {{ratio}} is above the < {{limit}} target. Flag for follow-up.',
             {
                 ratio,
-                limit: MIN_TOILET_RATIO,
+                limit: LEARNER_TO_TOILET_MAX_RATIO,
             }
         )
     }, [ratio])
@@ -256,7 +334,7 @@ const ToiletCapturePage: React.FC<ToiletCapturePageProps> = ({ inspectorName }) 
 
     return (
         <section className={classes.page}>
-            <div className={classes.summaryCard}>
+            <div className={classes.card}>
                 <h2 className={classes.cardTitle}>{i18n.t('Toilet capture')}</h2>
                 <p className={classes.cardCopy}>
                     {inspectorName
@@ -268,207 +346,178 @@ const ToiletCapturePage: React.FC<ToiletCapturePageProps> = ({ inspectorName }) 
                               'Log today’s toilet status. Data stays on this device until a sync feature is added.'
                           )}
                 </p>
-                <div
-                    className={
-                        ratioStatus === 'alert'
-                            ? classes.ratioWarning
-                            : ratioStatus === 'ok'
-                            ? classes.ratioSuccess
-                            : classes.ratioIdle
-                    }
+                <NoticeBox
+                    className={classes.ratioNotice}
+                    success={ratioStatus === 'ok'}
+                    warning={ratioStatus === 'alert'}
+                    info={ratioStatus === 'idle'}
+                    title={i18n.t('Learner-to-toilet ratio')}
                 >
-                    <span className={classes.ratioLabel}>{i18n.t('Learner-to-toilet ratio')}</span>
-                    <strong className={classes.ratioValue}>{ratio ?? '—'}</strong>
-                    <p className={classes.ratioMessage}>{ratioMessage}</p>
-                </div>
+                    <div className={classes.ratioContent}>
+                        <Tag
+                            className={classes.ratioValue}
+                            positive={ratioStatus === 'ok'}
+                            negative={ratioStatus === 'alert'}
+                        >
+                            {ratio ?? '—'}
+                        </Tag>
+                        <p className={classes.ratioMessage}>{ratioMessage}</p>
+                    </div>
+                </NoticeBox>
             </div>
 
             <form className={classes.form} onSubmit={handleSubmit} noValidate>
-                <fieldset className={classes.fieldset}>
-                    <legend className={classes.sectionTitle}>
+                <section className={classes.formSection} aria-labelledby="section-school">
+                    <h3 className={classes.sectionTitle} id="section-school">
                         {i18n.t('School details and context')}
-                    </legend>
+                    </h3>
 
-                    <label className={classes.label} htmlFor="schoolName">
-                        {i18n.t('School name')}
-                    </label>
-                    <input
-                        className={classes.input}
-                        id="schoolName"
-                        name="schoolName"
-                        value={form.schoolName}
-                        onChange={handleChange}
-                        placeholder={i18n.t('e.g. Campama LBS')}
-                        autoComplete="organization"
-                    />
-                    {errors.schoolName ? (
-                        <p className={classes.error}>{errors.schoolName}</p>
-                    ) : null}
+                    <SingleSelectField
+                        label={i18n.t('School')}
+                        name="orgUnitId"
+                        placeholder={i18n.t('Search school name')}
+                        filterable
+                        loading={orgUnitsLoading}
+                        selected={form.orgUnitId || undefined}
+                        onChange={handleOrgUnitChange}
+                        clearable
+                        noMatchText={i18n.t('No schools match your search')}
+                        emptyText={i18n.t('No schools found')}
+                        error={Boolean(errors.orgUnitId)}
+                        validationText={errors.orgUnitId}
+                    >
+                        {selectOptions.map((option) => (
+                            <SingleSelectOption
+                                key={option.value}
+                                value={option.value}
+                                label={option.label}
+                            />
+                        ))}
+                    </SingleSelectField>
 
-                    <label className={classes.label} htmlFor="inspectionDate">
-                        {i18n.t('Inspection date')}
-                    </label>
-                    <input
-                        className={classes.input}
-                        type="date"
-                        id="inspectionDate"
+                    <InputField
+                        label={i18n.t('Inspection date')}
                         name="inspectionDate"
+                        type="date"
                         value={form.inspectionDate}
-                        onChange={handleChange}
+                        onChange={handleFieldChange('inspectionDate')}
+                        required
+                        error={Boolean(errors.inspectionDate)}
+                        validationText={errors.inspectionDate}
                     />
-                    {errors.inspectionDate ? (
-                        <p className={classes.error}>{errors.inspectionDate}</p>
-                    ) : null}
 
-                    <label className={classes.label} htmlFor="learnerCount">
-                        {i18n.t('Learners present today')}
-                    </label>
-                    <input
-                        className={classes.input}
+                    <InputField
+                        label={i18n.t('Learners present today')}
+                        name="learnerCount"
                         type="number"
                         inputMode="numeric"
-                        min={0}
-                        id="learnerCount"
-                        name="learnerCount"
+                        min="0"
                         value={form.learnerCount}
-                        onChange={handleChange}
+                        onChange={handleFieldChange('learnerCount')}
+                        error={Boolean(errors.learnerCount)}
+                        validationText={errors.learnerCount}
                     />
-                    {errors.learnerCount ? (
-                        <p className={classes.error}>{errors.learnerCount}</p>
-                    ) : null}
-                </fieldset>
+                </section>
 
-                <fieldset className={classes.fieldset}>
-                    <legend className={classes.sectionTitle}>
+                <section className={classes.formSection} aria-labelledby="section-breakdown">
+                    <h3 className={classes.sectionTitle} id="section-breakdown">
                         {i18n.t('Toilet breakdown')}
-                    </legend>
+                    </h3>
 
                     <div className={classes.fieldGrid}>
-                        <div>
-                            <label className={classes.label} htmlFor="totalToilets">
-                                {i18n.t('Total toilets on site')}
-                            </label>
-                            <input
-                                className={classes.input}
-                                type="number"
-                                inputMode="numeric"
-                                min={0}
-                                id="totalToilets"
-                                name="totalToilets"
-                                value={form.totalToilets}
-                                onChange={handleChange}
-                            />
-                            {errors.totalToilets ? (
-                                <p className={classes.error}>{errors.totalToilets}</p>
-                            ) : null}
-                        </div>
+                        <InputField
+                            label={i18n.t('Total toilets on site')}
+                            name="totalToilets"
+                            type="number"
+                            inputMode="numeric"
+                            min="0"
+                            value={form.totalToilets}
+                            onChange={handleFieldChange('totalToilets')}
+                            error={Boolean(errors.totalToilets)}
+                            validationText={errors.totalToilets}
+                        />
 
-                        <div>
-                            <label className={classes.label} htmlFor="workingToilets">
-                                {i18n.t('Working toilets')}
-                            </label>
-                            <input
-                                className={classes.input}
-                                type="number"
-                                inputMode="numeric"
-                                min={0}
-                                id="workingToilets"
-                                name="workingToilets"
-                                value={form.workingToilets}
-                                onChange={handleChange}
-                            />
-                            {errors.workingToilets ? (
-                                <p className={classes.error}>{errors.workingToilets}</p>
-                            ) : null}
-                        </div>
+                        <InputField
+                            label={i18n.t('Working toilets')}
+                            name="workingToilets"
+                            type="number"
+                            inputMode="numeric"
+                            min="0"
+                            value={form.workingToilets}
+                            onChange={handleFieldChange('workingToilets')}
+                            error={Boolean(errors.workingToilets)}
+                            validationText={errors.workingToilets}
+                        />
 
-                        <div>
-                            <label className={classes.label} htmlFor="femaleFriendlyToilets">
-                                {i18n.t('Female-friendly toilets')}
-                            </label>
-                            <input
-                                className={classes.input}
-                                type="number"
-                                inputMode="numeric"
-                                min={0}
-                                id="femaleFriendlyToilets"
-                                name="femaleFriendlyToilets"
-                                value={form.femaleFriendlyToilets}
-                                onChange={handleChange}
-                            />
-                            {errors.femaleFriendlyToilets ? (
-                                <p className={classes.error}>{errors.femaleFriendlyToilets}</p>
-                            ) : null}
-                        </div>
+                        <InputField
+                            label={i18n.t('Female-friendly toilets')}
+                            name="femaleFriendlyToilets"
+                            type="number"
+                            inputMode="numeric"
+                            min="0"
+                            value={form.femaleFriendlyToilets}
+                            onChange={handleFieldChange('femaleFriendlyToilets')}
+                            error={Boolean(errors.femaleFriendlyToilets)}
+                            validationText={errors.femaleFriendlyToilets}
+                        />
 
-                        <div>
-                            <label className={classes.label} htmlFor="accessibleToilets">
-                                {i18n.t('Accessible toilets')}
-                            </label>
-                            <input
-                                className={classes.input}
-                                type="number"
-                                inputMode="numeric"
-                                min={0}
-                                id="accessibleToilets"
-                                name="accessibleToilets"
-                                value={form.accessibleToilets}
-                                onChange={handleChange}
-                            />
-                            {errors.accessibleToilets ? (
-                                <p className={classes.error}>{errors.accessibleToilets}</p>
-                            ) : null}
-                        </div>
+                        <InputField
+                            label={i18n.t('Accessible toilets')}
+                            name="accessibleToilets"
+                            type="number"
+                            inputMode="numeric"
+                            min="0"
+                            value={form.accessibleToilets}
+                            onChange={handleFieldChange('accessibleToilets')}
+                            error={Boolean(errors.accessibleToilets)}
+                            validationText={errors.accessibleToilets}
+                        />
                     </div>
-                </fieldset>
+                </section>
 
-                <fieldset className={classes.fieldset}>
-                    <legend className={classes.sectionTitle}>{i18n.t('Notes')}</legend>
+                <section className={classes.formSection} aria-labelledby="section-notes">
+                    <h3 className={classes.sectionTitle} id="section-notes">
+                        {i18n.t('Notes')}
+                    </h3>
 
-                    <label className={classes.label} htmlFor="notes">
-                        {i18n.t('Observations and maintenance needs')}
-                    </label>
-                    <textarea
-                        className={classes.textarea}
-                        id="notes"
+                    <TextAreaField
+                        label={i18n.t('Observations and maintenance needs')}
                         name="notes"
                         value={form.notes}
-                        onChange={handleChange}
+                        onChange={handleFieldChange('notes')}
                         rows={4}
                         placeholder={i18n.t(
                             'Describe cleanliness, stock levels (soap, water), or any urgent repairs.'
                         )}
                     />
-                </fieldset>
+                </section>
 
                 <div className={classes.actions}>
-                    <button className={classes.primaryButton} type="submit">
+                    <Button primary type="submit">
                         {i18n.t('Mark draft as ready')}
-                    </button>
-                    <button
-                        className={classes.secondaryButton}
-                        type="button"
-                        onClick={handleClearDraft}
-                    >
+                    </Button>
+                    <Button secondary type="button" onClick={handleClearDraft}>
                         {i18n.t('Clear draft')}
-                    </button>
+                    </Button>
                 </div>
 
                 {submissionSucceeded ? (
-                    <p className={classes.statusMessage}>
+                    <NoticeBox success title={i18n.t('Draft saved locally')}>
                         {lastSavedAt
-                            ? i18n.t('Draft saved locally at {{timestamp}}. Ready to sync later.', {
+                            ? i18n.t('Saved at {{timestamp}}. Ready to sync later.', {
                                   timestamp: new Date(lastSavedAt).toLocaleString(),
                               })
-                            : i18n.t('Draft saved locally on this device. Ready to sync later.')}
-                    </p>
+                            : i18n.t('Ready to sync later.')}
+                    </NoticeBox>
                 ) : wasSubmitted ? (
-                    <p className={classes.statusWarning}>
+                    <NoticeBox warning>
                         {i18n.t('Please fix the highlighted fields before finishing the draft.')}
-                    </p>
+                    </NoticeBox>
                 ) : null}
 
-                {persistError ? <p className={classes.statusError}>{persistError}</p> : null}
+                {persistError ? (
+                    <NoticeBox error title={i18n.t('Draft not saved')}>{persistError}</NoticeBox>
+                ) : null}
 
                 {lastSavedAt && !submissionSucceeded ? (
                     <p className={classes.helperText}>
@@ -485,7 +534,7 @@ const ToiletCapturePage: React.FC<ToiletCapturePageProps> = ({ inspectorName }) 
                     {i18n.t(
                         'Edutopia expects fewer than {{limit}} learners per working toilet. These notes will help plan maintenance visits and resource transfers once syncing is available.',
                         {
-                            limit: MIN_TOILET_RATIO,
+                            limit: LEARNER_TO_TOILET_MAX_RATIO,
                         }
                     )}
                 </p>

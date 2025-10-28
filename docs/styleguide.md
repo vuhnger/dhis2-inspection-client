@@ -25,6 +25,7 @@ This style guide complements `docs/architecture.md` by translating architectural
 
 ## 4. Styling & Layout
 
+- ALWAYS try to use DHIS2 components: [UI library](https://developers.dhis2.org/docs/tutorials/ui-library/)
 - Use CSS Modules (`.module.css`). Scope class names to the component (e.g., `.container`, `.metricValue`). Do not use global CSS.
 - For layout, leverage DHIS2 UI primitives (`Box`, `Stack`, `Table`, etc.) before introducing custom flexbox utilities.
 - Keep colour usage aligned with DHIS2 palettes; custom colours require design rationale recorded in the PR.
@@ -49,7 +50,7 @@ This style guide complements `docs/architecture.md` by translating architectural
 ## 7. Accessibility & UX
 
 - All interactive elements must be reachable via keyboard and include discernible labels.
-- Use semantic HTML first (`<button>`, `<label>`, `<table>`). When using custom components, ensure ARIA roles/attributes mirror the semantic expectation.
+- Use semantic HTML first (`<button>`, `<label>`, `<table>`) (USE DHIS2 variants if possible). When using custom components, ensure ARIA roles/attributes mirror the semantic expectation.
 - Provide meaningful empty/loading states instead of blank screens. Communicate connectivity changes via toast + persistent banner.
 - Write copy in plain language suited to varying digital literacy levels; avoid jargon.
 

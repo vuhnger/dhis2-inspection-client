@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-10-28T11:43:45.379Z\n"
-"PO-Revision-Date: 2025-10-28T11:43:45.379Z\n"
+"POT-Creation-Date: 2025-10-28T12:10:00.332Z\n"
+"PO-Revision-Date: 2025-10-28T12:10:00.333Z\n"
 
 msgid ""
 "We could not load your DHIS2 profile right now. You can still capture "
@@ -141,14 +141,20 @@ msgstr "Mark draft as ready"
 msgid "Clear draft"
 msgstr "Clear draft"
 
-msgid "Draft saved locally at {{timestamp}}. Ready to sync later."
-msgstr "Draft saved locally at {{timestamp}}. Ready to sync later."
+msgid "Draft saved locally"
+msgstr "Draft saved locally"
 
-msgid "Draft saved locally on this device. Ready to sync later."
-msgstr "Draft saved locally on this device. Ready to sync later."
+msgid "Saved at {{timestamp}}. Ready to sync later."
+msgstr "Saved at {{timestamp}}. Ready to sync later."
+
+msgid "Ready to sync later."
+msgstr "Ready to sync later."
 
 msgid "Please fix the highlighted fields before finishing the draft."
 msgstr "Please fix the highlighted fields before finishing the draft."
+
+msgid "Draft not saved"
+msgstr "Draft not saved"
 
 msgid "Draft auto-saved at {{timestamp}}"
 msgstr "Draft auto-saved at {{timestamp}}"
@@ -171,3 +177,11 @@ msgid ""
 msgstr ""
 "When online, the app will compare against DHIS2 baselines so you can "
 "explain changes to the head teacher in the field."
+
+msgctxt "Application title"
+msgid "__MANIFEST_APP_TITLE"
+msgstr "in5320-group-16"
+
+msgctxt "Application description"
+msgid "__MANIFEST_APP_DESCRIPTION"
+msgstr ""

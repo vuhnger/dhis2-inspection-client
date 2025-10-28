@@ -3,6 +3,7 @@ import i18n from '@dhis2/d2-i18n'
 import React from 'react'
 
 import ToiletCapturePage from '../features/inspection/ToiletCapturePage'
+import useAccessibleOrgUnits from '../shared/hooks/useAccessibleOrgUnits'
 import classes from './AppShell.module.css'
 
 type MeQueryResult = {
@@ -19,6 +20,8 @@ const query = {
 
 const AppShell: React.FC = () => {
     const { error, loading, data } = useDataQuery<MeQueryResult>(query)
+    const { orgUnits, loading: orgUnitsLoading, error: orgUnitsError, hasCachedData } =
+        useAccessibleOrgUnits()
 
     const notice = React.useMemo(() => {
         if (error) {
@@ -47,6 +50,38 @@ const AppShell: React.FC = () => {
 
     const inspectorName = data?.me?.name ?? ''
 
+    const orgUnitsNotice = React.useMemo(() => {
+        if (orgUnitsError && !hasCachedData) {
+            return {
+                tone: 'error' as const,
+                message: i18n.t('We could not load your school list. Try refreshing when you are back online.'),
+            }
+        }
+
+        if (orgUnitsError && hasCachedData) {
+            return {
+                tone: 'info' as const,
+                message: i18n.t('Working from cached school data. Refresh when connectivity returns for the latest list.'),
+            }
+        }
+
+        if (orgUnitsLoading && orgUnits.length === 0) {
+            return {
+                tone: 'info' as const,
+                message: i18n.t('Loading accessible schools…'),
+            }
+        }
+
+        if (!orgUnitsLoading && orgUnits.length === 0) {
+            return {
+                tone: 'info' as const,
+                message: i18n.t('No schools found for your account. Confirm your DHIS2 access rights.'),
+            }
+        }
+
+        return null
+    }, [hasCachedData, orgUnits.length, orgUnitsError, orgUnitsLoading])
+
     return (
         <div className={classes.container}>
             <header className={classes.header}>
@@ -69,7 +104,19 @@ const AppShell: React.FC = () => {
                     </div>
                 ) : null}
 
-                <ToiletCapturePage inspectorName={inspectorName} />
+                {orgUnitsNotice ? (
+                    <div
+                        className={`${classes.notice} ${orgUnitsNotice.tone === 'error' ? classes.noticeError : classes.noticeInfo}`}
+                    >
+                        {orgUnitsNotice.message}
+                    </div>
+                ) : null}
+
+                <ToiletCapturePage
+                    inspectorName={inspectorName}
+                    orgUnits={orgUnits}
+                    orgUnitsLoading={orgUnitsLoading}
+                />
             </main>
         </div>
     )

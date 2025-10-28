@@ -5,6 +5,10 @@ import React from 'react'
 import ToiletCapturePage from './ToiletCapturePage'
 
 const STORAGE_KEY = 'group16:toiletCapture:draft'
+const ORG_UNITS = [
+    { id: 'Ou123', name: 'Campama LBS', path: '/Ou123' },
+    { id: 'Ou456', name: 'Riverbend School', path: '/Ou456' },
+]
 
 describe('ToiletCapturePage', () => {
     let container: HTMLDivElement
@@ -29,9 +33,17 @@ describe('ToiletCapturePage', () => {
         container.remove()
     })
 
-    const renderComponent = async (props: React.ComponentProps<typeof ToiletCapturePage>) => {
+    const renderComponent = async (
+        props: Partial<React.ComponentProps<typeof ToiletCapturePage>> = {}
+    ) => {
         await act(async () => {
-            root.render(<ToiletCapturePage {...props} />)
+            root.render(
+                <ToiletCapturePage
+                    orgUnits={ORG_UNITS}
+                    orgUnitsLoading={false}
+                    {...props}
+                />
+            )
         })
     }
 
@@ -43,7 +55,8 @@ describe('ToiletCapturePage', () => {
         }
 
         await act(async () => {
-            submitButton.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+            submitButton.click()
+            await Promise.resolve()
         })
     }
 
@@ -51,6 +64,8 @@ describe('ToiletCapturePage', () => {
         window.localStorage.setItem(
             STORAGE_KEY,
             JSON.stringify({
+                orgUnitId: 'Ou123',
+                orgUnitName: 'Campama LBS',
                 schoolName: 'Campama LBS',
                 inspectionDate: '2024-10-15',
                 learnerCount: '420',
@@ -65,11 +80,11 @@ describe('ToiletCapturePage', () => {
 
         await renderComponent({ inspectorName: 'Test Inspector' })
 
-        const schoolField = container.querySelector<HTMLInputElement>('input[name="schoolName"]')
+        expect(container.textContent).toContain('Campama LBS')
+
         const dateField = container.querySelector<HTMLInputElement>('input[name="inspectionDate"]')
         const notesField = container.querySelector<HTMLTextAreaElement>('textarea[name="notes"]')
 
-        expect(schoolField?.value).toBe('Campama LBS')
         expect(dateField?.value).toBe('2024-10-15')
         expect(notesField?.value).toBe('Existing draft')
     })
@@ -78,33 +93,40 @@ describe('ToiletCapturePage', () => {
         window.localStorage.setItem(
             STORAGE_KEY,
             JSON.stringify({
-                schoolName: 'Seaview Primary',
+                orgUnitId: 'Ou123',
+                orgUnitName: 'Seaview Primary',
                 inspectionDate: '2024-10-21',
             })
         )
 
-        await renderComponent({})
+        await renderComponent()
 
-        const clearButton = container.querySelector<HTMLButtonElement>('button[type="button"]')
+        const clearButton = Array.from(
+            container.querySelectorAll<HTMLButtonElement>('button[data-test="dhis2-uicore-button"]')
+        ).find((button) => button.textContent?.includes('Clear draft'))
 
         if (!clearButton) {
             throw new Error('Clear draft button not found')
         }
 
         await act(async () => {
-            clearButton.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+            clearButton.click()
+            await Promise.resolve()
         })
+
+        const dateField = container.querySelector<HTMLInputElement>('input[name="inspectionDate"]')
+        expect(dateField?.value).toBe('')
 
         expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull()
     })
 
     it('surfaces validation errors when submitting an empty form', async () => {
-        await renderComponent({})
+        await renderComponent()
 
         await clickSubmit()
 
         expect(container.textContent).toContain('Please fix the highlighted fields before finishing the draft')
-        expect(container.textContent).toContain('Add the school name')
+        expect(container.textContent).toContain('Select a school from the list')
         expect(container.textContent).toContain('Select the inspection date')
     })
 
@@ -112,7 +134,8 @@ describe('ToiletCapturePage', () => {
         window.localStorage.setItem(
             STORAGE_KEY,
             JSON.stringify({
-                schoolName: 'Riverbend School',
+                orgUnitId: 'Ou456',
+                orgUnitName: 'Riverbend School',
                 inspectionDate: '2024-10-22',
                 learnerCount: '280',
                 totalToilets: '14',
@@ -124,7 +147,7 @@ describe('ToiletCapturePage', () => {
             })
         )
 
-        await renderComponent({})
+        await renderComponent()
 
         await clickSubmit()
 
