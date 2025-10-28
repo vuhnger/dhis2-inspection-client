@@ -1,5 +1,9 @@
 This project was bootstrapped with [DHIS2 Application Platform](https://github.com/dhis2/app-platform).
 
+## Project Focus
+
+We are building an **offline-first** DHIS2 web application aimed at tablet usage by school inspectors. All inspection workflows must function without connectivity; when online, the app will synchronise cached inspections and enrich comparisons with the latest DHIS2 data.
+
 ## Available Scripts
 
 In the project directory, you can run:
@@ -43,3 +47,7 @@ You can learn more about the platform in the [DHIS2 Application Platform Documen
 You can learn more about the runtime in the [DHIS2 Application Runtime Documentation](https://runtime.dhis2.nu/).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+## Selected requirements 
+
+We selected requirement 3 (school resource count) and requirement 5 (offline features). All design and development decisions must support inspectors who operate with no connectivity during school visits.
