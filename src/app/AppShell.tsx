@@ -20,17 +20,26 @@ const query = {
 const AppShell: React.FC = () => {
     const { error, loading, data } = useDataQuery<MeQueryResult>(query)
 
-    const statusMessage = React.useMemo(() => {
+    const notice = React.useMemo(() => {
         if (error) {
-            return i18n.t('We could not load your DHIS2 profile right now.')
+            return {
+                tone: 'error' as const,
+                message: i18n.t('We could not load your DHIS2 profile right now. You can still capture toilets and sync later.'),
+            }
         }
 
         if (loading) {
-            return i18n.t('Loading your workspace…')
+            return {
+                tone: 'info' as const,
+                message: i18n.t('Loading your workspace… You can start filling the form while we fetch your profile.'),
+            }
         }
 
         if (!data) {
-            return i18n.t('Offline cache empty – sync when online to personalise the view.')
+            return {
+                tone: 'info' as const,
+                message: i18n.t('Offline cache is empty. Complete the form below and it will stay on this device until you sync.'),
+            }
         }
 
         return null
@@ -52,11 +61,15 @@ const AppShell: React.FC = () => {
             </header>
 
             <main className={classes.body}>
-                {statusMessage ? (
-                    <div className={classes.statusMessage}>{statusMessage}</div>
-                ) : (
-                    <ToiletCapturePage inspectorName={inspectorName} />
-                )}
+                {notice ? (
+                    <div
+                        className={`${classes.notice} ${notice.tone === 'error' ? classes.noticeError : classes.noticeInfo}`}
+                    >
+                        {notice.message}
+                    </div>
+                ) : null}
+
+                <ToiletCapturePage inspectorName={inspectorName} />
             </main>
         </div>
     )

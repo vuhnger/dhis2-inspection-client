@@ -1,0 +1,237 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 880px;
+}
+
+.summaryCard,
+.supportCard,
+.form {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
+.cardTitle {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+}
+
+.cardCopy {
+  margin: 0;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.ratioLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #1e293b;
+}
+
+.ratioValue {
+  font-size: 2.25rem;
+  margin-top: 8px;
+  display: block;
+}
+
+.ratioMessage {
+  margin: 8px 0 0;
+  font-size: 0.95rem;
+}
+
+.ratioIdle {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 10px;
+  background-color: #f8fafc;
+  color: #334155;
+}
+
+.ratioSuccess {
+  composes: ratioIdle;
+  background-color: #ecfdf5;
+  color: #065f46;
+}
+
+.ratioWarning {
+  composes: ratioIdle;
+  background-color: #fef2f2;
+  color: #b91c1c;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.label {
+  font-weight: 500;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5f5;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.error {
+  margin: 4px 0 0;
+  color: #b91c1c;
+  font-size: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.primaryButton,
+.secondaryButton {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.primaryButton {
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  color: #ffffff;
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+}
+
+.secondaryButton {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.primaryButton:hover,
+.secondaryButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 18px -4px rgba(15, 23, 42, 0.25);
+}
+
+.primaryButton:focus,
+.secondaryButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+}
+
+.statusMessage,
+.statusWarning,
+.statusError,
+.helperText {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.statusMessage {
+  padding: 12px;
+  border-radius: 10px;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.statusWarning {
+  padding: 12px;
+  border-radius: 10px;
+  background: #fef9c3;
+  color: #92400e;
+}
+
+.statusError {
+  margin-top: -4px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.helperText {
+  color: #475569;
+}
+
+.supportCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.supportTitle {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.supportCopy {
+  margin: 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding-bottom: 32px;
+  }
+
+  .summaryCard,
+  .supportCard,
+  .form {
+    padding: 18px;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+}
