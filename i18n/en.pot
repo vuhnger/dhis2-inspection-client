@@ -1,0 +1,173 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: i18next-conv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"POT-Creation-Date: 2025-10-28T11:43:45.379Z\n"
+"PO-Revision-Date: 2025-10-28T11:43:45.379Z\n"
+
+msgid ""
+"We could not load your DHIS2 profile right now. You can still capture "
+"toilets and sync later."
+msgstr ""
+"We could not load your DHIS2 profile right now. You can still capture "
+"toilets and sync later."
+
+msgid ""
+"Loading your workspace… You can start filling the form while we fetch your "
+"profile."
+msgstr ""
+"Loading your workspace… You can start filling the form while we fetch your "
+"profile."
+
+msgid ""
+"Offline cache is empty. Complete the form below and it will stay on this "
+"device until you sync."
+msgstr ""
+"Offline cache is empty. Complete the form below and it will stay on this "
+"device until you sync."
+
+msgid "School Inspection Toolkit"
+msgstr "School Inspection Toolkit"
+
+msgid "Welcome back, {{name}}. Prepare your inspection below."
+msgstr "Welcome back, {{name}}. Prepare your inspection below."
+
+msgid "Prepare your inspection below. We will sync when connectivity returns."
+msgstr "Prepare your inspection below. We will sync when connectivity returns."
+
+msgid ""
+"We could not save the draft on this device. Copy your notes before "
+"refreshing."
+msgstr ""
+"We could not save the draft on this device. Copy your notes before "
+"refreshing."
+
+msgid "Add the school name"
+msgstr "Add the school name"
+
+msgid "Select the inspection date"
+msgstr "Select the inspection date"
+
+msgid "Enter a non-negative number"
+msgstr "Enter a non-negative number"
+
+msgid "Working toilets cannot exceed total toilets"
+msgstr "Working toilets cannot exceed total toilets"
+
+msgid "Female-friendly toilets cannot exceed total toilets"
+msgstr "Female-friendly toilets cannot exceed total toilets"
+
+msgid "Accessible toilets cannot exceed total toilets"
+msgstr "Accessible toilets cannot exceed total toilets"
+
+msgid "Add learner and working toilet counts to see the ratio"
+msgstr "Add learner and working toilet counts to see the ratio"
+
+msgid "Learner-to-toilet ratio {{ratio}} meets the < {{limit}} target."
+msgstr "Learner-to-toilet ratio {{ratio}} meets the < {{limit}} target."
+
+msgid ""
+"Learner-to-toilet ratio {{ratio}} is above the < {{limit}} target. Flag for "
+"follow-up."
+msgstr ""
+"Learner-to-toilet ratio {{ratio}} is above the < {{limit}} target. Flag for "
+"follow-up."
+
+msgid "Toilet capture"
+msgstr "Toilet capture"
+
+msgid ""
+"Log today’s toilet status for {{name}}. We will sync with DHIS2 when "
+"connectivity is available."
+msgstr ""
+"Log today’s toilet status for {{name}}. We will sync with DHIS2 when "
+"connectivity is available."
+
+msgid ""
+"Log today’s toilet status. Data stays on this device until a sync feature "
+"is added."
+msgstr ""
+"Log today’s toilet status. Data stays on this device until a sync feature "
+"is added."
+
+msgid "Learner-to-toilet ratio"
+msgstr "Learner-to-toilet ratio"
+
+msgid "School details and context"
+msgstr "School details and context"
+
+msgid "School name"
+msgstr "School name"
+
+msgid "e.g. Campama LBS"
+msgstr "e.g. Campama LBS"
+
+msgid "Inspection date"
+msgstr "Inspection date"
+
+msgid "Learners present today"
+msgstr "Learners present today"
+
+msgid "Toilet breakdown"
+msgstr "Toilet breakdown"
+
+msgid "Total toilets on site"
+msgstr "Total toilets on site"
+
+msgid "Working toilets"
+msgstr "Working toilets"
+
+msgid "Female-friendly toilets"
+msgstr "Female-friendly toilets"
+
+msgid "Accessible toilets"
+msgstr "Accessible toilets"
+
+msgid "Notes"
+msgstr "Notes"
+
+msgid "Observations and maintenance needs"
+msgstr "Observations and maintenance needs"
+
+msgid "Describe cleanliness, stock levels (soap, water), or any urgent repairs."
+msgstr "Describe cleanliness, stock levels (soap, water), or any urgent repairs."
+
+msgid "Mark draft as ready"
+msgstr "Mark draft as ready"
+
+msgid "Clear draft"
+msgstr "Clear draft"
+
+msgid "Draft saved locally at {{timestamp}}. Ready to sync later."
+msgstr "Draft saved locally at {{timestamp}}. Ready to sync later."
+
+msgid "Draft saved locally on this device. Ready to sync later."
+msgstr "Draft saved locally on this device. Ready to sync later."
+
+msgid "Please fix the highlighted fields before finishing the draft."
+msgstr "Please fix the highlighted fields before finishing the draft."
+
+msgid "Draft auto-saved at {{timestamp}}"
+msgstr "Draft auto-saved at {{timestamp}}"
+
+msgid "Why we capture toilets"
+msgstr "Why we capture toilets"
+
+msgid ""
+"Edutopia expects fewer than {{limit}} learners per working toilet. These "
+"notes will help plan maintenance visits and resource transfers once syncing "
+"is available."
+msgstr ""
+"Edutopia expects fewer than {{limit}} learners per working toilet. These "
+"notes will help plan maintenance visits and resource transfers once syncing "
+"is available."
+
+msgid ""
+"When online, the app will compare against DHIS2 baselines so you can "
+"explain changes to the head teacher in the field."
+msgstr ""
+"When online, the app will compare against DHIS2 baselines so you can "
+"explain changes to the head teacher in the field."
