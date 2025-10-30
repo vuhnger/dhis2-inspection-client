@@ -8,10 +8,16 @@ We are building an **offline-first** DHIS2 web application aimed at tablet usage
 
 In the project directory, you can run:
 
+### npx dhis-portal --target=https://data.research.dhis2.org/in5320/
+
 ### `yarn start`
 
 Runs the app in the development mode.<br />
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+You can log into this instance with the credentials:
+Username: admin
+Password: district
 
 The page will reload if you make edits.<br />
 You will also see any lint errors in the console.

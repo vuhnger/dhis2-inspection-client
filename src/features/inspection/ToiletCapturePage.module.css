@@ -1,0 +1,116 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 880px;
+}
+
+.card,
+.form,
+.supportCard {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cardTitle {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+}
+
+.cardCopy {
+  margin: 0;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.ratioNotice {
+  margin-top: 16px;
+}
+
+.ratioContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ratioValue {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.ratioMessage {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.helperText {
+  color: #475569;
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+}
+
+.supportCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.supportTitle {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.supportCopy {
+  margin: 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding-bottom: 32px;
+  }
+
+  .card,
+  .form,
+  .supportCard {
+    padding: 18px;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
