@@ -1,8 +1,10 @@
 import { useDataQuery } from '@dhis2/app-runtime'
 import i18n from '@dhis2/d2-i18n'
 import React from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 import ToiletCapturePage from '../features/inspection/ToiletCapturePage'
+import InspectionOverview from '../features/inspection/overview/InspectionOverview'
 import useAccessibleOrgUnits from '../shared/hooks/useAccessibleOrgUnits'
 import classes from './AppShell.module.css'
 
@@ -83,42 +85,55 @@ const AppShell: React.FC = () => {
     }, [hasCachedData, orgUnits.length, orgUnitsError, orgUnitsLoading])
 
     return (
-        <div className={classes.container}>
-            <header className={classes.header}>
-                <h1 className={classes.title}>{i18n.t('School Inspection Toolkit')}</h1>
-                <p className={classes.subtitle}>
-                    {inspectorName
-                        ? i18n.t('Welcome back, {{name}}. Prepare your inspection below.', {
-                              name: inspectorName,
-                          })
-                        : i18n.t('Prepare your inspection below. We will sync when connectivity returns.')}
-                </p>
-            </header>
+        <Router>
+            <div className={classes.container}>
+                <header className={classes.header}>
+                    <h1 className={classes.title}>{i18n.t('School Inspection Toolkit')}</h1>
+                    <p className={classes.subtitle}>
+                        {inspectorName
+                            ? i18n.t('Welcome back, {{name}}. Prepare your inspection below.', {
+                                  name: inspectorName,
+                              })
+                            : i18n.t('Prepare your inspection below. We will sync when connectivity returns.')}
+                    </p>
+                </header>
 
-            <main className={classes.body}>
-                {notice ? (
-                    <div
-                        className={`${classes.notice} ${notice.tone === 'error' ? classes.noticeError : classes.noticeInfo}`}
-                    >
-                        {notice.message}
-                    </div>
-                ) : null}
+                <main className={classes.body}>
+                    {notice ? (
+                        <div
+                            className={`${classes.notice} ${notice.tone === 'error' ? classes.noticeError : classes.noticeInfo}`}
+                        >
+                            {notice.message}
+                        </div>
+                    ) : null}
 
-                {orgUnitsNotice ? (
-                    <div
-                        className={`${classes.notice} ${orgUnitsNotice.tone === 'error' ? classes.noticeError : classes.noticeInfo}`}
-                    >
-                        {orgUnitsNotice.message}
-                    </div>
-                ) : null}
+                    {orgUnitsNotice ? (
+                        <div
+                            className={`${classes.notice} ${orgUnitsNotice.tone === 'error' ? classes.noticeError : classes.noticeInfo}`}
+                        >
+                            {orgUnitsNotice.message}
+                        </div>
+                    ) : null}
 
-                <ToiletCapturePage
-                    inspectorName={inspectorName}
-                    orgUnits={orgUnits}
-                    orgUnitsLoading={orgUnitsLoading}
-                />
-            </main>
-        </div>
+                    <Routes>
+                        <Route
+                            path="/"
+                            element={
+                                <ToiletCapturePage
+                                    inspectorName={inspectorName}
+                                    orgUnits={orgUnits}
+                                    orgUnitsLoading={orgUnitsLoading}
+                                />
+                            }
+                        />
+                        <Route
+                            path="/inspection-overview"
+                            element={<InspectionOverview />}
+                        />
+                    </Routes>
+                </main>
+            </div>
+        </Router>
     )
 }
 

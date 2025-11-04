@@ -1,0 +1,233 @@
+/* DHIS2 Mobile Design System Colors */
+:root {
+  --dhis2-blue-900: #093371;
+  --dhis2-blue-700: #1565c0;
+  --dhis2-blue-500: #2196f3;
+  --dhis2-blue-300: #90caf9;
+  --dhis2-blue-050: #f5fbff;
+
+  --dhis2-teal-700: #00695c;
+  --dhis2-teal-500: #00897b;
+  --dhis2-teal-300: #4db6ac;
+  --dhis2-teal-100: #e0f2f1;
+
+  --dhis2-green-700: #2e7d32;
+  --dhis2-green-500: #43a047;
+  --dhis2-green-100: #e8f5e9;
+
+  --dhis2-grey-900: #212934;
+  --dhis2-grey-700: #4a5768;
+  --dhis2-grey-600: #6C7787;
+  --dhis2-grey-500: #a0adba;
+  --dhis2-grey-300: #e8edf2;
+  --dhis2-grey-200: #f3f5f7;
+  --dhis2-grey-100: #f8f9fa;
+  --dhis2-grey-050: #fbfcfd;
+
+  --dhis2-white: #ffffff;
+
+  /* DHIS2 Spacers (8-point grid) */
+  --dhis2-space-4: 4px;
+  --dhis2-space-8: 8px;
+  --dhis2-space-12: 12px;
+  --dhis2-space-16: 16px;
+  --dhis2-space-24: 24px;
+  --dhis2-space-32: 32px;
+  --dhis2-space-48: 48px;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dhis2-space-16);
+  max-width: 100%;
+  background: var(--dhis2-grey-100);
+  min-height: 100vh;
+  padding-bottom: 88px; /* Space for fixed submit button */
+}
+
+.header {
+  background: var(--dhis2-white);
+  padding: var(--dhis2-space-16);
+  box-shadow: 0 1px 3px rgba(33, 41, 52, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: var(--dhis2-space-16);
+}
+
+.headerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dhis2-space-4);
+}
+
+.schoolName {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--dhis2-grey-900);
+  line-height: 1.2;
+}
+
+.inspectionDate {
+  margin: 0;
+  color: var(--dhis2-grey-600);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.categories {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--dhis2-space-12);
+}
+
+.categoryButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88px;
+  border-radius: 8px;
+  border: 1px solid var(--dhis2-grey-300);
+  background: var(--dhis2-white);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dhis2-grey-700);
+  padding: var(--dhis2-space-12);
+  box-shadow: 0 1px 2px rgba(33, 41, 52, 0.06);
+}
+
+.categoryButton:hover {
+  border-color: var(--dhis2-grey-500);
+  background: var(--dhis2-grey-050);
+  box-shadow: 0 2px 4px rgba(33, 41, 52, 0.08);
+}
+
+.categoryButton:active {
+  transform: scale(0.98);
+}
+
+.categoryButton.active {
+  border-color: var(--dhis2-teal-500);
+  background: var(--dhis2-teal-100);
+  color: var(--dhis2-teal-700);
+  font-weight: 600;
+  box-shadow: 0 0 0 2px rgba(0, 137, 123, 0.1);
+}
+
+.categoryButton.completed {
+  border-color: var(--dhis2-green-500);
+  background: var(--dhis2-green-100);
+  color: var(--dhis2-green-700);
+  opacity: 0.7;
+}
+
+.categoryButton.completed:hover {
+  opacity: 0.85;
+}
+
+.categoryButton.active.completed {
+  opacity: 1;
+  border-color: var(--dhis2-teal-500);
+  background: var(--dhis2-teal-100);
+  color: var(--dhis2-teal-700);
+}
+
+.categoryButton:focus {
+  outline: 2px solid var(--dhis2-blue-500);
+  outline-offset: 2px;
+}
+
+.categoryLabel {
+  text-align: center;
+  line-height: 1.3;
+}
+
+.form {
+  background: var(--dhis2-white);
+  padding: var(--dhis2-space-16);
+  box-shadow: 0 1px 3px rgba(33, 41, 52, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: var(--dhis2-space-16);
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dhis2-space-16);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-weight: 600;
+  color: var(--dhis2-grey-900);
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.formFields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dhis2-space-16);
+}
+
+.actions {
+  display: flex;
+  gap: var(--dhis2-space-12);
+  flex-wrap: wrap;
+  margin-top: var(--dhis2-space-8);
+}
+
+.submitButtonContainer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--dhis2-white);
+  padding: var(--dhis2-space-16);
+  box-shadow: 0 -2px 8px rgba(33, 41, 52, 0.12);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+}
+
+/* Submit button should span full width on mobile */
+.submitButtonContainer button {
+  width: 100%;
+  max-width: 480px;
+  min-height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+@media (min-width: 641px) {
+  .page {
+    max-width: 640px;
+    margin: 0 auto;
+    background: var(--dhis2-white);
+  }
+
+  .header {
+    border-radius: 8px;
+    margin: var(--dhis2-space-16);
+  }
+
+  .form {
+    border-radius: 8px;
+    margin: 0 var(--dhis2-space-16);
+  }
+
+  .categories {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .submitButtonContainer {
+    position: relative;
+    box-shadow: none;
+    margin-top: var(--dhis2-space-16);
+    padding: var(--dhis2-space-24);
+  }
+}

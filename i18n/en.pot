@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-10-28T12:10:00.332Z\n"
-"PO-Revision-Date: 2025-10-28T12:10:00.333Z\n"
+"POT-Creation-Date: 2025-11-04T11:35:20.129Z\n"
+"PO-Revision-Date: 2025-11-04T11:35:20.130Z\n"
 
 msgid ""
 "We could not load your DHIS2 profile right now. You can still capture "
@@ -28,6 +28,22 @@ msgid ""
 msgstr ""
 "Offline cache is empty. Complete the form below and it will stay on this "
 "device until you sync."
+
+msgid "We could not load your school list. Try refreshing when you are back online."
+msgstr "We could not load your school list. Try refreshing when you are back online."
+
+msgid ""
+"Working from cached school data. Refresh when connectivity returns for the "
+"latest list."
+msgstr ""
+"Working from cached school data. Refresh when connectivity returns for the "
+"latest list."
+
+msgid "Loading accessible schools…"
+msgstr "Loading accessible schools…"
+
+msgid "No schools found for your account. Confirm your DHIS2 access rights."
+msgstr "No schools found for your account. Confirm your DHIS2 access rights."
 
 msgid "School Inspection Toolkit"
 msgstr "School Inspection Toolkit"
@@ -45,8 +61,14 @@ msgstr ""
 "We could not save the draft on this device. Copy your notes before "
 "refreshing."
 
-msgid "Add the school name"
-msgstr "Add the school name"
+msgid "{{name}} (not in current list)"
+msgstr "{{name}} (not in current list)"
+
+msgid "Previously selected school ({{id}})"
+msgstr "Previously selected school ({{id}})"
+
+msgid "Select a school from the list"
+msgstr "Select a school from the list"
 
 msgid "Select the inspection date"
 msgstr "Select the inspection date"
@@ -99,11 +121,17 @@ msgstr "Learner-to-toilet ratio"
 msgid "School details and context"
 msgstr "School details and context"
 
-msgid "School name"
-msgstr "School name"
+msgid "School"
+msgstr "School"
 
-msgid "e.g. Campama LBS"
-msgstr "e.g. Campama LBS"
+msgid "Search school name"
+msgstr "Search school name"
+
+msgid "No schools match your search"
+msgstr "No schools match your search"
+
+msgid "No schools found"
+msgstr "No schools found"
 
 msgid "Inspection date"
 msgstr "Inspection date"
@@ -177,11 +205,3 @@ msgid ""
 msgstr ""
 "When online, the app will compare against DHIS2 baselines so you can "
 "explain changes to the head teacher in the field."
-
-msgctxt "Application title"
-msgid "__MANIFEST_APP_TITLE"
-msgstr "in5320-group-16"
-
-msgctxt "Application description"
-msgid "__MANIFEST_APP_DESCRIPTION"
-msgstr ""
