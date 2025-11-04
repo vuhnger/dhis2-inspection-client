@@ -1,0 +1,389 @@
+/* Tablet-optimized layout for 768x1024 viewport */
+.container {
+    max-width: 768px;
+    margin: 0 auto;
+    padding: 24px;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+/* Header Styles */
+.header {
+    margin-bottom: 24px;
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.headerTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0 0 6px;
+    color: #1e293b;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.statusBadge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.offlineDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #64748b;
+}
+
+/* Action Bar */
+.actionBar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.actionBar button {
+    min-height: 48px;
+    padding: 0 20px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    flex: 0 0 auto;
+}
+
+/* Loading State */
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+}
+
+/* Content Sections */
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.sectionTitle {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+    color: #1e293b;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 12px;
+    background: #e0f2fe;
+    color: #0369a1;
+    border-radius: 16px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* Inspection Cards Grid */
+.inspectionGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+}
+
+.inspectionCard {
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    gap: 12px;
+}
+
+.schoolName {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    color: #1e293b;
+    line-height: 1.4;
+}
+
+.overdueTag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #fee2e2;
+    color: #991b1b;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.cardDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.detailRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.detailLabel {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.detailValue {
+    font-size: 0.95rem;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.statusPill {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.statusPill.schedule {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.statusPill.active {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.statusPill.completed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.cardActions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.cardActions button {
+    min-height: 44px;
+    border-radius: 8px;
+}
+
+/* Completed Inspections List */
+.inspectionList {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.listItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: white;
+    min-height: 80px;
+    gap: 16px;
+}
+
+.listItemLeft {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    min-width: 0;
+}
+
+.checkmark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: #d1fae5;
+    color: #065f46;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.listSchoolName {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 4px;
+    color: #1e293b;
+}
+
+.listDate {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.listItemRight {
+    flex-shrink: 0;
+}
+
+.listItemRight button {
+    min-height: 44px;
+}
+
+/* Empty States */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 16px;
+}
+
+.emptyText {
+    font-size: 1rem;
+    color: #64748b;
+    margin: 0;
+    text-align: center;
+}
+
+/* Stats Section */
+.statsSection {
+    margin-top: 8px;
+}
+
+.stats {
+    display: flex;
+    padding: 24px;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.statItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.statValue {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1;
+}
+
+.statLabel {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.statDivider {
+    width: 1px;
+    height: 60px;
+    background: #e2e8f0;
+}
+
+/* Tablet-specific responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 16px;
+    }
+
+    .title {
+        font-size: 1.75rem;
+    }
+
+    .inspectionGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .actionBar {
+        flex-direction: column;
+    }
+
+    .actionBar button {
+        width: 100%;
+    }
+
+    .stats {
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .statDivider {
+        width: 60px;
+        height: 1px;
+    }
+}
+
+/* Touch-friendly hover states for tablets */
+@media (hover: hover) {
+    .listItem:hover {
+        background: #f8fafc;
+    }
+}
+
+/* Accessibility */
+.cardActions button:focus,
+.listItemRight button:focus,
+.actionBar button:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
