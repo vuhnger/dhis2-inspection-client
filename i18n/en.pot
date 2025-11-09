@@ -5,84 +5,14 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-04T12:50:27.502Z\n"
-"PO-Revision-Date: 2025-11-04T12:50:27.502Z\n"
-
-msgid "School Inspections"
-msgstr "School Inspections"
-
-msgid "Edutopia District Inspector Dashboard"
-msgstr "Edutopia District Inspector Dashboard"
-
-msgid "Online"
-msgstr "Online"
-
-msgid "Offline"
-msgstr "Offline"
-
-msgid "New Inspection"
-msgstr "New Inspection"
-
-msgid "Refresh"
-msgstr "Refresh"
-
-msgid "Working Offline"
-msgstr "Working Offline"
-
-msgid "Showing cached data. New inspections will sync when connection is restored."
-msgstr "Showing cached data. New inspections will sync when connection is restored."
-
-msgid "Loading inspections..."
-msgstr "Loading inspections..."
-
-msgid "Could not load inspections"
-msgstr "Could not load inspections"
-
-msgid ""
-"Check your connection and try refreshing. Cached data may be available "
-"offline."
-msgstr ""
-"Check your connection and try refreshing. Cached data may be available "
-"offline."
-
-msgid "Upcoming Inspections"
-msgstr "Upcoming Inspections"
+"POT-Creation-Date: 2025-11-09T14:22:39.343Z\n"
+"PO-Revision-Date: 2025-11-09T14:22:39.343Z\n"
 
 msgid "No upcoming inspections scheduled"
 msgstr "No upcoming inspections scheduled"
 
-msgid "Schedule Inspection"
-msgstr "Schedule Inspection"
-
-msgid "Overdue"
-msgstr "Overdue"
-
-msgid "Scheduled"
-msgstr "Scheduled"
-
-msgid "In Progress"
-msgstr "In Progress"
-
-msgid "View Details"
-msgstr "View Details"
-
-msgid "Start Inspection"
-msgstr "Start Inspection"
-
-msgid "Completed Inspections"
-msgstr "Completed Inspections"
-
 msgid "No completed inspections yet"
 msgstr "No completed inspections yet"
-
-msgid "View Report"
-msgstr "View Report"
-
-msgid "Upcoming"
-msgstr "Upcoming"
-
-msgid "Completed"
-msgstr "Completed"
 
 msgid ""
 "We could not save the draft on this device. Copy your notes before "
