@@ -67,17 +67,73 @@ const InspectionHomePage: React.FC = () => {
     // Parse events into upcoming vs finished
     const { upcomingInspections, finishedInspections } = React.useMemo(() => {
         const events = data?.events?.instances || []
+        
+        // Add dummy data if no real data available
+        const dummyUpcoming: InspectionEvent[] = [
+            {
+                event: 'dummy-1',
+                orgUnit: 'school-a',
+                orgUnitName: 'School A (dummydata)',
+                eventDate: '2025-11-17T16:00:00',
+                status: 'SCHEDULE',
+                dataValues: []
+            },
+            {
+                event: 'dummy-2',
+                orgUnit: 'school-a',
+                orgUnitName: 'School A (dummydata)',
+                eventDate: '2025-11-18T16:00:00',
+                status: 'SCHEDULE',
+                dataValues: []
+            },
+            {
+                event: 'dummy-3',
+                orgUnit: 'school-a',
+                orgUnitName: 'School A (dummydata)',
+                eventDate: '2025-12-09T16:00:00',
+                status: 'SCHEDULE',
+                dataValues: []
+            }
+        ]
+        
+        const dummyCompleted: InspectionEvent[] = [
+            {
+                event: 'dummy-4',
+                orgUnit: 'school-a',
+                orgUnitName: 'School A (dummydata)',
+                eventDate: '2025-09-10T16:00:00',
+                status: 'COMPLETED',
+                dataValues: []
+            },
+            {
+                event: 'dummy-5',
+                orgUnit: 'school-a',
+                orgUnitName: 'School A (dummydata)',
+                eventDate: '2025-09-10T16:00:00',
+                status: 'COMPLETED',
+                dataValues: []
+            },
+            {
+                event: 'dummy-6',
+                orgUnit: 'school-a',
+                orgUnitName: 'School A (dummydata)',
+                eventDate: '2025-09-10T16:00:00',
+                status: 'COMPLETED',
+                dataValues: []
+            }
+        ]
+        
         const now = new Date()
         
-        const upcoming = events.filter(event => {
+        const upcoming = events.length > 0 ? events.filter(event => {
             const eventDate = new Date(event.eventDate)
             return event.status === 'SCHEDULE' || (event.status === 'ACTIVE' && eventDate >= now)
-        })
+        }) : dummyUpcoming
         
-        const finished = events.filter(event => {
+        const finished = events.length > 0 ? events.filter(event => {
             const eventDate = new Date(event.eventDate)
             return event.status === 'COMPLETED' || (eventDate < now && event.status !== 'SCHEDULE')
-        })
+        }) : dummyCompleted
 
         return {
             upcomingInspections: upcoming,
