@@ -209,9 +209,9 @@ const InspectionHomePage: React.FC = () => {
                 {/* Upcoming Inspections Section */}
                 <section className={classes.section}>
                     <div className={classes.sectionHeader}>
-                        <h2 className={classes.sectionTitle}>Your upcoming inspections</h2>
+                        <h2 className={classes.sectionTitle}>Upcoming inspections</h2>
                         <button className={classes.seeAllLink}>
-                            See all upcoming inspections &gt;
+                            See all upcoming inspections ▾
                         </button>
                     </div>
 
@@ -264,9 +264,9 @@ const InspectionHomePage: React.FC = () => {
                 {/* Completed Inspections Section */}
                 <section className={classes.section}>
                     <div className={classes.sectionHeader}>
-                        <h2 className={classes.sectionTitle}>Your completed inspections</h2>
+                        <h2 className={classes.sectionTitle}>Completed inspections</h2>
                         <button className={classes.seeAllLink}>
-                            See all previous inspections &gt;
+                            See all previous inspections ▾
                         </button>
                     </div>
 

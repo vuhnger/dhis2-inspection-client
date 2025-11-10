@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap');
+
 /* Tablet-optimized layout for 768x1024 viewport */
 .container {
     max-width: 768px;
@@ -5,12 +7,13 @@
     padding: 24px;
     background: #1260BA;
     min-height: 100vh;
+    font-family: 'Roboto', sans-serif;
 }
 
 /* Header Styles */
 .header {
     margin-bottom: 24px;
-    background: #1D1B20;
+    background: #1D2B36;
     padding: 24px;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -37,10 +40,11 @@
 }
 
 .greeting {
-    font-size: 2rem;
-    font-weight: 600;
+    font-size: 1.75rem;
+    font-weight: 400;
     margin: 0 0 6px;
     color: #ffffff;
+    font-family: 'Roboto Mono', monospace;
 }
 
 .syncBadge {
@@ -169,6 +173,26 @@
     font-weight: 600;
     margin: 0;
     color: #ffffff;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.seeAllLink {
+    background: #1260BA;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    font-weight: 400;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.seeAllLink:hover {
+    background: #1260BA;
 }
 
 .badge {
