@@ -240,10 +240,10 @@ const InspectionHomePage: React.FC = () => {
                                                 {formatDate(inspection.eventDate)}
                                             </div>
                                             <div className={classes.cardTime}>
-                                                Scheduled time: 16:00 - 17:30
+                                                16:00 - 17:30
                                             </div>
                                             <div className={classes.cardSchool}>
-                                                School: {inspection.orgUnitName}
+                                                {inspection.orgUnitName}
                                             </div>
                                             <div className={classes.cardStatus}>
                                                 <span className={classes.syncIcon}>✓</span> Synced
@@ -252,7 +252,7 @@ const InspectionHomePage: React.FC = () => {
                                     </div>
                                     <div className={classes.cardRight}>
                                         <div className={classes.daysIndicator}>
-                                            📅 In {days} days
+                                            In {days} days
                                         </div>
                                     </div>
                                 </div>
@@ -289,10 +289,10 @@ const InspectionHomePage: React.FC = () => {
                                                 {formatDate(inspection.eventDate)}
                                             </div>
                                             <div className={classes.cardTime}>
-                                                Scheduled time: 16:00 - 17:30
+                                                16:00 - 17:30
                                             </div>
                                             <div className={classes.cardSchool}>
-                                                School: {inspection.orgUnitName}
+                                                {inspection.orgUnitName}
                                             </div>
                                             <div className={classes.cardStatus}>
                                                 <span className={classes.syncIcon}>✓</span> Synced
@@ -301,7 +301,7 @@ const InspectionHomePage: React.FC = () => {
                                     </div>
                                     <div className={classes.cardRight}>
                                         <div className={classes.daysAgo}>
-                                            📅 {days} days ago
+                                            {days} days ago
                                         </div>
                                     </div>
                                 </div>

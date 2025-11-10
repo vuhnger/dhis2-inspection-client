@@ -202,6 +202,101 @@
     padding: 20px;
     background: white;
     border-radius: 12px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.cardLeft {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+}
+
+.avatarCircle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #E2F2FF;
+    color: #1260BA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.cardInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cardDate {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1260BA;
+    margin: 0;
+}
+
+.cardTime {
+    font-size: 0.9rem;
+    color: #1e293b;
+    margin: 0;
+}
+
+.cardTime::before {
+    content: 'Scheduled time: ';
+    color: #64748b;
+}
+
+.cardSchool {
+    font-size: 0.9rem;
+    color: #1e293b;
+    margin: 0;
+}
+
+.cardSchool::before {
+    content: 'School: ';
+    color: #64748b;
+}
+
+.cardStatus {
+    font-size: 0.85rem;
+    color: #10b981;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.syncIcon {
+    font-size: 0.85rem;
+}
+
+.cardRight {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.daysIndicator {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #10b981;
+    white-space: nowrap;
+}
+
+.daysAgo {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+    white-space: nowrap;
 }
 
 .cardHeader {
