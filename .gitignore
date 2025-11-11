@@ -4,3 +4,15 @@ node_modules
 src/locales
 build
 .env
+
+# Package managers / lockfiles
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+npm-shrinkwrap.json
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

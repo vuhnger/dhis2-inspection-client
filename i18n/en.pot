@@ -8,8 +8,42 @@ msgstr ""
 "POT-Creation-Date: 2025-11-09T14:22:39.343Z\n"
 "PO-Revision-Date: 2025-11-09T14:22:39.343Z\n"
 
-msgid "No upcoming inspections scheduled"
-msgstr "No upcoming inspections scheduled"
+msgid ""
+"We could not load your DHIS2 profile right now. You can still capture "
+"toilets and sync later."
+msgstr ""
+"We could not load your DHIS2 profile right now. You can still capture "
+"toilets and sync later."
+
+msgid ""
+"Loading your workspace… You can start filling the form while we fetch your "
+"profile."
+msgstr ""
+"Loading your workspace… You can start filling the form while we fetch your "
+"profile."
+
+msgid ""
+"Offline cache is empty. Complete the form below and it will stay on this "
+"device until you sync."
+msgstr ""
+"Offline cache is empty. Complete the form below and it will stay on this "
+"device until you sync."
+
+msgid "We could not load your school list. Try refreshing when you are back online."
+msgstr "We could not load your school list. Try refreshing when you are back online."
+
+msgid ""
+"Working from cached school data. Refresh when connectivity returns for the "
+"latest list."
+msgstr ""
+"Working from cached school data. Refresh when connectivity returns for the "
+"latest list."
+
+msgid "Loading accessible schools…"
+msgstr "Loading accessible schools…"
+
+msgid "No schools found for your account. Confirm your DHIS2 access rights."
+msgstr "No schools found for your account. Confirm your DHIS2 access rights."
 
 msgid "No completed inspections yet"
 msgstr "No completed inspections yet"
@@ -165,3 +199,114 @@ msgid ""
 msgstr ""
 "When online, the app will compare against DHIS2 baselines so you can "
 "explain changes to the head teacher in the field."
+
+msgid "Total student count is required"
+msgstr "Total student count is required"
+
+msgid "Male student count is required"
+msgstr "Male student count is required"
+
+msgid "Female student count is required"
+msgstr "Female student count is required"
+
+msgid "Total must equal male + female students"
+msgstr "Total must equal male + female students"
+
+msgid "Staff count is required"
+msgstr "Staff count is required"
+
+msgid "Classroom count is required"
+msgstr "Classroom count is required"
+
+msgid "Textbooks"
+msgstr "Textbooks"
+
+msgid "Decrease textbooks"
+msgstr "Decrease textbooks"
+
+msgid "Increase textbooks"
+msgstr "Increase textbooks"
+
+msgid "Desks"
+msgstr "Desks"
+
+msgid "Decrease desks"
+msgstr "Decrease desks"
+
+msgid "Increase desks"
+msgstr "Increase desks"
+
+msgid "Chairs"
+msgstr "Chairs"
+
+msgid "Decrease chairs"
+msgstr "Decrease chairs"
+
+msgid "Increase chairs"
+msgstr "Increase chairs"
+
+msgid "Test field"
+msgstr "Test field"
+
+msgid "Optional"
+msgstr "Optional"
+
+msgid "Select option"
+msgstr "Select option"
+
+msgid "Option 1"
+msgstr "Option 1"
+
+msgid "Option 2"
+msgstr "Option 2"
+
+msgid "Option 3"
+msgstr "Option 3"
+
+msgid "Additional notes on resources"
+msgstr "Additional notes on resources"
+
+msgid "Total Students"
+msgstr "Total Students"
+
+msgid "Male Students"
+msgstr "Male Students"
+
+msgid "Female Students"
+msgstr "Female Students"
+
+msgid "Total Staff Count"
+msgstr "Total Staff Count"
+
+msgid "Number of Classrooms"
+msgstr "Number of Classrooms"
+
+msgid "Information about the school"
+msgstr "Information about the school"
+
+msgid "Staff"
+msgstr "Staff"
+
+msgid "Resources"
+msgstr "Resources"
+
+msgid "Students"
+msgstr "Students"
+
+msgid "Facilities"
+msgstr "Facilities"
+
+msgid "Validation Required"
+msgstr "Validation Required"
+
+msgid "Please complete all categories before submitting."
+msgstr "Please complete all categories before submitting."
+
+msgid "Report Submitted"
+msgstr "Report Submitted"
+
+msgid "Your inspection report has been submitted successfully."
+msgstr "Your inspection report has been submitted successfully."
+
+msgid "Submit Report"
+msgstr "Submit Report"
