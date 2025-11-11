@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-11T11:08:09.766Z\n"
-"PO-Revision-Date: 2025-11-11T11:08:09.767Z\n"
+"POT-Creation-Date: 2025-11-09T14:22:39.343Z\n"
+"PO-Revision-Date: 2025-11-09T14:22:39.343Z\n"
 
 msgid ""
 "We could not load your DHIS2 profile right now. You can still capture "
@@ -45,14 +45,8 @@ msgstr "Loading accessible schools…"
 msgid "No schools found for your account. Confirm your DHIS2 access rights."
 msgstr "No schools found for your account. Confirm your DHIS2 access rights."
 
-msgid "School Inspection Toolkit"
-msgstr "School Inspection Toolkit"
-
-msgid "Welcome back, {{name}}. Prepare your inspection below."
-msgstr "Welcome back, {{name}}. Prepare your inspection below."
-
-msgid "Prepare your inspection below. We will sync when connectivity returns."
-msgstr "Prepare your inspection below. We will sync when connectivity returns."
+msgid "No completed inspections yet"
+msgstr "No completed inspections yet"
 
 msgid ""
 "We could not save the draft on this device. Copy your notes before "
