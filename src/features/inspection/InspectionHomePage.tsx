@@ -1,0 +1,324 @@
+import React from 'react'
+import { useDataQuery } from '@dhis2/app-runtime'
+import i18n from '@dhis2/d2-i18n'
+import { Card, Button, CircularLoader, NoticeBox, IconAdd24, IconSync24, colors, spacers } from '@dhis2/ui'
+import classes from './InspectionHomePage.module.css'
+
+/**
+ * Inspection event from DHIS2 tracker API
+ */
+interface InspectionEvent {
+    event: string
+    orgUnit: string
+    orgUnitName: string
+    eventDate: string
+    status: 'COMPLETED' | 'ACTIVE' | 'SCHEDULE'
+    dataValues: Array<{
+        dataElement: string
+        value: string | number
+    }>
+}
+
+interface EventsQueryResult {
+    events: {
+        instances: InspectionEvent[]
+    }
+}
+
+/**
+ * Query to fetch inspection events for the user's accessible org units
+ * This will be cached offline per DHIS2 App Runtime behavior
+ */
+const eventsQuery = {
+    events: {
+        resource: 'tracker/events',
+        params: {
+            program: 'UxK2o06ScIe', // School Inspection program UID
+            fields: 'event,orgUnit,orgUnitName,eventDate,status,dataValues[dataElement,value]',
+            order: 'eventDate:desc',
+            pageSize: 50,
+        },
+    },
+}
+
+/**
+ * Home page showing upcoming and completed school inspections
+ * Designed for 768x1024 tablet viewport with offline-first workflow
+ */
+const InspectionHomePage: React.FC = () => {
+    const { loading, error, data, refetch } = useDataQuery<EventsQueryResult>(eventsQuery)
+    const [isOnline, setIsOnline] = React.useState(navigator.onLine)
+    const [searchQuery, setSearchQuery] = React.useState('')
+
+    // Track online/offline status
+    React.useEffect(() => {
+        const handleOnline = () => setIsOnline(true)
+        const handleOffline = () => setIsOnline(false)
+
+        window.addEventListener('online', handleOnline)
+        window.addEventListener('offline', handleOffline)
+
+        return () => {
+            window.removeEventListener('online', handleOnline)
+            window.removeEventListener('offline', handleOffline)
+        }
+    }, [])
+
+    // Parse events into upcoming vs finished
+    const { upcomingInspections, finishedInspections } = React.useMemo(() => {
+        const events = data?.events?.instances || []
+        
+        // Add dummy data if no real data available
+        const dummyUpcoming: InspectionEvent[] = [
+            {
+                event: 'dummy-1',
+                orgUnit: 'school-a',
+                orgUnitName: 'School A (dummydata)',
+                eventDate: '2025-11-17T16:00:00',
+                status: 'SCHEDULE',
+                dataValues: []
+            },
+            {
+                event: 'dummy-2',
+                orgUnit: 'school-a',
+                orgUnitName: 'School A (dummydata)',
+                eventDate: '2025-11-18T16:00:00',
+                status: 'SCHEDULE',
+                dataValues: []
+            },
+            {
+                event: 'dummy-3',
+                orgUnit: 'school-a',
+                orgUnitName: 'School A (dummydata)',
+                eventDate: '2025-12-09T16:00:00',
+                status: 'SCHEDULE',
+                dataValues: []
+            }
+        ]
+        
+        const dummyCompleted: InspectionEvent[] = [
+            {
+                event: 'dummy-4',
+                orgUnit: 'school-a',
+                orgUnitName: 'School A (dummydata)',
+                eventDate: '2025-09-10T16:00:00',
+                status: 'COMPLETED',
+                dataValues: []
+            },
+            {
+                event: 'dummy-5',
+                orgUnit: 'school-a',
+                orgUnitName: 'School A (dummydata)',
+                eventDate: '2025-09-10T16:00:00',
+                status: 'COMPLETED',
+                dataValues: []
+            },
+            {
+                event: 'dummy-6',
+                orgUnit: 'school-a',
+                orgUnitName: 'School A (dummydata)',
+                eventDate: '2025-09-10T16:00:00',
+                status: 'COMPLETED',
+                dataValues: []
+            }
+        ]
+        
+        const now = new Date()
+        
+        const upcoming = events.length > 0 ? events.filter(event => {
+            const eventDate = new Date(event.eventDate)
+            return event.status === 'SCHEDULE' || (event.status === 'ACTIVE' && eventDate >= now)
+        }) : dummyUpcoming
+        
+        const finished = events.length > 0 ? events.filter(event => {
+            const eventDate = new Date(event.eventDate)
+            return event.status === 'COMPLETED' || (eventDate < now && event.status !== 'SCHEDULE')
+        }) : dummyCompleted
+
+        return {
+            upcomingInspections: upcoming,
+            finishedInspections: finished,
+        }
+    }, [data])
+
+    // Calculate days until/since inspection
+    const getDaysRelative = (dateString: string): { days: number; isPast: boolean } => {
+        const eventDate = new Date(dateString)
+        const now = new Date()
+        const diffTime = eventDate.getTime() - now.getTime()
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        return {
+            days: Math.abs(diffDays),
+            isPast: diffDays < 0,
+        }
+    }
+
+    // Format date for display
+    const formatDate = (dateString: string): string => {
+        const date = new Date(dateString)
+        return date.toLocaleDateString('en-GB', { 
+            day: 'numeric', 
+            month: 'short' 
+        })
+    }
+
+    // Format time for display
+    const formatTime = (dateString: string): string => {
+        const date = new Date(dateString)
+        return date.toLocaleTimeString('en-GB', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false
+        })
+    }
+
+    return (
+        <div className={classes.container}>
+            {/* Dark Header */}
+            <header className={classes.header}>
+                <div className={classes.headerTop}>
+                    <h1 className={classes.greeting}>Hi, inspector!</h1>
+                    <div className={classes.headerActions}>
+                        {isOnline && (
+                            <div className={classes.syncBadge}>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 4V1L8 5L12 9V6C15.31 6 18 8.69 18 12C18 13.01 17.75 13.97 17.3 14.8L18.76 16.26C19.54 15.03 20 13.57 20 12C20 7.58 16.42 4 12 4ZM12 18C8.69 18 6 15.31 6 12C6 10.99 6.25 10.03 6.7 9.2L5.24 7.74C4.46 8.97 4 10.43 4 12C4 16.42 7.58 20 12 20V23L16 19L12 15V18Z" fill="#059669"/>
+                                </svg>
+                                <span>Synced</span>
+                            </div>
+                        )}
+                        <div className={classes.userAvatar}>LH</div>
+                    </div>
+                </div>
+
+                {/* Search Bar */}
+                <div className={classes.searchContainer}>
+                    <input
+                        type="text"
+                        placeholder="Looking for an inspection?"
+                        className={classes.searchInput}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <button className={classes.searchButton}>
+                        <span className={classes.searchIcon}>🔍</span>
+                    </button>
+                </div>
+            </header>
+
+            {/* Main Content */}
+            <main className={classes.content}>
+                {/* Upcoming Inspections Section */}
+                <section className={classes.section}>
+                    <div className={classes.sectionHeader}>
+                        <h2 className={classes.sectionTitle}>Upcoming inspections</h2>
+                        <button className={classes.seeAllLink}>
+                            See all upcoming inspections ▾
+                        </button>
+                    </div>
+
+                    {loading && (
+                        <div className={classes.loadingContainer}>
+                            <CircularLoader small />
+                        </div>
+                    )}
+
+                    {!loading && upcomingInspections.length === 0 && (
+                        <div className={classes.emptyCard}>
+                            <p>{i18n.t('No upcoming inspections scheduled')}</p>
+                        </div>
+                    )}
+
+                    <div className={classes.inspectionCards}>
+                        {upcomingInspections.slice(0, 3).map((inspection) => {
+                            const { days } = getDaysRelative(inspection.eventDate)
+                            
+                            return (
+                                <div key={inspection.event} className={classes.inspectionCard}>
+                                    <div className={classes.cardLeft}>
+                                        <div className={classes.avatarCircle}>LH</div>
+                                        <div className={classes.cardInfo}>
+                                            <div className={classes.cardDate}>
+                                                {formatDate(inspection.eventDate)}
+                                            </div>
+                                            <div className={classes.cardTime}>
+                                                16:00 - 17:30
+                                            </div>
+                                            <div className={classes.cardSchool}>
+                                                {inspection.orgUnitName}
+                                            </div>
+                                            <div className={classes.cardStatus}>
+                                                <span className={classes.syncIcon}>✓</span> Synced
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className={classes.cardRight}>
+                                        <div className={classes.daysIndicator}>
+                                            In {days} days
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </section>
+
+                {/* Completed Inspections Section */}
+                <section className={classes.section}>
+                    <div className={classes.sectionHeader}>
+                        <h2 className={classes.sectionTitle}>Completed inspections</h2>
+                        <button className={classes.seeAllLink}>
+                            See all previous inspections ▾
+                        </button>
+                    </div>
+
+                    {!loading && finishedInspections.length === 0 && (
+                        <div className={classes.emptyCard}>
+                            <p>{i18n.t('No completed inspections yet')}</p>
+                        </div>
+                    )}
+
+                    <div className={classes.inspectionCards}>
+                        {finishedInspections.slice(0, 3).map((inspection) => {
+                            const { days } = getDaysRelative(inspection.eventDate)
+                            
+                            return (
+                                <div key={inspection.event} className={classes.inspectionCard}>
+                                    <div className={classes.cardLeft}>
+                                        <div className={classes.avatarCircle}>LH</div>
+                                        <div className={classes.cardInfo}>
+                                            <div className={classes.cardDate}>
+                                                {formatDate(inspection.eventDate)}
+                                            </div>
+                                            <div className={classes.cardTime}>
+                                                16:00 - 17:30
+                                            </div>
+                                            <div className={classes.cardSchool}>
+                                                {inspection.orgUnitName}
+                                            </div>
+                                            <div className={classes.cardStatus}>
+                                                <span className={classes.syncIcon}>✓</span> Synced
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className={classes.cardRight}>
+                                        <div className={classes.daysAgo}>
+                                            {days} days ago
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </section>
+            </main>
+
+            {/* Floating Action Button */}
+            <button className={classes.fab}>
+                <span className={classes.fabIcon}>+</span>
+            </button>
+        </div>
+    )
+}
+
+export default InspectionHomePage
