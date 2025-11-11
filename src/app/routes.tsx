@@ -2,6 +2,7 @@ import React from 'react'
 
 // Feature components - using lazy loading for code splitting
 const InspectionHome = React.lazy(() => import('../features/inspection/InspectionHomePage'))
+const InspectionOverviewPage = React.lazy(() => import('../features/inspection/overview/InspectionOverview'))
 
 export type AppRoute = {
     path: string
@@ -14,5 +15,10 @@ export const routes: AppRoute[] = [
         path: '/',
         name: 'Home',
         component: InspectionHome,
+    },
+    {
+        path: '/inspection/overview',
+        name: 'Inspection Overview',
+        component: InspectionOverviewPage,
     },
 ]
