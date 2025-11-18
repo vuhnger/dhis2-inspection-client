@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-18T11:22:00.016Z\n"
-"PO-Revision-Date: 2025-11-18T11:22:00.016Z\n"
+"POT-Creation-Date: 2025-11-18T12:03:45.130Z\n"
+"PO-Revision-Date: 2025-11-18T12:03:45.130Z\n"
 
 msgid "No upcoming inspections scheduled"
 msgstr "No upcoming inspections scheduled"
@@ -166,6 +166,58 @@ msgstr ""
 "When online, the app will compare against DHIS2 baselines so you can "
 "explain changes to the head teacher in the field."
 
+msgid "School name is required"
+msgstr "School name is required"
+
+msgid "Inspection date is required"
+msgstr "Inspection date is required"
+
+msgid "Inspection date cannot be in the past"
+msgstr "Inspection date cannot be in the past"
+
+msgid "Start time is required"
+msgstr "Start time is required"
+
+msgid "End time is required"
+msgstr "End time is required"
+
+msgid "End time must be after start time"
+msgstr "End time must be after start time"
+
+msgid "Failed to create inspection. Please try again."
+msgstr "Failed to create inspection. Please try again."
+
+msgid "Schedule New Inspection"
+msgstr "Schedule New Inspection"
+
+msgid "Error"
+msgstr "Error"
+
+msgid "School Name"
+msgstr "School Name"
+
+msgid "Inspection Date"
+msgstr "Inspection Date"
+
+msgid "Start Time"
+msgstr "Start Time"
+
+msgid "End Time"
+msgstr "End Time"
+
+msgid ""
+"The inspection will be created with empty form data. You can fill in the "
+"details during the inspection."
+msgstr ""
+"The inspection will be created with empty form data. You can fill in the "
+"details during the inspection."
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Create Inspection"
+msgstr "Create Inspection"
+
 msgid "Total student count is required"
 msgstr "Total student count is required"
 
@@ -235,6 +287,12 @@ msgstr "Total Staff Count"
 msgid "Number of Classrooms"
 msgstr "Number of Classrooms"
 
+msgid "Inspection not found"
+msgstr "Inspection not found"
+
+msgid "The requested inspection could not be found."
+msgstr "The requested inspection could not be found."
+
 msgid "Hide summary"
 msgstr "Hide summary"
 
@@ -246,6 +304,9 @@ msgstr "Submit Report"
 
 msgid "Synced"
 msgstr "Synced"
+
+msgid "Not synced"
+msgstr "Not synced"
 
 msgid "Information about the school"
 msgstr "Information about the school"

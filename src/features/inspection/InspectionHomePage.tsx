@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { useInspections } from '../../shared/hooks/useInspections'
 
-import { CreateInspectionModal } from './components/CreateInspectionModal'
+import { CreateInspectionBottomSheet } from './components/CreateInspectionBottomSheet'
 import classes from './InspectionHomePage.module.css'
 
 /**
@@ -314,8 +314,8 @@ const InspectionHomePage: React.FC = () => {
                 <span className={classes.fabIcon}>+</span>
             </button>
 
-            {/* Create Inspection Modal */}
-            <CreateInspectionModal
+            {/* Create Inspection Bottom Sheet */}
+            <CreateInspectionBottomSheet
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onSuccess={() => {
