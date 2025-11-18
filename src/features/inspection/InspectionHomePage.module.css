@@ -21,7 +21,7 @@
     max-width: 100vw;
     margin: 0;
     padding: 0;
-    background: #1260BA;
+    background: #F5F5F5;
     min-height: 100vh;
     font-family: 'Roboto', sans-serif;
     width: 100%;
@@ -203,13 +203,13 @@
     font-size: 1.3rem;
     font-weight: 200;
     margin: 0;
-    color: #ffffff;
+    color: #000000;
     font-family: 'Roboto Mono', monospace;
 }
 
 .seeAllLink {
-    background: #1260BA;
-    color: #ffffff;
+    background: #F5F5F5;
+    color: #000000;
     border: none;
     border-radius: 8px;
     padding: 8px 16px;
@@ -223,7 +223,7 @@
 }
 
 .seeAllLink:hover {
-    background: #1260BA;
+    background: #E5E5E5;
 }
 
 .badge {
@@ -255,7 +255,18 @@
 
 .inspectionCard {
     padding: 20px;
-    background: white;
+    background: #E2F2FF;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.inspectionCardCompleted {
+    padding: 20px;
+    background: #DDDDDD;
     border-radius: 12px;
     display: flex;
     flex-direction: row;
@@ -276,7 +287,7 @@
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: #E2F2FF;
+    background: #F1F9FF;
     color: #1260BA;
     display: flex;
     align-items: center;

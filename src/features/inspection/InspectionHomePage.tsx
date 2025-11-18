@@ -283,7 +283,7 @@ const InspectionHomePage: React.FC = () => {
                             const { days } = getDaysRelative(inspection.eventDate)
                             
                             return (
-                                <div key={inspection.event} className={classes.inspectionCard}>
+                                <div key={inspection.event} className={classes.inspectionCardCompleted}>
                                     <div className={classes.cardLeft}>
                                         <div className={classes.avatarCircle}>LH</div>
                                         <div className={classes.cardInfo}>
