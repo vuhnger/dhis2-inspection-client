@@ -17,8 +17,8 @@ export const routes: AppRoute[] = [
         component: InspectionHome,
     },
     {
-        path: '/inspection/overview',
-        name: 'Inspection Overview',
+        path: '/inspection/:id',
+        name: 'Inspection Detail',
         component: InspectionOverviewPage,
     },
 ]

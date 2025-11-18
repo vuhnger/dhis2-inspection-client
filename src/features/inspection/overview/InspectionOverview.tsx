@@ -1,6 +1,9 @@
 import React from 'react'
-import { Button, InputField, NoticeBox, TextAreaField, Tooltip } from '@dhis2/ui'
+import { useParams } from 'react-router-dom'
+import { Button, InputField, NoticeBox, TextAreaField, Tooltip, CircularLoader } from '@dhis2/ui'
 import i18n from '@dhis2/d2-i18n'
+import { useInspection } from '../../../shared/hooks/useInspections'
+import type { InspectionFormData } from '../../../shared/types/inspection'
 
 import classes from './InspectionOverview.module.css'
 
@@ -57,15 +60,27 @@ const DEFAULT_FORM: FormState = {
 }
 
 const InspectionOverview: React.FC = () => {
+    const { id } = useParams<{ id: string }>()
+    const { inspection, loading: inspectionLoading, updateInspection } = useInspection(id || null)
+
     const [selectedCategory, setSelectedCategory] = React.useState<Category>('resources')
     const [form, setForm] = React.useState<FormState>(DEFAULT_FORM)
     const [errors, setErrors] = React.useState<Partial<Record<keyof FormState, string>>>({})
     const [wasSubmitted, setWasSubmitted] = React.useState(false)
     const [showSummary, setShowSummary] = React.useState(false)
 
-    // TODO: Replace with actual data from DHIS2 when inspection is loaded
-    const schoolName = 'School Name'
-    const inspectionDate = React.useMemo(() => new Date(), [])
+    // Load form data from inspection when available
+    React.useEffect(() => {
+        if (inspection?.formData) {
+            setForm(inspection.formData)
+        }
+    }, [inspection])
+
+    const schoolName = inspection?.orgUnitName || 'School Name'
+    const inspectionDate = React.useMemo(
+        () => (inspection?.eventDate ? new Date(inspection.eventDate) : new Date()),
+        [inspection]
+    )
     const formattedInspectionDate = React.useMemo(
         () =>
             inspectionDate
@@ -77,6 +92,7 @@ const InspectionOverview: React.FC = () => {
                 .replace(',', ''),
         [inspectionDate]
     )
+    const isSynced = inspection?.syncStatus === 'synced'
 
     const validateCategory = React.useCallback((category: Category, state: FormState) => {
         const nextErrors: Partial<Record<keyof FormState, string>> = {}
@@ -161,9 +177,20 @@ const InspectionOverview: React.FC = () => {
         setForm(prev => {
             const next = updater(prev)
             setErrors(validateAll(next))
+
+            // Auto-save to database on form changes
+            if (inspection) {
+                updateInspection({
+                    formData: next,
+                    status: 'in_progress',
+                }).catch(error => {
+                    console.error('Auto-save failed:', error)
+                })
+            }
+
             return next
         })
-    }, [validateAll])
+    }, [validateAll, inspection, updateInspection])
 
     const handleFieldChange = (field: keyof FormState) =>
         ({ value }: { value?: string }) => {
@@ -207,17 +234,23 @@ const InspectionOverview: React.FC = () => {
         }
     }, [nextCategory])
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const validationErrors = validateAll(form)
         setErrors(validationErrors)
         setWasSubmitted(true)
 
         if (Object.keys(validationErrors).length === 0) {
-            console.log('Form submitted successfully:', {
-                school: schoolName,
-                date: formattedInspectionDate,
-                data: form,
-            })
+            try {
+                // Save form data to the inspection
+                await updateInspection({
+                    formData: form,
+                    status: 'completed',
+                    syncStatus: 'not_synced', // Mark as not synced until pushed to DHIS2
+                })
+                console.log('Form submitted successfully and saved to local database')
+            } catch (error) {
+                console.error('Failed to save inspection:', error)
+            }
         }
     }
 
@@ -432,6 +465,28 @@ const InspectionOverview: React.FC = () => {
         }
     }
 
+    // Show loading state while inspection is loading
+    if (inspectionLoading) {
+        return (
+            <div className={classes.page}>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                    <CircularLoader />
+                </div>
+            </div>
+        )
+    }
+
+    // Show error if no inspection found
+    if (!inspection && id) {
+        return (
+            <div className={classes.page}>
+                <NoticeBox error title={i18n.t('Inspection not found')}>
+                    {i18n.t('The requested inspection could not be found.')}
+                </NoticeBox>
+            </div>
+        )
+    }
+
     const submissionSucceeded = wasSubmitted && Object.keys(errors).length === 0
     const ensureCurrentCategoryValid = React.useCallback(() => {
         const categoryErrors = validateCategory(selectedCategory, form)
@@ -502,7 +557,7 @@ const InspectionOverview: React.FC = () => {
                         </p>
                     </div>
 
-                    <span className={classes.syncedBadge}>
+                    <span className={classes.syncedBadge} style={{ backgroundColor: isSynced ? undefined : '#fef3c7', color: isSynced ? undefined : '#92400e' }}>
                         <svg
                             className={classes.syncedIcon}
                             width="24"
@@ -518,7 +573,7 @@ const InspectionOverview: React.FC = () => {
                                 fill="currentColor"
                             />
                         </svg>
-                        <span>{i18n.t('Synced')}</span>
+                        <span>{isSynced ? i18n.t('Synced') : i18n.t('Not synced')}</span>
                     </span>
                 </div>
 

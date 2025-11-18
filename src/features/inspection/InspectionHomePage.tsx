@@ -1,7 +1,9 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useDataQuery } from '@dhis2/app-runtime'
 import i18n from '@dhis2/d2-i18n'
 import { Card, Button, CircularLoader, NoticeBox, IconAdd24, IconSync24, colors, spacers } from '@dhis2/ui'
+import { useInspections } from '../../shared/hooks/useInspections'
 import classes from './InspectionHomePage.module.css'
 
 /**
@@ -46,7 +48,9 @@ const eventsQuery = {
  * Designed for 768x1024 tablet viewport with offline-first workflow
  */
 const InspectionHomePage: React.FC = () => {
+    const navigate = useNavigate()
     const { loading, error, data, refetch } = useDataQuery<EventsQueryResult>(eventsQuery)
+    const { inspections: localInspections, loading: localLoading } = useInspections()
     const [isOnline, setIsOnline] = React.useState(navigator.onLine)
     const [searchQuery, setSearchQuery] = React.useState('')
 
@@ -64,26 +68,40 @@ const InspectionHomePage: React.FC = () => {
         }
     }, [])
 
-    // Parse events into upcoming vs finished
+    // Parse local inspections and DHIS2 events into upcoming vs finished
     const { upcomingInspections, finishedInspections } = React.useMemo(() => {
-        const events = data?.events?.instances || []
         const now = new Date()
 
-        const upcoming = events.filter(event => {
-            const eventDate = new Date(event.eventDate)
-            return event.status === 'SCHEDULE' || (event.status === 'ACTIVE' && eventDate >= now)
+        // Map local inspections to display format
+        const localInspectionsList = localInspections.map(inspection => ({
+            id: inspection.id,
+            event: inspection.dhis2EventId || inspection.id,
+            orgUnit: inspection.orgUnit,
+            orgUnitName: inspection.orgUnitName,
+            eventDate: inspection.eventDate,
+            status: inspection.status,
+            syncStatus: inspection.syncStatus,
+            isLocal: true,
+        }))
+
+        // Separate upcoming and finished based on status and date
+        const upcoming = localInspectionsList.filter(inspection => {
+            const eventDate = new Date(inspection.eventDate)
+            return inspection.status === 'scheduled' ||
+                   (inspection.status === 'in_progress' && eventDate >= now)
         })
 
-        const finished = events.filter(event => {
-            const eventDate = new Date(event.eventDate)
-            return event.status === 'COMPLETED' || (eventDate < now && event.status !== 'SCHEDULE')
+        const finished = localInspectionsList.filter(inspection => {
+            const eventDate = new Date(inspection.eventDate)
+            return inspection.status === 'completed' ||
+                   (eventDate < now && inspection.status !== 'scheduled')
         })
 
         return {
             upcomingInspections: upcoming,
             finishedInspections: finished,
         }
-    }, [data])
+    }, [localInspections])
 
     // Calculate days until/since inspection
     const getDaysRelative = (dateString: string): { days: number; isPast: boolean } => {
@@ -161,7 +179,7 @@ const InspectionHomePage: React.FC = () => {
                         </button>
                     </div>
 
-                    {loading && (
+                    {(loading || localLoading) && (
                         <div className={classes.loadingContainer}>
                             <CircularLoader small />
                         </div>
@@ -176,9 +194,15 @@ const InspectionHomePage: React.FC = () => {
                     <div className={classes.inspectionCards}>
                         {upcomingInspections.slice(0, 3).map((inspection) => {
                             const { days } = getDaysRelative(inspection.eventDate)
-                            
+                            const isSynced = inspection.syncStatus === 'synced'
+
                             return (
-                                <div key={inspection.event} className={classes.inspectionCard}>
+                                <div
+                                    key={inspection.id}
+                                    className={classes.inspectionCard}
+                                    onClick={() => navigate(`/inspection/${inspection.id}`)}
+                                    style={{ cursor: 'pointer' }}
+                                >
                                     <div className={classes.cardLeft}>
                                         <div className={classes.avatarCircle}>LH</div>
                                         <div className={classes.cardInfo}>
@@ -192,7 +216,8 @@ const InspectionHomePage: React.FC = () => {
                                                 {inspection.orgUnitName}
                                             </div>
                                             <div className={classes.cardStatus}>
-                                                <span className={classes.syncIcon}>✓</span> Synced
+                                                <span className={classes.syncIcon}>{isSynced ? '✓' : '⚠'}</span>
+                                                {isSynced ? 'Synced' : 'Not synced'}
                                             </div>
                                         </div>
                                     </div>
@@ -225,9 +250,15 @@ const InspectionHomePage: React.FC = () => {
                     <div className={classes.inspectionCards}>
                         {finishedInspections.slice(0, 3).map((inspection) => {
                             const { days } = getDaysRelative(inspection.eventDate)
-                            
+                            const isSynced = inspection.syncStatus === 'synced'
+
                             return (
-                                <div key={inspection.event} className={classes.inspectionCard}>
+                                <div
+                                    key={inspection.id}
+                                    className={classes.inspectionCard}
+                                    onClick={() => navigate(`/inspection/${inspection.id}`)}
+                                    style={{ cursor: 'pointer' }}
+                                >
                                     <div className={classes.cardLeft}>
                                         <div className={classes.avatarCircle}>LH</div>
                                         <div className={classes.cardInfo}>
@@ -241,7 +272,8 @@ const InspectionHomePage: React.FC = () => {
                                                 {inspection.orgUnitName}
                                             </div>
                                             <div className={classes.cardStatus}>
-                                                <span className={classes.syncIcon}>✓</span> Synced
+                                                <span className={classes.syncIcon}>{isSynced ? '✓' : '⚠'}</span>
+                                                {isSynced ? 'Synced' : 'Not synced'}
                                             </div>
                                         </div>
                                     </div>

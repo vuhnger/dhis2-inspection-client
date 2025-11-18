@@ -4,6 +4,11 @@ import React from 'react'
 import './locales'
 import AppShell from './app/AppShell'
 
+// Import test data utilities in development mode
+if (process.env.NODE_ENV === 'development') {
+    import('./shared/utils/testData')
+}
+
 const App: React.FC = () => {
     return <AppShell />
 }
