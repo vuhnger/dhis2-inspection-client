@@ -1,3 +1,4 @@
+import i18n from '@dhis2/d2-i18n'
 import {
     Modal,
     ModalTitle,
@@ -8,10 +9,10 @@ import {
     InputField,
     NoticeBox,
 } from '@dhis2/ui'
-import i18n from '@dhis2/d2-i18n'
 import React from 'react'
 
 import { useInspections } from '../../../shared/hooks/useInspections'
+
 import type { CreateInspectionInput } from '../../../shared/types/inspection'
 
 interface CreateInspectionModalProps {

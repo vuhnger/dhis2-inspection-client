@@ -1,5 +1,5 @@
-import { Button, InputField, NoticeBox, TextAreaField, Tooltip, CircularLoader } from '@dhis2/ui'
 import i18n from '@dhis2/d2-i18n'
+import { Button, InputField, NoticeBox, TextAreaField, Tooltip, CircularLoader } from '@dhis2/ui'
 import React from 'react'
 import { useParams } from 'react-router-dom'
 
@@ -183,6 +183,7 @@ const InspectionOverview: React.FC = () => {
                 updateInspection({
                     formData: next,
                     status: 'in_progress',
+                    syncStatus: 'not_synced',
                 }).catch(error => {
                     console.error('Auto-save failed:', error)
                 })
@@ -559,7 +560,13 @@ const InspectionOverview: React.FC = () => {
                         </p>
                     </div>
 
-                    <span className={classes.syncedBadge} style={{ backgroundColor: isSynced ? undefined : '#fef3c7', color: isSynced ? undefined : '#92400e' }}>
+                    <span
+                        className={classes.syncedBadge}
+                        style={{
+                            backgroundColor: isSynced ? undefined : '#E5E7EB',
+                            color: isSynced ? undefined : '#374151',
+                        }}
+                    >
                         <svg
                             className={classes.syncedIcon}
                             width="24"
