@@ -5,8 +5,23 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-18T12:03:45.130Z\n"
-"PO-Revision-Date: 2025-11-18T12:03:45.130Z\n"
+"POT-Creation-Date: 2025-11-18T12:52:24.335Z\n"
+"PO-Revision-Date: 2025-11-18T12:52:24.335Z\n"
+
+msgid "Syncing..."
+msgstr "Syncing..."
+
+msgid "Not synced"
+msgstr "Not synced"
+
+msgid "Tap to sync"
+msgstr "Tap to sync"
+
+msgid "Connect to sync"
+msgstr "Connect to sync"
+
+msgid "Synced"
+msgstr "Synced"
 
 msgid "No upcoming inspections scheduled"
 msgstr "No upcoming inspections scheduled"
@@ -301,12 +316,6 @@ msgstr "See summary"
 
 msgid "Submit Report"
 msgstr "Submit Report"
-
-msgid "Synced"
-msgstr "Synced"
-
-msgid "Not synced"
-msgstr "Not synced"
 
 msgid "Information about the school"
 msgstr "Information about the school"

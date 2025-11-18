@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button, InputField } from '@dhis2/ui';
+import { useInspections } from '../../../shared/hooks/useInspections';
 import styles from './CreateInspectionBottomSheet.module.css';
 
 interface Props {
@@ -15,6 +16,8 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
     const [endTime, setEndTime] = useState('17:30');
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isCreating, setIsCreating] = useState(false);
+    
+    const { createInspection } = useInspections();
 
     // Handle escape key
     useEffect(() => {
@@ -79,18 +82,27 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
         setIsCreating(true);
 
         try {
-            const db = await openDB();
-            const inspection = {
-                id: crypto.randomUUID(),
-                schoolName,
-                eventDate,
-                startTime,
-                endTime,
-                status: 'active',
-                createdAt: new Date().toISOString(),
+            const inspectionInput = {
+                orgUnit: 'demo-school-' + Date.now(), // Generate a demo org unit ID
+                orgUnitName: schoolName,
+                eventDate: eventDate + 'T' + startTime + ':00', // ISO 8601 format
+                scheduledStartTime: startTime,
+                scheduledEndTime: endTime,
+                status: 'scheduled' as const, // Create as scheduled for upcoming inspections
+                formData: {
+                    textbooks: 0,
+                    desks: 0,
+                    chairs: 0,
+                    testFieldNotes: '',
+                    totalStudents: '',
+                    maleStudents: '',
+                    femaleStudents: '',
+                    staffCount: '',
+                    classroomCount: '',
+                },
             };
 
-            await addInspection(db, inspection);
+            await createInspection(inspectionInput);
 
             // Reset form
             resetForm();
@@ -117,29 +129,7 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
         setErrors({});
     };
 
-    const openDB = (): Promise<IDBDatabase> => {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open('InspectionDB', 1);
-            request.onerror = () => reject(request.error);
-            request.onsuccess = () => resolve(request.result);
-            request.onupgradeneeded = (event) => {
-                const db = (event.target as IDBOpenDBRequest).result;
-                if (!db.objectStoreNames.contains('inspections')) {
-                    db.createObjectStore('inspections', { keyPath: 'id' });
-                }
-            };
-        });
-    };
 
-    const addInspection = (db: IDBDatabase, inspection: any): Promise<void> => {
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction(['inspections'], 'readwrite');
-            const store = transaction.objectStore('inspections');
-            const request = store.add(inspection);
-            request.onsuccess = () => resolve();
-            request.onerror = () => reject(request.error);
-        });
-    };
 
     if (!isOpen) return null;
 
