@@ -45,9 +45,9 @@ const CATEGORY_FIELDS: Record<Category, Array<keyof FormState>> = {
 }
 
 const DEFAULT_FORM: FormState = {
-    textbooks: 35,
-    desks: 35,
-    chairs: 35,
+    textbooks: 0,
+    desks: 0,
+    chairs: 0,
     totalStudents: '',
     maleStudents: '',
     femaleStudents: '',
@@ -63,8 +63,8 @@ const InspectionOverview: React.FC = () => {
     const [wasSubmitted, setWasSubmitted] = React.useState(false)
     const [showSummary, setShowSummary] = React.useState(false)
 
-    // Dummy data for display
-    const schoolName = 'Demo Primary School'
+    // TODO: Replace with actual data from DHIS2 when inspection is loaded
+    const schoolName = 'School Name'
     const inspectionDate = React.useMemo(() => new Date(), [])
     const formattedInspectionDate = React.useMemo(
         () =>
