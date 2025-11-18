@@ -1,10 +1,11 @@
 import { useDataQuery } from '@dhis2/app-runtime'
-import { CircularLoader } from '@dhis2/ui'
 import i18n from '@dhis2/d2-i18n'
+import { CircularLoader } from '@dhis2/ui'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useInspections } from '../../shared/hooks/useInspections'
+import { useSync } from '../../shared/hooks/useSync'
 
 import { CreateInspectionBottomSheet } from './components/CreateInspectionBottomSheet'
 import classes from './InspectionHomePage.module.css'
@@ -54,9 +55,35 @@ const InspectionHomePage: React.FC = () => {
     const navigate = useNavigate()
     const { loading } = useDataQuery<EventsQueryResult>(eventsQuery)
     const { inspections: localInspections, loading: localLoading, refetch: refetchInspections } = useInspections()
+    const { hasUnsynced, isSyncing, triggerSync } = useSync()
     const [isOnline, setIsOnline] = React.useState(navigator.onLine)
     const [searchQuery, setSearchQuery] = React.useState('')
     const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false)
+    const canTriggerSync = isOnline && hasUnsynced && !isSyncing
+
+    const syncBadgeColors = React.useMemo(() => {
+        if (isSyncing) {
+            return {
+                background: '#DBEAFE',
+                color: '#1D4ED8',
+                border: '1px solid #BFDBFE',
+            }
+        }
+
+        if (hasUnsynced) {
+            return {
+                background: '#F3F4F6',
+                color: '#4B5563',
+                border: '1px solid #E5E7EB',
+            }
+        }
+
+        return {
+            background: '#D1FAE5',
+            color: '#047857',
+            border: '1px solid #6EE7B7',
+        }
+    }, [hasUnsynced, isSyncing])
 
     // Track online/offline status
     React.useEffect(() => {
@@ -128,16 +155,6 @@ const InspectionHomePage: React.FC = () => {
         })
     }
 
-    // Format time for display
-    const formatTime = (dateString: string): string => {
-        const date = new Date(dateString)
-        return date.toLocaleTimeString('en-GB', { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: false
-        })
-    }
-
     return (
         <div className={classes.container}>
             {/* Dark Header */}
@@ -145,14 +162,82 @@ const InspectionHomePage: React.FC = () => {
                 <div className={classes.headerTop}>
                     <h1 className={classes.greeting}>Hi, inspector!</h1>
                     <div className={classes.headerActions}>
-                        {isOnline && (
-                            <div className={classes.syncBadge}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 4V1L8 5L12 9V6C15.31 6 18 8.69 18 12C18 13.01 17.75 13.97 17.3 14.8L18.76 16.26C19.54 15.03 20 13.57 20 12C20 7.58 16.42 4 12 4ZM12 18C8.69 18 6 15.31 6 12C6 10.99 6.25 10.03 6.7 9.2L5.24 7.74C4.46 8.97 4 10.43 4 12C4 16.42 7.58 20 12 20V23L16 19L12 15V18Z" fill="#059669"/>
+                        <div
+                            className={classes.syncBadge}
+                            style={{
+                                ...syncBadgeColors,
+                                cursor: canTriggerSync ? 'pointer' : 'default',
+                            }}
+                            onClick={canTriggerSync ? triggerSync : undefined}
+                            role={canTriggerSync ? 'button' : undefined}
+                            tabIndex={canTriggerSync ? 0 : undefined}
+                            onKeyDown={(event) => {
+                                if (!canTriggerSync) {
+                                    return
+                                }
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                    event.preventDefault()
+                                    triggerSync()
+                                }
+                            }}
+                            aria-live="polite"
+                        >
+                            {isSyncing ? (
+                                <>
+                                    <svg
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    style={{ animation: 'spin 1s linear infinite' }}
+                                >
+                                    <path
+                                        d="M12 4V1L8 5L12 9V6C15.31 6 18 8.69 18 12C18 13.01 17.75 13.97 17.3 14.8L18.76 16.26C19.54 15.03 20 13.57 20 12C20 7.58 16.42 4 12 4ZM12 18C8.69 18 6 15.31 6 12C6 10.99 6.25 10.03 6.7 9.2L5.24 7.74C4.46 8.97 4 10.43 4 12C4 16.42 7.58 20 12 20V23L16 19L12 15V18Z"
+                                        fill="currentColor"
+                                    />
                                 </svg>
-                                <span>Synced</span>
-                            </div>
-                        )}
+                                    <span>{i18n.t('Syncing...')}</span>
+                                </>
+                            ) : hasUnsynced ? (
+                                <>
+                                    <svg
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <path
+                                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm0-8c-.69 0-1.25-.56-1.25-1.25S11.31 6.5 12 6.5s1.25.56 1.25 1.25S12.69 9 12 9z"
+                                            fill="currentColor"
+                                        />
+                                    </svg>
+                                    <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+                                        <span>{i18n.t('Not synced')}</span>
+                                        <small style={{ fontSize: '0.7rem', opacity: 0.9 }}>
+                                            {isOnline ? i18n.t('Tap to sync') : i18n.t('Connect to sync')}
+                                        </small>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <svg
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <path
+                                            d="M12 4V1L8 5L12 9V6C15.31 6 18 8.69 18 12C18 13.01 17.75 13.97 17.3 14.8L18.76 16.26C19.54 15.03 20 13.57 20 12C20 7.58 16.42 4 12 4ZM12 18C8.69 18 6 15.31 6 12C6 10.99 6.25 10.03 6.7 9.2L5.24 7.74C4.46 8.97 4 10.43 4 12C4 16.42 7.58 20 12 20V23L16 19L12 15V18Z"
+                                            fill="currentColor"
+                                        />
+                                    </svg>
+                                    <span>{i18n.t('Synced')}</span>
+                                </>
+                            )}
+                        </div>
                         <div className={classes.userAvatar}>LH</div>
                     </div>
                 </div>
@@ -227,9 +312,14 @@ const InspectionHomePage: React.FC = () => {
                                             <div className={classes.cardSchool}>
                                                 {inspection.orgUnitName}
                                             </div>
-                                            <div className={classes.cardStatus}>
-                                                <span className={classes.syncIcon}>{isSynced ? '✓' : '⚠'}</span>
-                                                {isSynced ? 'Synced' : 'Not synced'}
+                                            <div
+                                                className={classes.cardStatus}
+                                                style={{ color: isSynced ? '#059669' : '#6B7280' }}
+                                            >
+                                                <span className={classes.syncIcon}>
+                                                    {isSynced ? '✓' : '•'}
+                                                </span>
+                                                {isSynced ? i18n.t('Synced') : i18n.t('Not synced')}
                                             </div>
                                         </div>
                                     </div>
@@ -291,9 +381,14 @@ const InspectionHomePage: React.FC = () => {
                                             <div className={classes.cardSchool}>
                                                 {inspection.orgUnitName}
                                             </div>
-                                            <div className={classes.cardStatus}>
-                                                <span className={classes.syncIcon}>{isSynced ? '✓' : '⚠'}</span>
-                                                {isSynced ? 'Synced' : 'Not synced'}
+                                            <div
+                                                className={classes.cardStatus}
+                                                style={{ color: isSynced ? '#059669' : '#6B7280' }}
+                                            >
+                                                <span className={classes.syncIcon}>
+                                                    {isSynced ? '✓' : '•'}
+                                                </span>
+                                                {isSynced ? i18n.t('Synced') : i18n.t('Not synced')}
                                             </div>
                                         </div>
                                     </div>
@@ -318,8 +413,12 @@ const InspectionHomePage: React.FC = () => {
             <CreateInspectionBottomSheet
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
-                onSuccess={() => {
-                    refetchInspections()
+                onSuccess={async () => {
+                    await refetchInspections()
+                    // Trigger sync if online
+                    if (isOnline) {
+                        await triggerSync()
+                    }
                 }}
             />
         </div>

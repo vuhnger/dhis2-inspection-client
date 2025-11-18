@@ -73,7 +73,7 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = async () => {
+    const handleStartInspection = async () => {
         if (!validateForm()) return;
 
         setIsCreating(true);
@@ -86,27 +86,35 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
                 eventDate,
                 startTime,
                 endTime,
-                status: 'scheduled',
+                status: 'active',
                 createdAt: new Date().toISOString(),
             };
 
             await addInspection(db, inspection);
 
             // Reset form
-            setSchoolName('');
-            setEventDate('');
-            setStartTime('16:00');
-            setEndTime('17:30');
-            setErrors({});
-
+            resetForm();
             onSuccess();
             onClose();
         } catch (error) {
             console.error('Error creating inspection:', error);
-            setErrors({ submit: 'Failed to create inspection. Please try again.' });
+            setErrors({ submit: 'Failed to start inspection. Please try again.' });
         } finally {
             setIsCreating(false);
         }
+    };
+
+    const handleDiscard = () => {
+        resetForm();
+        onClose();
+    };
+
+    const resetForm = () => {
+        setSchoolName('');
+        setEventDate('');
+        setStartTime('16:00');
+        setEndTime('17:30');
+        setErrors({});
     };
 
     const openDB = (): Promise<IDBDatabase> => {
@@ -233,16 +241,19 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
 
                 {/* Footer */}
                 <div className={styles.footer}>
-                    <Button onClick={onClose} disabled={isCreating}>
-                        Cancel
+                    <Button 
+                        onClick={handleDiscard} 
+                        disabled={isCreating}
+                    >
+                        Discard
                     </Button>
                     <Button 
                         primary 
-                        onClick={handleSubmit} 
+                        onClick={handleStartInspection} 
                         loading={isCreating}
                         disabled={isCreating}
                     >
-                        Create Inspection
+                        Start Inspection
                     </Button>
                 </div>
             </div>
