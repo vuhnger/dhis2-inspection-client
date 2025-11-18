@@ -1,9 +1,12 @@
+import { useDataQuery } from '@dhis2/app-runtime'
+import { CircularLoader } from '@dhis2/ui'
+import i18n from '@dhis2/d2-i18n'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useDataQuery } from '@dhis2/app-runtime'
-import i18n from '@dhis2/d2-i18n'
-import { Card, Button, CircularLoader, NoticeBox, IconAdd24, IconSync24, colors, spacers } from '@dhis2/ui'
+
 import { useInspections } from '../../shared/hooks/useInspections'
+
+import { CreateInspectionModal } from './components/CreateInspectionModal'
 import classes from './InspectionHomePage.module.css'
 
 /**
@@ -49,10 +52,11 @@ const eventsQuery = {
  */
 const InspectionHomePage: React.FC = () => {
     const navigate = useNavigate()
-    const { loading, error, data, refetch } = useDataQuery<EventsQueryResult>(eventsQuery)
-    const { inspections: localInspections, loading: localLoading } = useInspections()
+    useDataQuery<EventsQueryResult>(eventsQuery)
+    const { inspections: localInspections, loading: localLoading, refetch: refetchInspections } = useInspections()
     const [isOnline, setIsOnline] = React.useState(navigator.onLine)
     const [searchQuery, setSearchQuery] = React.useState('')
+    const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false)
 
     // Track online/offline status
     React.useEffect(() => {
@@ -201,6 +205,14 @@ const InspectionHomePage: React.FC = () => {
                                     key={inspection.id}
                                     className={classes.inspectionCard}
                                     onClick={() => navigate(`/inspection/${inspection.id}`)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault()
+                                            navigate(`/inspection/${inspection.id}`)
+                                        }
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
                                     style={{ cursor: 'pointer' }}
                                 >
                                     <div className={classes.cardLeft}>
@@ -257,6 +269,14 @@ const InspectionHomePage: React.FC = () => {
                                     key={inspection.id}
                                     className={classes.inspectionCard}
                                     onClick={() => navigate(`/inspection/${inspection.id}`)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault()
+                                            navigate(`/inspection/${inspection.id}`)
+                                        }
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
                                     style={{ cursor: 'pointer' }}
                                 >
                                     <div className={classes.cardLeft}>
@@ -290,9 +310,18 @@ const InspectionHomePage: React.FC = () => {
             </main>
 
             {/* Floating Action Button */}
-            <button className={classes.fab}>
+            <button className={classes.fab} onClick={() => setIsCreateModalOpen(true)}>
                 <span className={classes.fabIcon}>+</span>
             </button>
+
+            {/* Create Inspection Modal */}
+            <CreateInspectionModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onSuccess={() => {
+                    refetchInspections()
+                }}
+            />
         </div>
     )
 }

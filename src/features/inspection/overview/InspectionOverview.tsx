@@ -1,9 +1,9 @@
-import React from 'react'
-import { useParams } from 'react-router-dom'
 import { Button, InputField, NoticeBox, TextAreaField, Tooltip, CircularLoader } from '@dhis2/ui'
 import i18n from '@dhis2/d2-i18n'
+import React from 'react'
+import { useParams } from 'react-router-dom'
+
 import { useInspection } from '../../../shared/hooks/useInspections'
-import type { InspectionFormData } from '../../../shared/types/inspection'
 
 import classes from './InspectionOverview.module.css'
 
@@ -233,6 +233,45 @@ const InspectionOverview: React.FC = () => {
             setShowSummary(false)
         }
     }, [nextCategory])
+
+    const ensureCurrentCategoryValid = React.useCallback(() => {
+        const categoryErrors = validateCategory(selectedCategory, form)
+        if (Object.keys(categoryErrors).length > 0) {
+            setErrors(prev => ({ ...prev, ...categoryErrors }))
+            return false
+        }
+        return true
+    }, [form, selectedCategory, validateCategory])
+
+    const handleCategorySelect = React.useCallback((category: Category) => {
+        if (category === selectedCategory) {
+            return
+        }
+
+        const targetIndex = CATEGORY_ORDER.indexOf(category)
+
+        if (targetIndex > currentCategoryIndex && !ensureCurrentCategoryValid()) {
+            return
+        }
+
+        setSelectedCategory(category)
+    }, [selectedCategory, currentCategoryIndex, ensureCurrentCategoryValid])
+
+    const handleNextCategory = React.useCallback(() => {
+        if (!nextCategory) {
+            return
+        }
+
+        if (!ensureCurrentCategoryValid()) {
+            return
+        }
+
+        setSelectedCategory(nextCategory)
+    }, [nextCategory, ensureCurrentCategoryValid])
+
+    const handleToggleSummary = React.useCallback(() => {
+        setShowSummary(prev => !prev)
+    }, [])
 
     const handleSubmit = async () => {
         const validationErrors = validateAll(form)
@@ -488,43 +527,6 @@ const InspectionOverview: React.FC = () => {
     }
 
     const submissionSucceeded = wasSubmitted && Object.keys(errors).length === 0
-    const ensureCurrentCategoryValid = React.useCallback(() => {
-        const categoryErrors = validateCategory(selectedCategory, form)
-        if (Object.keys(categoryErrors).length > 0) {
-            setErrors(prev => ({ ...prev, ...categoryErrors }))
-            return false
-        }
-        return true
-    }, [form, selectedCategory, validateCategory])
-
-    const handleCategorySelect = (category: Category) => {
-        if (category === selectedCategory) {
-            return
-        }
-
-        const targetIndex = CATEGORY_ORDER.indexOf(category)
-
-        if (targetIndex > currentCategoryIndex && !ensureCurrentCategoryValid()) {
-            return
-        }
-
-        setSelectedCategory(category)
-    }
-
-    const handleNextCategory = () => {
-        if (!nextCategory) {
-            return
-        }
-
-        if (!ensureCurrentCategoryValid()) {
-            return
-        }
-
-        setSelectedCategory(nextCategory)
-    }
-    const handleToggleSummary = () => {
-        setShowSummary(prev => !prev)
-    }
     const summaryButton = (
         <Button
             className={`${classes.previousButton} ${classes.summaryButton}`}
