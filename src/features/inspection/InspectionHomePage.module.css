@@ -324,7 +324,7 @@
 .cardStatus {
     font-size: 0.85rem;
     color: #10b981;
-    display: none;
+    display: flex;
     align-items: center;
     gap: 4px;
 }
@@ -663,3 +663,4 @@
     }
 }
 
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
