@@ -54,6 +54,7 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
             setEndTime('17:30')
             setErrors({})
             setError(null)
+            setLoading(false)
         }
     }, [isOpen])
 
@@ -145,7 +146,7 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
     const today = new Date().toISOString().split('T')[0]
 
     return (
-        <Modal open={isOpen} onClose={onClose} position="middle">
+        <Modal hide={!isOpen} onClose={onClose} position="middle">
             <ModalTitle>{i18n.t('Schedule New Inspection')}</ModalTitle>
             <ModalContent>
                 {error && (

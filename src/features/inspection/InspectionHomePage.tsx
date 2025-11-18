@@ -52,7 +52,7 @@ const eventsQuery = {
  */
 const InspectionHomePage: React.FC = () => {
     const navigate = useNavigate()
-    useDataQuery<EventsQueryResult>(eventsQuery)
+    const { loading } = useDataQuery<EventsQueryResult>(eventsQuery)
     const { inspections: localInspections, loading: localLoading, refetch: refetchInspections } = useInspections()
     const [isOnline, setIsOnline] = React.useState(navigator.onLine)
     const [searchQuery, setSearchQuery] = React.useState('')
