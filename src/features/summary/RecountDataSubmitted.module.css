@@ -1,0 +1,44 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.content {
+    padding: 16px;
+    flex: 1;
+}
+
+.headerContent {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.successCard {
+    padding: 20px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.card {
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.rowLeft p {
+    margin: 0;
+    color: #666;
+}
+
+.diff {
+    margin-right: 8px;
+    font-weight: bold;
+}

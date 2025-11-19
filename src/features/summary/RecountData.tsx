@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import {
-  CheckCircle,
-  XCircle,
-  AlertCircle,
   Layers,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import styles from "./RecountData.module.css";
-import { Button, TextArea } from '@dhis2/ui';
+import { Button, InputField, TextArea } from '@dhis2/ui';
 import BottomNavBar from "./BottomNavBar"; 
 
 
@@ -22,6 +20,7 @@ interface ResourceRowProps {
   previous: number;
   recount: number;
   status: "ok" | "warning" | "error";
+  onRecountChange: (newRecount: number) => void;
 }
 
 interface ResourceItem {
@@ -76,7 +75,7 @@ const getStatusIcon = (status: ResourceRowProps["status"]) => {
   }
 };
 
-const ResourceRow: React.FC<ResourceRowProps> = ({ item, previous, recount, status }) => {
+const ResourceRow: React.FC<ResourceRowProps> = ({ item, previous, recount, status, onRecountChange }) => {
   const difference = recount - previous;
   const formattedDiff = difference > 0 ? `+${difference}` : `${difference}`;
 
@@ -84,7 +83,19 @@ const ResourceRow: React.FC<ResourceRowProps> = ({ item, previous, recount, stat
     <tr>
       <td>{item}</td>
       <td>{previous}</td>
-      <td>{recount}</td>
+      <td>
+        <InputField
+        type="number"
+        dense
+        className={styles.recountInput}
+        value={String(recount)}
+        onChange={({value}) =>{
+            const num = Number(value ?? 0);
+            onRecountChange(Number.isNaN(num)? 0 : num)
+        }}
+        ></InputField>
+      </td>
+
       <td>{formattedDiff}</td>
       <td>{getStatusIcon(status)}</td>
     </tr>
@@ -94,12 +105,24 @@ const ResourceRow: React.FC<ResourceRowProps> = ({ item, previous, recount, stat
 
 const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({ data }) => {
     const [notes, setNotes] = useState("");
+    const [rows, setRows] = useState<ResourceItem[]>(data);
+    const navigate = useNavigate();
+
+    const handleRecountChange = (index: number, newRecount: number) => {
+        setRows((prev) =>
+        prev.map((row, i) =>
+            i === index ? { ...row, recount: newRecount } : row
+            )
+        );
+    };
 
     const handleSave = () => {
-    console.log("Saving data...");
-    console.log("Notes:", notes);
-    console.log("Resources:", data);
-    // Replace this with proper code
+    navigate("/summary/RecountDatasubmitted", {
+        state: {
+            notes,
+            data: rows,
+        },
+    });
   };
 
     return (
@@ -116,8 +139,12 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({ data }) => 
             </tr>
         </thead>
         <tbody>
-            {data.map((resource, index) => (
-            <ResourceRow key={index} {...resource} />
+            {rows.map((resource, index) => (
+            <ResourceRow 
+            key={index} 
+            {...resource}
+            onRecountChange={(newVal) => handleRecountChange(index, newVal)}
+            />
             ))}
         </tbody>
         </table>

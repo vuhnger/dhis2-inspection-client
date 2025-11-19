@@ -5,6 +5,21 @@ import {
   AlertCircle,
   Layers,
 } from "lucide-react";
+
+import type { ReactNode } from 'react'
+import {
+    Card,
+    Tag,
+    colors,
+    spacers,
+} from '@dhis2/ui'
+import {
+    IconApps24,
+    IconCheckmarkCircle24,
+    IconError24,
+    IconWarning24,
+    IconInfo24,
+} from '@dhis2/ui'
 import styles from './Dashboard.module.css';
 import BottomNavBar from "./BottomNavBar"; 
 
@@ -31,6 +46,7 @@ interface MetricCardProps {
 
 
 const TopHeader: React.FC<HeaderProps> = ({schoolName, inspectionDate, logoSrc, pageTitle = "Inspection Summary"}) => {
+  
   return (
     <div className={styles.header}>
       <div className={styles.headerContent}>
@@ -249,7 +265,6 @@ const SchoolInspectorDashboard: React.FC = () => {
 
 
 export default SchoolInspectorDashboard; 
-
 
 
 
