@@ -148,9 +148,9 @@ const RecountDataSubmitted: React.FC = () => {
                 <Button
                     secondary
                     icon={<IconArrowLeft24 />}
-                    onClick={() => navigate("/dashboard")}
+                    onClick={() => navigate("/")}
                 >
-                    Back to Dashboard
+                    Back to Inspection Homepage
                 </Button>
             </div>
 

@@ -5,21 +5,7 @@ import {
   AlertCircle,
   Layers,
 } from "lucide-react";
-
-import type { ReactNode } from 'react'
-import {
-    Card,
-    Tag,
-    colors,
-    spacers,
-} from '@dhis2/ui'
-import {
-    IconApps24,
-    IconCheckmarkCircle24,
-    IconError24,
-    IconWarning24,
-    IconInfo24,
-} from '@dhis2/ui'
+import { useNavigate } from "react-router-dom";
 import styles from './Dashboard.module.css';
 import BottomNavBar from "./BottomNavBar"; 
 
@@ -46,19 +32,29 @@ interface MetricCardProps {
 
 
 const TopHeader: React.FC<HeaderProps> = ({schoolName, inspectionDate, logoSrc, pageTitle = "Inspection Summary"}) => {
-  
+  const navigate = useNavigate();
+
   return (
     <div className={styles.header}>
       <div className={styles.headerContent}>
+
+        {/* Venstre siden */}
         <div className={styles.headerIcon}>
           {logoSrc ? (<img src={logoSrc} alt="School logo" />) :
            ( <Layers size={32} color="white" /> )}
         </div>
+
         <div className={styles.headerText}>
           <h1 className={styles.headerTitle}>{pageTitle}</h1>
           <p className={styles.schoolName}>{schoolName}</p>
           <p className={styles.inspectionDate}>{inspectionDate}</p>
         </div>
+
+        {/* Høyre siden */}
+        <button className={styles.editButton} onClick={() => navigate("/InspectionHome")}>
+          Back To Inspection
+        </button>
+
       </div>
     </div>
   );

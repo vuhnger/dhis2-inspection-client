@@ -192,7 +192,7 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({ data }) => 
             />
 
             <div className={styles.saveButtonWrapper}>
-                <Button primary className={styles.saveButton} onClick={handleSave}>
+                <Button primary className={styles.roundSaveButton} onClick={handleSave}>
                 Save
                 </Button>
 
@@ -227,8 +227,9 @@ const RecountDataScreen: React.FC = () => {
                 <h2 className={styles.recountTitle}>Resource recount</h2>
                 <Info size={16} className={styles.infoIcon} />
           </div>
-          
+
           <ResourceRecountTable data={resourceData} />
+
         </div>
       </div>
 

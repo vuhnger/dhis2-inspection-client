@@ -15,9 +15,29 @@
 
 .headerContent {
   display: flex;
-  align-items: flex-start;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
   gap: 1rem;
-  max-width: 100%;
+}
+
+.editButton {
+  background-color: #1f2937;   /* dark pill like mock */
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.editButton:hover {
+  background-color: #111827;
 }
 
 .headerIcon {
