@@ -80,7 +80,8 @@ const TopHeader: React.FC<HeaderProps> = ({schoolName, inspectionDate, logoSrc, 
         </div>
 
         {/* Høyre siden */}
-        <button className={styles.editButton} onClick={() => navigate("/InspectionHome")}>
+        {/* TODO: endre navigation til korrekt path så det ikke blir noe knot */}
+        <button className={styles.editButton} onClick={() => navigate("inspection")}>
           Back To Inspection
         </button>
 
