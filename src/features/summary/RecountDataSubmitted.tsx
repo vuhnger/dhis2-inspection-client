@@ -7,11 +7,17 @@ import {
     colors,
     spacers,
 } from "@dhis2/ui";
+
 import {
     IconCheckmarkCircle24,
     IconArrowLeft24,
     IconApps24,
 } from "@dhis2/ui";
+
+import {
+  Layers,
+} from "lucide-react";
+
 import styles from "./RecountDataSubmitted.module.css";
 import BottomNavBar from "./BottomNavBar";
 
@@ -29,7 +35,7 @@ interface SubmittedItemRowProps {
     status: string;
 }
 
-
+/*
 const TopHeader: React.FC<HeaderProps> = ({
     schoolName,
     inspectionDate,
@@ -62,7 +68,26 @@ const TopHeader: React.FC<HeaderProps> = ({
         </div>
     );
 };
+*/
 
+const TopHeader: React.FC<HeaderProps> = ({schoolName, inspectionDate, logoSrc, pageTitle = "Inspection Summary"}) => {
+  
+  return (
+    <div className={styles.header}>
+      <div className={styles.headerContent}>
+        <div className={styles.headerIcon}>
+          {logoSrc ? (<img src={logoSrc} alt="School logo" />) :
+           ( <Layers size={32} color="white" /> )}
+        </div>
+        <div className={styles.headerText}>
+          <h1 className={styles.headerTitle}>{pageTitle}</h1>
+          <p className={styles.schoolName}>{schoolName}</p>
+          <p className={styles.inspectionDate}>{inspectionDate}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const SubmittedItemRow: React.FC<SubmittedItemRowProps> = ({
     item,
