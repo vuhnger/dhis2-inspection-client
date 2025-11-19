@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Layers, Info, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styles from "./RecountData.module.css";
 import { Button, TextArea } from '@dhis2/ui';
 import BottomNavBar from "./BottomNavBar"; 
@@ -135,6 +135,7 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({ data }) => 
     const [notes, setNotes] = useState("");
     const [rows, setRows] = useState<ResourceItem[]>(data);
     const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>(); 
 
     const handleRecountChange = (index: number, newRecount: number) => {
         setRows((prev) =>
@@ -145,7 +146,13 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({ data }) => 
     };
 
     const handleSave = () => {
-    navigate("/summary/RecountDataSubmitted", {
+      if (!id) {
+          console.error("No inspection id in URL, cannot navigate to submitted view.");
+          return;
+        }
+
+
+    navigate(`/summary/${id}/RecountDataSubmitted`,  {
         state: {
             notes,
             data: rows,

@@ -7,7 +7,6 @@ const SummaryPage = React.lazy(() => import('../features/summary/Dashboard'))
 const RecountPage = React.lazy(() => import('../features/summary/RecountData'))
 const RecountPageSubmitted = React.lazy(() => import('../features/summary/RecountDataSubmitted'))
 
-
 export type AppRoute = {
     path: string
     name: string
@@ -21,25 +20,25 @@ export const routes: AppRoute[] = [
         component: InspectionHome,
     },
     {
-        path: '/inspection/overview',
-        name: 'Inspection Overview',
+        path: '/inspection/:id',
+        name: 'Inspection Detail',
         component: InspectionOverviewPage,
     },
     {
-        path: '/summary',
+        path: '/summary/:id',
         name: 'Summary Page',
         component: SummaryPage,
     },
     {
-        path: '/summary/RecountData',
+        path: '/summary/:id/RecountData',
         name: 'Recount data Page',
         component: RecountPage,
     },
         {
-        path: '/summary/RecountDataSubmitted',
+        path: '/summary/:id/RecountDataSubmitted',
         name: 'Recount data Page Submitted',
         component: RecountPageSubmitted,
     },
-    
+
     
 ]
