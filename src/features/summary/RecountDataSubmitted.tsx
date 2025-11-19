@@ -35,41 +35,6 @@ interface SubmittedItemRowProps {
     status: string;
 }
 
-/*
-const TopHeader: React.FC<HeaderProps> = ({
-    schoolName,
-    inspectionDate,
-    logoSrc,
-    pageTitle = "Recount Submitted",
-}) => {
-    return (
-        <div
-            className={styles.header}
-            style={{
-                padding: spacers.dp16,
-                backgroundColor: colors.teal700,
-                color: "white",
-            }}
-        >
-            <div className={styles.headerContent}>
-                <div className={styles.headerIcon}>
-                    {logoSrc ? (
-                        <img src={logoSrc} alt="school logo" />
-                    ) : (
-                        <IconCheckmarkCircle24 color="white" />
-                    )}
-                </div>
-                <div className={styles.headerText}>
-                    <h1>{pageTitle}</h1>
-                    <p>{schoolName}</p>
-                    <p>{inspectionDate}</p>
-                </div>
-            </div>
-        </div>
-    );
-};
-*/
-
 const TopHeader: React.FC<HeaderProps> = ({schoolName, inspectionDate, logoSrc, pageTitle = "Inspection Summary"}) => {
   
   return (

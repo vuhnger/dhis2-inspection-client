@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import {
-  Layers,
-} from "lucide-react";
+import { Layers, Info, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import styles from "./RecountData.module.css";
-import { Button, InputField, TextArea } from '@dhis2/ui';
+import { Button, TextArea } from '@dhis2/ui';
 import BottomNavBar from "./BottomNavBar"; 
 
 
@@ -20,7 +18,7 @@ interface ResourceRowProps {
   previous: number;
   recount: number;
   status: "ok" | "warning" | "error";
-  onRecountChange: (newRecount: number) => void;
+  onRecountChange: (newRecount: number ) => void;
 }
 
 interface ResourceItem {
@@ -65,13 +63,25 @@ const TopHeader: React.FC<HeaderProps> = ({schoolName, inspectionDate, logoSrc, 
 const getStatusIcon = (status: ResourceRowProps["status"]) => {
   switch (status) {
     case "ok":
-      return "✅";
+      return (
+        <div className={`${styles.statusIcon} ${styles.statusOk}`}>
+          <CheckCircle2 size={16} />
+        </div>
+      );
     case "warning":
-      return "⚠️";
+      return (
+        <div className={`${styles.statusIcon} ${styles.statusWarning}`}>
+          <AlertTriangle size={16} />
+        </div>
+      );
     case "error":
-      return "❌";
+      return (
+        <div className={`${styles.statusIcon} ${styles.statusError}`}>
+          <XCircle size={16} />
+        </div>
+      );
     default:
-      return "";
+      return null;
   }
 };
 
@@ -79,25 +89,43 @@ const ResourceRow: React.FC<ResourceRowProps> = ({ item, previous, recount, stat
   const difference = recount - previous;
   const formattedDiff = difference > 0 ? `+${difference}` : `${difference}`;
 
+  const diffClass =
+    difference > 0
+      ? styles.diffPositive
+      : difference < 0
+      ? styles.diffNegative
+      : styles.diffNeutral;
+
   return (
-    <tr>
-      <td>{item}</td>
-      <td>{previous}</td>
-      <td>
-        <InputField
-        type="number"
-        dense
-        className={styles.recountInput}
-        value={String(recount)}
-        onChange={({value}) =>{
-            const num = Number(value ?? 0);
-            onRecountChange(Number.isNaN(num)? 0 : num)
-        }}
-        ></InputField>
+    <tr className={styles.row}>
+      <td className={styles.itemCell}>{item}</td>
+
+      <td className={styles.numberCell}>
+        <div className={styles.valueChip}>{previous}</div>
+        </td>
+
+      <td className={styles.numberCell}>
+        <input
+          type="number"
+          className={styles.recountInput}
+          value={recount}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            const val = e.target.value;
+
+            if (val === "") {
+                onRecountChange(null as any);
+                return
+            } 
+            
+            const num = Number(val);
+            if (!Number.isNaN(num)) onRecountChange(num)
+
+          }}
+        />
       </td>
 
-      <td>{formattedDiff}</td>
-      <td>{getStatusIcon(status)}</td>
+      <td className={`${styles.numberCell} ${diffClass}`}>{formattedDiff}</td>
+      <td className={styles.statusCell}>{getStatusIcon(status)}</td>
     </tr>
   );
 };
@@ -117,7 +145,7 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({ data }) => 
     };
 
     const handleSave = () => {
-    navigate("/summary/RecountDatasubmitted", {
+    navigate("/summary/RecountDataSubmitted", {
         state: {
             notes,
             data: rows,
@@ -127,17 +155,18 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({ data }) => 
 
     return (
     <div className={styles.resourceRecountCard}>
-        <h2>Resource recount</h2>
+        
         <table className={styles.table}>
         <thead>
             <tr>
-            <th>Item</th>
+            <th className={styles.itemHead}>Item</th>
             <th>Previous</th>
             <th>Recount</th>
             <th>Difference</th>
             <th>Status</th>
             </tr>
         </thead>
+
         <tbody>
             {rows.map((resource, index) => (
             <ResourceRow 
@@ -147,20 +176,27 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({ data }) => 
             />
             ))}
         </tbody>
+
         </table>
 
 
         <div className={styles.notesSection}>
-            <label htmlFor="notes">Notes (optional)</label>
+            <label htmlFor="notes" className={styles.notesLabel}>
+                Notes (optional)
+            </label>
             <TextArea
             name="notes"
             value={notes}
             onChange={({value}) => setNotes(value ?? "")}
             placeholder="Add any comments or observations..."
             />
-            <Button primary onClick={handleSave}>
-            Save
-            </Button>
+
+            <div className={styles.saveButtonWrapper}>
+                <Button primary className={styles.saveButton} onClick={handleSave}>
+                Save
+                </Button>
+
+            </div>
         </div>
     </div>
   );
@@ -184,12 +220,18 @@ const RecountDataScreen: React.FC = () => {
         logoSrc={schoolData.logoSrc}
         pageTitle="Recount Data"
       />
+
       <div className={styles.content}>
-        {/* Recount-specific content here */}
-
-        <ResourceRecountTable data={resourceData} />
-
+        <div className={styles.contentInner}>
+            <div className={styles.recountHeaderRow}>
+                <h2 className={styles.recountTitle}>Resource recount</h2>
+                <Info size={16} className={styles.infoIcon} />
+          </div>
+          
+          <ResourceRecountTable data={resourceData} />
+        </div>
       </div>
+
       <BottomNavBar/>
     </div>
   );
