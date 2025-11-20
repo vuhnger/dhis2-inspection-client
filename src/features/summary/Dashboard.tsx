@@ -11,7 +11,11 @@ import BottomNavBar from "./BottomNavBar";
 import { getInspectionById } from "../../shared/db";
 import type { Inspection } from "../../shared/types/inspection";
 
-type SectionStatus = "no progress" | "improved" | "decline";
+type SectionStatus =
+  | "below requirement"
+  | "meets requirement"
+  | "above requirement";
+
 type MetricStatus = "success" | "warning" | "error" | "info";
 
 /* Interfaces */
@@ -24,7 +28,7 @@ interface HeaderProps {
 
 interface SectionStatusProps {
   title: string;
-  status: "no progress" | "improved" | "decline";
+  status: SectionStatus;  
   count?: number;
 }
 
@@ -37,17 +41,8 @@ interface MetricCardProps {
 
 interface SectionContainerProps {
   title: string;
-  status: "no progress" | "improved" | "decline";
+  status: SectionStatus;   // <-- use the type alias
   children: React.ReactNode;
-}
-
-interface SchoolInspectorDashboardProps {
-  inspection: Inspection;
-}
-
-interface BaseMetric {
-  label: string;
-  value: number;
 }
 
 interface SectionConfig {
@@ -91,31 +86,41 @@ const TopHeader: React.FC<HeaderProps> = ({schoolName, inspectionDate, logoSrc, 
 };
 
 
-/* Section Badge */
-const StatusBadge: React.FC<SectionStatusProps> = ({title, status, count}) => {
+const StatusBadge: React.FC<SectionStatusProps> = ({ title, status, count }) => {
+  const getStatusColor = (status: SectionStatus) => {
+    switch (status) {
+      case "below requirement":
+        return styles.statusDecline;      // red
+      case "meets requirement":
+        return styles.statusNoProgress;   // yellow
+      case "above requirement":
+        return styles.statusImproved;     // green
+      default:
+        return "";
+    }
+  };
 
-    // Henter status og tiklhørende bakgrunnsfarge
-    const getStatusColor = (status: string) => {
-        switch (status) {
-        case "no progress":
-            return styles.statusNoProgress;
-        case "improved":
-            return styles.statusImproved;
-        case "decline":
-            return styles.statusDecline;
-        default:
-            return "";
-        }
-    };
+
+    const getStatusLabel = (status: SectionStatus) => {
+    switch (status) {
+      case "below requirement":
+        return "Below Requirements";
+      case "meets requirement":
+        return "Meets Requirements";
+      case "above requirement":
+        return "Above Requirements";
+      default:
+        return "";
+    }
+  };
 
   return (
     <div className={`${styles.statusBadge} ${getStatusColor(status)}`}>
-      <span className={styles.statusLabel}>{status}</span>
+      <span className={styles.statusLabel}>{getStatusLabel(status)}</span>
       {count && <span className={styles.statusCount}>{count}</span>}
     </div>
   );
 };
-
 
 /* Metric card */
 // Kortet som inneholder navn på elementet, antall elementer og status
@@ -169,176 +174,309 @@ const SectionContainer: React.FC<SectionContainerProps> = ({
 
 /* Helpers for process logic */
 
-const toNumber = (v: number | string | undefined): number => {
-  if (typeof v === "number") return v;
-  if (!v) return 0;
-  const n = Number(v);
-  return Number.isNaN(n) ? 0 : n;
-};
+/*
+-- Standards --
+Seat-to-learner ratio is 1:1
+Textbook-to-learner ratio across all levels and subjects is 1:1
+Learner-to-classroom ratio is <53:1
+Learner-to-teacher ratio across all levels is <45:1
+Learner-to-toilet ratio is <25:1
 
-// Rank worst to best
-const metricStatusRank: Record<MetricStatus, number> = {
-  error: 0,
-  warning: 1,
-  info: 2,
-  success: 3,
-};
+Gender Parity Index (GPI): 
+- the number of female learners divided by males 
+- and the number of female teachers divided by males
 
-// Sort metrics by progress (worst first so issues are most visuible)
-const sortMetricsByProgress = (metrics: MetricCardProps[]): MetricCardProps[] =>
-  [...metrics].sort(
-    (a, b) => metricStatusRank[a.status] - metricStatusRank[b.status]
-  );
+-- Tags and Progress Suggestions --
+Above requirement
+Meets requirement
+Below requirement
+
+-- Comparising --
+Could compare with the school overtime
+Could compare with other schools in the cluster
+Could compare with the standards
+Or all of these
+
+-- Inspection Object --
+interface Inspection {
+    // Primary key - auto-generated UUID
+    id: string
+
+    // School/org unit information
+    orgUnit: string
+    orgUnitName: string
+
+    // Scheduling information
+    eventDate: string // ISO 8601 format
+    scheduledStartTime?: string // e.g., "16:00"
+    scheduledEndTime?: string // e.g., "17:30"
+
+    // Status tracking
+    status: InspectionStatus
+    syncStatus: SyncStatus
+
+    // Form data - all inspection fields
+    formData: InspectionFormData
+
+    // Metadata
+    createdAt: string // ISO 8601 format
+    updatedAt: string // ISO 8601 format
+
+    // DHIS2 integration
+    dhis2EventId?: string // If synced to DHIS2
+}
+
+interface InspectionFormData {
+    // Resources
+    textbooks: number
+    desks: number
+    chairs: number
+    testFieldNotes: string
+
+    // Students
+    totalStudents: string
+    maleStudents: string
+    femaleStudents: string
+
+    // Staff
+    staffCount: string
+
+    // Facilities
+    classroomCount: string
+}
+
+*/
+
+// Inspections Standards
+const INSPECTION_STANDARDS = {
+  seatToLearner: {
+    label: "Seat-to-learner ratio",
+    comparator: "equal" as const,
+    target: 1, // 1:1
+  },
+  textbookToLearner: {
+    label: "Textbook-to-learner ratio",
+    comparator: "equal" as const,
+    target: 1, // 1:1
+  },
+  learnerToClassroom: {
+    label: "Learner-to-classroom ratio",
+    comparator: "lessThan" as const,
+    target: 53, // <53:1
+  },
+  learnerToTeacher: {
+    label: "Learner-to-teacher ratio",
+    comparator: "lessThan" as const,
+    target: 45, // <45:1
+  },
+  learnerToToilet: {
+    label: "Learner-to-toilet ratio",
+    comparator: "lessThan" as const,
+    target: 25, // <25:1
+  },
+  gpiLearners: {
+    label: "Gender Parity Index (learners)",
+    comparator: "equal" as const,
+    target: 1, // female learners / male learners
+  },
+  gpiTeachers: {
+    label: "Gender Parity Index (teachers)",
+    comparator: "equal" as const,
+    target: 1, // female teachers / male teachers
+  },
+}
+
+type StandardKey = keyof typeof INSPECTION_STANDARDS;
+type StandardConfig = (typeof INSPECTION_STANDARDS)[StandardKey];
+type ProgressTag = (typeof PROGRESS_TAGS)[keyof typeof PROGRESS_TAGS];
 
 
-// Obtain section status from containing metrics
-const getSectionStatusFromMetrics = (
-  metrics: MetricCardProps[]
-): SectionStatus => {
-  const hasError = metrics.some((m) => m.status === "error");
-  const hasWarningOrInfo = metrics.some(
-    (m) => m.status === "warning" || m.status === "info"
-  );
-  const allSuccess = metrics.every((m) => m.status === "success");
+// Progress tags
+const PROGRESS_TAGS = {
+  ABOVE_REQUIREMENT: {
+    id: "above-requirement",
+    label: "Above requirement",
+  },
+  MEETS_REQUIREMENT: {
+    id: "meets-requirement",
+    label: "Meets requirement",
+  },
+  BELOW_REQUIREMENT: {
+    id: "below-requirement",
+    label: "Below requirement",
+  },
+}
 
-  if (hasError) return "decline";
-  if (allSuccess) return "improved";
-  if (hasWarningOrInfo) return "no progress";
+interface EvaluatedMetric {
+  key: StandardKey;
+  label: string;
+  value: number;
+  target: number;
+  tag: ProgressTag;
+}
 
-  // Fallback
-  return "no progress";
-};
-
-
-
-/**
- * Build MetricCardProps from raw values using generic rules:
- * - If all values are 0 → info: "No data recorded"
- * - If value === 0    → error: "No data recorded"
- * - If value >= average of non-zero values → success: "At or above section average"
- * - If value < average → warning: "Below section average"
- */
-const buildMetricsFromValues = (
-  values: BaseMetric[],
-  sectionName: string
-): MetricCardProps[] => {
-  if (values.length === 0) return [];
-
-  const nonZero = values.filter((v) => v.value > 0);
-  const allZero = nonZero.length === 0;
-
-  if (allZero) {
-    // No data at all in this section
-    return values.map((v) => ({
-      label: v.label,
-      value: v.value,
-      status: "info",
-      statusText: `No data recorded for ${sectionName.toLowerCase()}`,
-    }));
-  }
-
-  const avg =
-    nonZero.reduce((sum, m) => sum + m.value, 0) / nonZero.length;
-
-  return values.map((m) => {
-    if (m.value === 0) {
+function mapProgressTagToMetricStatus(
+  tag: ProgressTag
+): { status: MetricStatus; statusText: string } {
+  switch (tag.id) {
+    case PROGRESS_TAGS.BELOW_REQUIREMENT.id:
       return {
-        label: m.label,
-        value: m.value,
         status: "error",
-        statusText: "No data recorded",
+        statusText: "Below requirement",
       };
-    }
-
-    if (m.value >= avg) {
+    case PROGRESS_TAGS.ABOVE_REQUIREMENT.id:
       return {
-        label: m.label,
-        value: m.value,
-        status: "success",
-        statusText: "At or above section average",
+        status: "info",
+        statusText: "Above requirement",
       };
-    }
+    case PROGRESS_TAGS.MEETS_REQUIREMENT.id:
+      return {
+        status: "success",
+        statusText: "Meets requirement",
+      };
+    default:
+      return {
+        status: "info",
+        statusText: tag.label,
+      };
+  }
+}
 
-    return {
-      label: m.label,
-      value: m.value,
-      status: "warning",
-      statusText: "Below section average",
-    };
-  });
-};
+interface SectionDefinition {
+  key: string;
+  title: string;
+  metricKeys: StandardKey[];
+}
+
+const SECTION_DEFINITIONS: SectionDefinition[] = [
+  {
+    key: "resources",
+    title: "Resources",
+    metricKeys: ["seatToLearner", "textbookToLearner"],
+  },
+  {
+    key: "learningEnvironment",
+    title: "Learning Environment",
+    metricKeys: ["learnerToClassroom", "learnerToToilet"],
+  },
+  {
+    key: "staffing",
+    title: "Staffing & Teaching",
+    metricKeys: ["learnerToTeacher"],
+  },
+  {
+    key: "genderParity",
+    title: "Gender Parity",
+    metricKeys: ["gpiLearners"],
+  },
+];
+
+function getSectionStatusFromMetrics(
+  metrics: EvaluatedMetric[]
+): SectionStatus {
+  const hasBelow = metrics.some(
+    (m) => m.tag.id === PROGRESS_TAGS.BELOW_REQUIREMENT.id
+  );
+  const hasMeets = metrics.some(
+    (m) => m.tag.id === PROGRESS_TAGS.MEETS_REQUIREMENT.id
+  );
+  const hasAbove = metrics.some(
+    (m) => m.tag.id === PROGRESS_TAGS.ABOVE_REQUIREMENT.id
+  );
+
+  if (hasBelow) return "below requirement";
+  if (hasMeets) return "meets requirement";
+  if (hasAbove) return "above requirement";
+
+  // Fallback (shouldn't really happen)
+  return "meets requirement";
+}
 
 
-/* Main Summary Screen*/
-const SchoolInspectorDashboard: React.FC = () => {
 
+// Fetches Inspection object
+type InspectionFetchStatus = "loading" | "success" | "error";
+
+interface UseInspectionResult {
+  inspection: Inspection | null;
+  status: InspectionFetchStatus;
+  error: string | null;
+}
+
+// Fetches an Inspection based on the 'id' in the route
+// Returns the inspection or null if it fails, 
+// As well as a status indicator.
+const fetchInspection = (): UseInspectionResult => {
   const { id } = useParams<{ id: string }>();
+
   const [inspection, setInspection] = React.useState<Inspection | null>(null);
-  const [loading, setLoading] = React.useState(true);
-  const [loadError, setLoadError] = React.useState<string | null>(null);
+  const [status, setStatus] = React.useState<InspectionFetchStatus>("loading");
+  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!id) {
-      setLoadError("No inspection id provided in the URL.");
-      setLoading(false);
+      setError("No inspection id provided in the URL.");
+      setInspection(null);
+      setStatus("error");
       return;
     }
 
-  let isMounted = true;
+    let isMounted = true;
+    setStatus("loading");
+    setError(null);
+    setInspection(null);
 
-  getInspectionById(id)
+    getInspectionById(id)
       .then((result: Inspection | null) => {
         if (!isMounted) return;
+
         if (!result) {
-          setLoadError("Inspection not found.");
+          setError("Inspection not found.");
+          setInspection(null);
+          setStatus("error");
         } else {
           setInspection(result);
+          setStatus("success");
         }
       })
       .catch((err: unknown) => {
         if (!isMounted) return;
         console.error("Failed to load inspection", err);
-        setLoadError("Failed to load inspection.");
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false);
+        setError("Failed to load inspection.");
+        setInspection(null);
+        setStatus("error");
       });
 
-      return () => {
+    return () => {
       isMounted = false;
     };
   }, [id]);
 
-  if (loading) {
-    return <div className={styles.dashboardContainer}>Loading inspection...</div>;
-  }
+  return { inspection, status, error };
+};
 
-  if (loadError || !inspection) {
-    return (
-      <div className={styles.dashboardContainer}>
-        <TopHeader
-          schoolName="Unknown school"
-          inspectionDate=""
-          logoSrc={undefined}
-          pageTitle="Inspection Summary"
-        />
-        <div className={styles.content}>
-          <p>{loadError ?? "Inspection could not be loaded."}</p>
-        </div>
-        <BottomNavBar />
-      </div>
-    );
-  }
+interface ObtainedInspectionData {
+  schoolName: string;
+  inspectionDate: string;
+  textbooks: number;
+  desks: number;
+  chairs: number;
+  totalStudents: number;
+  maleStudents: number;
+  femaleStudents: number;
+  genderGpi: number;
+  staffCount: number;
+  classrooms: number;
+}
 
-  if (loading) {
-    return <div className={styles.dashboardContainer}>Loading inspection...</div>;
-  }
-
-  console.log("Dashboard loaded for inspection", inspection.id);
+// Builds and returns data from the Inspection object, if and only if it is not null
+// Have an if statement before calling this method 
+function buildObtainedInspectionData(
+  inspection : Inspection
+): ObtainedInspectionData {
 
   const { formData } = inspection;
 
-  // Header data from inspection
   const schoolName = inspection.orgUnitName;
   const inspectionDate = new Date(inspection.eventDate).toLocaleDateString();
 
@@ -348,95 +486,233 @@ const SchoolInspectorDashboard: React.FC = () => {
   const chairs = formData.chairs;
 
   // Students
-  const totalStudents = toNumber(formData.totalStudents);
-  const maleStudents = toNumber(formData.maleStudents);
-  const femaleStudents = toNumber(formData.femaleStudents);
+  const totalStudents = Number(formData.totalStudents || 0);
+  const maleStudents = Number(formData.maleStudents || 0);
+  const femaleStudents = Number(formData.femaleStudents || 0);
+
   const genderGpi =
     maleStudents > 0 ? Number((femaleStudents / maleStudents).toFixed(2)) : 0;
 
   // Staff
-  const staffCount = toNumber(formData.staffCount);
+  const staffCount = Number(formData.staffCount || 0);
 
   // Facilities
-  const classrooms = toNumber(formData.classroomCount);
+  const classrooms = Number(formData.classroomCount || 0);
 
-  // 1) Build base metrics from Inspection.formData
-  const resourceBase: BaseMetric[] = [
-    { label: "Textbooks", value: toNumber(textbooks) },
-    { label: "Desks", value: toNumber(desks) },
-    { label: "Chairs", value: toNumber(chairs) },
-  ];
+  return {
+    schoolName,
+    inspectionDate,
+    textbooks,
+    desks,
+    chairs,
+    totalStudents,
+    maleStudents,
+    femaleStudents,
+    genderGpi,
+    staffCount,
+    classrooms,
+  };
+}
 
-  const facilitiesBase: BaseMetric[] = [
-    { label: "Classrooms", value: classrooms },
-  ];
+// Helper methods for comparing
+interface RetrievedMetrics {
+  seatToLearner: number;
+  textbookToLearner: number;
+  learnerToClassroom: number;
+  learnerToTeacher: number;
+  gpiLearners: number;
+}
 
-  const studentBase: BaseMetric[] = [
-    { label: "Females", value: femaleStudents },
-    { label: "Males", value: maleStudents },
-    { label: "Gender GPI", value: genderGpi },
-  ];
+function buildRetrivedInspectionMetrics(data: ObtainedInspectionData) {
+  return {
+    seatToLearner: data.chairs > 0 ? data.totalStudents / data.chairs : 0,
+    textbookToLearner: data.textbooks > 0 ? data.totalStudents / data.textbooks : 0,
+    learnerToClassroom: data.classrooms > 0 ? data.totalStudents / data.classrooms : 0,
+    learnerToTeacher: data.staffCount > 0 ? data.totalStudents / data.staffCount : 0,
+    gpiLearners: data.genderGpi,
+  };
+}
 
-  const staffBase: BaseMetric[] = [
-    { label: "Staff", value: staffCount },
-  ];
+// Metric evaluator
+function evaluateMetric(value: number, standard: StandardConfig) {
+  switch (standard.comparator) {
+    case "equal":
+      if (value === standard.target) return PROGRESS_TAGS.MEETS_REQUIREMENT;
+      if (value > standard.target) return PROGRESS_TAGS.ABOVE_REQUIREMENT;
+      return PROGRESS_TAGS.BELOW_REQUIREMENT;
 
-  // 2) Build MetricCardProps per section
-  const resourceMetrics = buildMetricsFromValues(resourceBase, "Resources");
-  const facilitiesMetrics = buildMetricsFromValues(facilitiesBase, "Facilities");
-  const studentMetrics = buildMetricsFromValues(studentBase, "Students");
-  const staffMetrics = buildMetricsFromValues(staffBase, "Staff");
+    case "lessThan":
+      if (value < standard.target) return PROGRESS_TAGS.MEETS_REQUIREMENT;
+      return PROGRESS_TAGS.BELOW_REQUIREMENT;
 
-  // 3) Sort each section by progress
-  const sortedResourceMetrics = sortMetricsByProgress(resourceMetrics);
-  const sortedFacilitiesMetrics = sortMetricsByProgress(facilitiesMetrics);
-  const sortedStudentMetrics = sortMetricsByProgress(studentMetrics);
-  const sortedStaffMetrics = sortMetricsByProgress(staffMetrics);
+    default:
+      return PROGRESS_TAGS.BELOW_REQUIREMENT;
+  }
+}
 
-  // 4) Derive section status from sorted metrics
-  const resourcesSectionStatus =
-    getSectionStatusFromMetrics(sortedResourceMetrics);
-  const facilitiesSectionStatus =
-    getSectionStatusFromMetrics(sortedFacilitiesMetrics);
-  const studentsSectionStatus =
-    getSectionStatusFromMetrics(sortedStudentMetrics);
-  const staffSectionStatus =
-    getSectionStatusFromMetrics(sortedStaffMetrics);
+// Evaluating all metrics
+function evaluateAllInspectionMetrics(
+  metrics: RetrievedMetrics
+): EvaluatedMetric[] {
+  const results: EvaluatedMetric[] = [];
 
-  // 5) One reusable sections array driving the UI
-  const sections: SectionConfig[] = [
-    {
-      key: "resources",
-      title: "Resources",
-      metrics: sortedResourceMetrics,
-      status: resourcesSectionStatus,
-    },
-    {
-      key: "facilities",
-      title: "Facilities",
-      metrics: sortedFacilitiesMetrics,
-      status: facilitiesSectionStatus,
-    },
-    {
-      key: "students",
-      title: "Students",
-      metrics: sortedStudentMetrics,
-      status: studentsSectionStatus,
-    },
-    {
-      key: "staff",
-      title: "Staff",
-      metrics: sortedStaffMetrics,
-      status: staffSectionStatus,
-    },
-  ];
+  (Object.keys(INSPECTION_STANDARDS) as StandardKey[]).forEach((key) => {
+    const standard = INSPECTION_STANDARDS[key];
+    const value = (metrics as any)[key] ?? 0;
 
+    results.push({
+      key,
+      label: standard.label,
+      value,
+      target: standard.target,
+      tag: evaluateMetric(value, standard),
+    });
+  });
+
+  return results;
+}
+
+
+// Logic for displaying the metrocs based in requirements/standards
+/*
+  1. Below standards
+  2. Above standards
+  3. Meet standards
+*/
+
+interface EvaluatedMetric {
+  key: StandardKey;
+  label: string;
+  value: number;
+  target: number;
+  tag: ProgressTag;
+}
+
+function sortEvaluatedMetrics(evaluated: EvaluatedMetric[]): EvaluatedMetric[] {
+  const PRIORITY: Record<string, number> = {
+    "below-requirement": 0,
+    "meets-requirement": 1,
+    "above-requirement": 2,
+  };
+
+  return [...evaluated].sort((a, b) => {
+    const pa = PRIORITY[a.tag.id] ?? 99;
+    const pb = PRIORITY[b.tag.id] ?? 99;
+
+    if (pa !== pb) return pa - pb;
+
+    // If same status, sort alphabetically by label
+    return a.label.localeCompare(b.label);
+  });
+}
+
+
+function buildSortedInspectionMetrics(
+  inspection: Inspection
+): EvaluatedMetric[] {
+  const obtained = buildObtainedInspectionData(inspection);
+  const metrics = buildRetrivedInspectionMetrics(obtained);
+  const evaluated = evaluateAllInspectionMetrics(metrics);
+  return sortEvaluatedMetrics(evaluated);
+}
+
+function buildDashboardSections(
+  evaluatedMetrics: EvaluatedMetric[]
+): SectionConfig[] {
+  // 1. Build all sections
+  const sections: SectionConfig[] = SECTION_DEFINITIONS.map((sectionDef) => {
+    const sectionMetrics = evaluatedMetrics.filter((m) =>
+      sectionDef.metricKeys.includes(m.key)
+    );
+
+    if (sectionMetrics.length === 0) {
+      return null;
+    }
+
+    // Sort metrics inside this section
+    const sortedMetrics = sortEvaluatedMetrics(sectionMetrics);
+
+    // Compute section status based on its sorted metrics
+    const sectionStatus = getSectionStatusFromMetrics(sortedMetrics);
+
+    // Convert evaluated metrics → MetricCardProps for UI
+    const metricCards: MetricCardProps[] = sortedMetrics.map((m) => {
+      const { status, statusText } = mapProgressTagToMetricStatus(m.tag);
+
+      return {
+        label: m.label,
+        value: Number(m.value.toFixed(2)),
+        status,
+        statusText,
+      };
+    });
+
+    return {
+      key: sectionDef.key,
+      title: sectionDef.title,
+      metrics: metricCards,
+      status: sectionStatus,
+    };
+  }).filter((s): s is SectionConfig => s !== null);
+
+  // 2. Sort the SECTIONS by their status
+  const SECTION_PRIORITY: Record<SectionStatus, number> = {
+    "below requirement": 0,
+    "meets requirement": 1,
+    "above requirement": 2,
+  };
+
+  sections.sort((a, b) => {
+    const pa = SECTION_PRIORITY[a.status];
+    const pb = SECTION_PRIORITY[b.status];
+    return pa - pb;
+  });
+
+  return sections;
+}
+
+
+
+/* Main Summary Screen*/
+const SchoolInspectorDashboard: React.FC = () => {
+  const { inspection, status, error } = fetchInspection();
+
+  if (status === "loading") {
+    return (
+      <div className={styles.dashboardContainer}>
+        Loading inspection...
+      </div>
+    );
+  }
+
+  if (status === "error" || !inspection) {
+    return (
+      <div className={styles.dashboardContainer}>
+        <TopHeader
+          schoolName="Unknown school"
+          inspectionDate=""
+          logoSrc={undefined}
+          pageTitle="Inspection Summary"
+        />
+        <div className={styles.content}>
+          <p>{error ?? "Inspection could not be loaded."}</p>
+        </div>
+        <BottomNavBar />
+      </div>
+    );
+  }
+
+  // Build all the data pipeline for this inspection
+  const obtained = buildObtainedInspectionData(inspection);
+  const metrics = buildRetrivedInspectionMetrics(obtained);
+  const evaluated = evaluateAllInspectionMetrics(metrics);
+  const sections = buildDashboardSections(evaluated);
 
   return (
-      <div className={styles.dashboardContainer}>
+    <div className={styles.dashboardContainer}>
       <TopHeader
-        schoolName={schoolName}
-        inspectionDate={inspectionDate}
+        schoolName={obtained.schoolName}
+        inspectionDate={obtained.inspectionDate}
         logoSrc={undefined}
         pageTitle="Inspection Summary"
       />
@@ -448,13 +724,17 @@ const SchoolInspectorDashboard: React.FC = () => {
             title={section.title}
             status={section.status}
           >
-            <div className={styles.cardGrid}>
-              {section.metrics.map((metric) => (
-                <MetricCard key={metric.label} {...metric} />
-              ))}
-            </div>
+            {section.metrics.map((metric) => (
+              <MetricCard
+                key={metric.label}
+                label={metric.label}
+                value={metric.value}
+                status={metric.status}
+                statusText={metric.statusText}
+              />
+            ))}
           </SectionContainer>
-      ))}
+        ))}
       </div>
 
       <BottomNavBar />
@@ -462,7 +742,6 @@ const SchoolInspectorDashboard: React.FC = () => {
   );
 
 }
-
 
 export default SchoolInspectorDashboard; 
 
