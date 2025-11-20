@@ -119,9 +119,13 @@
 
 .tabRow {
   display: flex;
+  justify-content: center; 
+  align-items: center;
   gap: 12px;
-  margin-top: 4px;
+  width: 100%;
+  margin-top: 12px;
 }
+
 
 .tab {
   padding: 8px 18px;

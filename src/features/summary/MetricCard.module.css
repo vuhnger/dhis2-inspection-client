@@ -1,0 +1,91 @@
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  min-width: 190px;
+  max-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Middle row: value + icon */
+
+.mainRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.value {
+  font-size: 32px;
+  line-height: 1.1;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Circular icon container */
+
+.statusIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+}
+
+/* Status variants */
+
+.statusSuccess {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.statusError {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.statusWarning {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.statusInfo {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+/* Footer status text */
+
+.footer {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+}
+
+.statusLabel {
+  font-weight: 600;
+  color: #64748b;
+}
+
+.statusText {
+  color: #111827;
+}

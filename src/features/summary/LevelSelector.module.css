@@ -1,0 +1,48 @@
+.levelSection {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;  
+  width: 100%;
+  gap: 8px;
+}
+
+.levelLabel {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+
+.levelPills {
+  display: inline-flex;
+  justify-content: center;  
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border-radius: 9999px;
+  background: #e2e8f0;
+}
+
+/* Single pill */
+.pill {
+  min-width: 64px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+/* Selected pill */
+.pillActive {
+  background: #0f172a;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.35);
+}
