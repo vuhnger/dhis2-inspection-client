@@ -1,4 +1,3 @@
-import { useDataQuery } from '@dhis2/app-runtime'
 import i18n from '@dhis2/d2-i18n'
 import { CircularLoader } from '@dhis2/ui'
 import React from 'react'
@@ -7,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { DHIS2_PROGRAM_UID } from '../../shared/config/dhis2'
 import { useInspections } from '../../shared/hooks/useInspections'
 import { useSync } from '../../shared/hooks/useSync'
+import { getApiBase, getAuthHeader } from '../../shared/utils/auth'
 
 import { CreateInspectionModal } from './components/CreateInspectionModal'
 import classes from './InspectionHomePage.module.css'
@@ -33,33 +33,21 @@ interface EventsQueryResult {
 }
 
 /**
- * Query to fetch inspection events for the user's accessible org units
- * This will be cached offline per DHIS2 App Runtime behavior
- */
-const eventsQuery = {
-    events: {
-        resource: 'tracker/events',
-        params: {
-            program: DHIS2_PROGRAM_UID, // School Inspection program UID (configurable)
-            fields: 'event,orgUnit,orgUnitName,eventDate,status,dataValues[dataElement,value]',
-            order: 'eventDate:desc',
-            pageSize: 50,
-        },
-    },
-}
-
-/**
  * Home page showing upcoming and completed school inspections
  * Designed for 768x1024 tablet viewport with offline-first workflow
  */
 const InspectionHomePage: React.FC = () => {
     const navigate = useNavigate()
-    const { loading } = useDataQuery<EventsQueryResult>(eventsQuery)
+    const apiBase = React.useMemo(() => getApiBase(), [])
+    const [remoteEvents, setRemoteEvents] = React.useState<InspectionEvent[]>([])
+    const [remoteLoading, setRemoteLoading] = React.useState(false)
+    const [remoteError, setRemoteError] = React.useState<string | null>(null)
     const { inspections: localInspections, loading: localLoading, refetch: refetchInspections } = useInspections()
     const { hasUnsynced, isSyncing, triggerSync } = useSync()
     const [isOnline, setIsOnline] = React.useState(navigator.onLine)
     const [searchQuery, setSearchQuery] = React.useState('')
     const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false)
+    const loading = remoteLoading
     const canTriggerSync = isOnline && hasUnsynced && !isSyncing
 
     const syncBadgeColors = React.useMemo(() => {
@@ -99,6 +87,51 @@ const InspectionHomePage: React.FC = () => {
             window.removeEventListener('offline', handleOffline)
         }
     }, [])
+
+    // Load DHIS2 events once per mount (or when online changes to true)
+    React.useEffect(() => {
+        let cancelled = false
+        const fetchEvents = async () => {
+            if (!isOnline) {
+                return
+            }
+            setRemoteLoading(true)
+            setRemoteError(null)
+            try {
+                const params = new URLSearchParams()
+                params.set('program', DHIS2_PROGRAM_UID)
+                params.set('fields', 'event,orgUnit,orgUnitName,eventDate,status,dataValues[dataElement,value]')
+                params.set('order', 'eventDate:desc')
+                params.set('pageSize', '50')
+                const url = `${apiBase}/tracker/events?${params.toString()}`
+                const res = await fetch(url, {
+                    headers: {
+                        Authorization: getAuthHeader(),
+                    },
+                })
+                if (!res.ok) {
+                    throw new Error(`${res.status} ${res.statusText}`)
+                }
+                const data = (await res.json()) as EventsQueryResult
+                if (!cancelled) {
+                    setRemoteEvents(data?.events?.instances || [])
+                }
+            } catch (err) {
+                if (!cancelled) {
+                    setRemoteError(err instanceof Error ? err.message : 'Unknown error')
+                    setRemoteEvents([])
+                }
+            } finally {
+                if (!cancelled) {
+                    setRemoteLoading(false)
+                }
+            }
+        }
+        fetchEvents()
+        return () => {
+            cancelled = true
+        }
+    }, [apiBase, isOnline])
 
     // Parse local inspections and DHIS2 events into upcoming vs finished
     const { upcomingInspections, finishedInspections } = React.useMemo(() => {

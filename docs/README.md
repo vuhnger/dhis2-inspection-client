@@ -25,7 +25,7 @@ If you're implementing DHIS2 sync, start here:
   "programStageId": "eJiBjm9Rl7E"
 }
 ```
-> Override via env if your backend uses different IDs: set `VITE_DHIS2_PROGRAM_UID`, `VITE_DHIS2_PROGRAM_STAGE_UID`, and `VITE_DHIS2_ROOT_OU_UID` (default: `plNY03ITg7K`, Albion Cluster) in your `.env`.
+> Override via env if your backend uses different IDs: set `VITE_DHIS2_PROGRAM_UID`, `VITE_DHIS2_PROGRAM_STAGE_UID`, and `VITE_DHIS2_ROOT_OU_UID` (default root: `QGMu6bmPtkD`, Gambia) in your `.env`. Dev auth defaults are hardcoded: `REACT_APP_DHIS2_USERNAME=in5320`, `REACT_APP_DHIS2_PASSWORD=P1@tform`, `REACT_APP_DHIS2_BASE_URL=https://research.im.dhis2.org/in5320g16` (change/remove for production).
 
 **Quick Example**:
 ```typescript

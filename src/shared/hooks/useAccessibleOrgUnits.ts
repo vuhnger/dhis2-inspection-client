@@ -1,5 +1,6 @@
-import { useDataQuery } from '@dhis2/app-runtime'
 import React from 'react'
+
+import { getApiBase, getAuthHeader } from '../utils/auth'
 
 export type AccessibleOrgUnit = {
     id: string
@@ -17,18 +18,6 @@ type OrgUnitsQueryResponse = {
 }
 
 const STORAGE_KEY = 'group16:orgUnits:cache'
-
-const query = {
-    orgUnits: {
-        resource: 'organisationUnits',
-        params: {
-            fields: 'id,name,displayName,path',
-            paging: false,
-            withinUserHierarchy: true,
-            order: 'displayName:asc',
-        },
-    },
-}
 
 const loadCachedOrgUnits = (): AccessibleOrgUnit[] => {
     if (typeof window === 'undefined') {
@@ -70,31 +59,57 @@ const persistOrgUnits = (orgUnits: AccessibleOrgUnit[]) => {
 export const useAccessibleOrgUnits = () => {
     const cached = React.useRef<AccessibleOrgUnit[]>(loadCachedOrgUnits())
     const [orgUnits, setOrgUnits] = React.useState<AccessibleOrgUnit[]>(cached.current)
+    const [loading, setLoading] = React.useState(false)
+    const [error, setError] = React.useState<Error | null>(null)
+    const apiBase = React.useMemo(() => getApiBase(), [])
 
-    const { data, loading, error, refetch } = useDataQuery<{ orgUnits: OrgUnitsQueryResponse }>(query)
+    const fetchOrgUnits = React.useCallback(async () => {
+        setLoading(true)
+        setError(null)
+        try {
+            const params = new URLSearchParams()
+            params.set('fields', 'id,name,displayName,path')
+            params.set('paging', 'false')
+            params.set('withinUserHierarchy', 'true')
+            params.set('order', 'displayName:asc')
+            const url = `${apiBase}/organisationUnits?${params.toString()}`
+            const res = await fetch(url, {
+                headers: {
+                    Authorization: getAuthHeader(),
+                },
+            })
+            if (!res.ok) {
+                throw new Error(`${res.status} ${res.statusText}`)
+            }
+            const data: OrgUnitsQueryResponse = await res.json()
+            const normalised: AccessibleOrgUnit[] = (data.organisationUnits || [])
+                .map((orgUnit) => ({
+                    id: orgUnit.id,
+                    name: (orgUnit as any).displayName ?? orgUnit.name,
+                    path: orgUnit.path,
+                }))
+                .sort((a, b) => a.name.localeCompare(b.name))
+
+            setOrgUnits(normalised)
+            persistOrgUnits(normalised)
+        } catch (err) {
+            setError(err instanceof Error ? err : new Error('Failed to load org units'))
+        } finally {
+            setLoading(false)
+        }
+    }, [apiBase])
 
     React.useEffect(() => {
-        if (!data?.orgUnits?.organisationUnits) {
-            return
+        if (!orgUnits.length) {
+            fetchOrgUnits()
         }
-
-        const normalised: AccessibleOrgUnit[] = data.orgUnits.organisationUnits
-            .map((orgUnit) => ({
-                id: orgUnit.id,
-                name: orgUnit.displayName ?? orgUnit.name,
-                path: orgUnit.path,
-            }))
-            .sort((a, b) => a.name.localeCompare(b.name))
-
-        setOrgUnits(normalised)
-        persistOrgUnits(normalised)
-    }, [data])
+    }, [fetchOrgUnits, orgUnits.length])
 
     return {
         orgUnits,
         loading,
         error,
-        refetch,
+        refetch: fetchOrgUnits,
         hasCachedData: cached.current.length > 0,
     }
 }

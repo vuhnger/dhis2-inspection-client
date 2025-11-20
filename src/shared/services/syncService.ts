@@ -4,6 +4,7 @@
 
 import { updateInspection, getInspectionsBySyncStatus } from '../db/indexedDB'
 import { DHIS2_PROGRAM_STAGE_UID, DHIS2_PROGRAM_UID } from '../config/dhis2'
+import { getAuthHeader } from '../utils/auth'
 
 import type { Inspection } from '../types/inspection'
 
@@ -167,6 +168,9 @@ export async function syncInspectionToDHIS2(
                 async: false, // Synchronous import
             },
             data: trackerPayload,
+            headers: {
+                Authorization: getAuthHeader(),
+            },
         })
 
         console.log('DHIS2 sync response:', response)

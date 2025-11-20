@@ -8,14 +8,19 @@ import {
     ButtonStrip,
     InputField,
     NoticeBox,
-    OrganisationUnitTree,
+    SingleSelectField,
+    SingleSelectOption,
 } from '@dhis2/ui'
 import React from 'react'
 
-import { DHIS2_ROOT_OU_UID } from '../../../shared/config/dhis2'
+import { DHIS2_PROGRAM_UID, DHIS2_ROOT_OU_UID } from '../../../shared/config/dhis2'
+import { getApiBase, getAuthHeader } from '../../../shared/utils/auth'
 import { useInspections } from '../../../shared/hooks/useInspections'
 
 import type { CreateInspectionInput } from '../../../shared/types/inspection'
+
+// School-related organisation unit groups (LBE/UBE/ECD/Tertiary)
+const SCHOOL_GROUP_IDS = ['ib40OsG9QAI', 'SPCm0Ts3SLR', 'UzSEGuwAfyX', 'sSgWDKuCrmi']
 
 interface CreateInspectionModalProps {
     isOpen: boolean
@@ -29,6 +34,76 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
     onSuccess,
 }) => {
     const { createInspection } = useInspections()
+    const [schoolsLoading, setSchoolsLoading] = React.useState(false)
+    const [schoolsError, setSchoolsError] = React.useState<string | null>(null)
+    const [schoolOptions, setSchoolOptions] = React.useState<Array<{ value: string; label: string }>>([])
+    const [schoolsLoadedOnce, setSchoolsLoadedOnce] = React.useState(false)
+    const isFetchingRef = React.useRef(false)
+    const apiBase = React.useMemo(() => getApiBase(), [])
+
+    const fetchSchools = React.useCallback(async () => {
+        if (isFetchingRef.current) {
+            return
+        }
+        isFetchingRef.current = true
+        setSchoolsLoading(true)
+        setSchoolsError(null)
+        try {
+            const filters = [
+                `organisationUnitGroups.id:in:[${SCHOOL_GROUP_IDS.join(',')}]`,
+                'level:ge:4',
+            ]
+            if (DHIS2_ROOT_OU_UID) {
+                filters.push(`path:like:/${DHIS2_ROOT_OU_UID}`)
+            }
+
+            const params = new URLSearchParams()
+            params.set('paging', 'false')
+            params.set('fields', 'id,displayName')
+            filters.forEach(f => params.append('filter', f))
+            params.set('program', DHIS2_PROGRAM_UID)
+            params.set('_', Date.now().toString()) // cache buster to avoid 304
+
+            const url = `${apiBase}/organisationUnits?${params.toString()}`
+            const res = await fetch(url, {
+                headers: {
+                    Authorization: getAuthHeader(),
+                    'Cache-Control': 'no-cache',
+                    Pragma: 'no-cache',
+                },
+                cache: 'no-store',
+            })
+
+            if (!res.ok) {
+                throw new Error(`${res.status} ${res.statusText}`)
+            }
+
+            const data = await res.json()
+            const list = data?.organisationUnits || []
+            setSchoolOptions(
+                [...list]
+                    .sort((a: any, b: any) => a.displayName.localeCompare(b.displayName))
+                    .map((ou: any) => ({
+                        value: ou.id,
+                        label: ou.displayName,
+                    }))
+            )
+            setSchoolsLoadedOnce(true)
+        } catch (err) {
+            console.error('Failed to load schools', err)
+            setSchoolsError(err instanceof Error ? err.message : 'Unknown error')
+            setSchoolOptions([])
+        } finally {
+            isFetchingRef.current = false
+            setSchoolsLoading(false)
+        }
+    }, [])
+
+    React.useEffect(() => {
+        if (isOpen && !schoolsLoadedOnce) {
+            fetchSchools()
+        }
+    }, [isOpen, fetchSchools, schoolsLoadedOnce])
 
     // Form state
     const [selectedOrgUnit, setSelectedOrgUnit] = React.useState<{
@@ -179,30 +254,39 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
                         >
                             {i18n.t('Select School')} <span style={{ color: '#d32f2f' }}>*</span>
                         </label>
-                        <div
-                            style={{
-                                border: errors.orgUnit ? '1px solid #d32f2f' : '1px solid #a0adba',
-                                borderRadius: '4px',
-                                padding: '8px',
-                                maxHeight: '200px',
-                                overflowY: 'auto',
-                            }}
-                        >
-                            <OrganisationUnitTree
-                                onChange={(orgUnit: { id: string; displayName?: string; path?: string }) => {
+                        <SingleSelectField
+                            selected={selectedOrgUnit?.id || ''}
+                        filterable
+                        clearable
+                        loading={schoolsLoading}
+                        onFocus={() => {
+                                if (schoolsError && !schoolsLoading) {
+                                    fetchSchools()
+                                }
+                        }}
+                            onChange={({ selected }: { selected: string }) => {
+                                const choice = schoolOptions.find(option => option.value === selected)
+                                if (choice) {
                                     setSelectedOrgUnit({
-                                        id: orgUnit.id,
-                                        displayName: orgUnit.displayName || orgUnit.path || orgUnit.id,
+                                        id: choice.value,
+                                        displayName: choice.label,
                                     })
                                     if (errors.orgUnit) {
                                         setErrors({ ...errors, orgUnit: undefined })
                                     }
-                                }}
-                                selected={selectedOrgUnit ? [selectedOrgUnit.id] : []}
-                                singleSelection
-                                roots={[DHIS2_ROOT_OU_UID]}
-                            />
-                        </div>
+                                }
+                            }}
+                            placeholder={schoolsLoading ? i18n.t('Loading schools...') : i18n.t('Search schools')}
+                            error={Boolean(errors.orgUnit || schoolsError)}
+                            validationText={
+                                errors.orgUnit ||
+                                (schoolsError ? i18n.t('Failed to load schools. Please try again.') : undefined)
+                            }
+                        >
+                            {schoolOptions.map(option => (
+                                <SingleSelectOption key={option.value} value={option.value} label={option.label} />
+                            ))}
+                        </SingleSelectField>
                         {selectedOrgUnit && (
                             <div
                                 style={{

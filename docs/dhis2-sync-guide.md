@@ -36,7 +36,9 @@ Our inspection system uses a **simple event program** in DHIS2. This means:
 > ```
 > GET /api/programs.json?fields=id,displayName,programStages[id,displayName]&paging=false
 > ```
-> Then set `VITE_DHIS2_PROGRAM_UID`, `VITE_DHIS2_PROGRAM_STAGE_UID`, and `VITE_DHIS2_ROOT_OU_UID` in your `.env` to match. Default root OU is `plNY03ITg7K` (Albion Cluster, Banjul) – a unit assigned to the program.
+> Then set `VITE_DHIS2_PROGRAM_UID`, `VITE_DHIS2_PROGRAM_STAGE_UID`, and `VITE_DHIS2_ROOT_OU_UID` in your `.env` to match. Default root OU is `QGMu6bmPtkD` (Gambia root) – assigned to the program for full tree browsing. School selector filters org units by program assignment + school org unit groups (LBE, UBE, ECD, Tertiary) and path under the root.
+
+> For local dev without logging into DHIS2 each time, the app is currently hardcoded to use `in5320 / P1@tform` via `REACT_APP_DHIS2_USERNAME/PASSWORD` (see `.env.example`). Remove these or log out before production use.
 
 ---
 
