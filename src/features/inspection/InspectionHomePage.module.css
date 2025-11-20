@@ -121,6 +121,15 @@
     flex: none;
     order: 2;
     flex-grow: 1;
+    position: relative;
+}
+
+.searchWrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    position: relative;
 }
 
 .searchInput {
@@ -152,6 +161,46 @@
 
 .searchIcon {
     font-size: 1.2rem;
+}
+
+.searchDropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.searchResultItem {
+    padding: 16px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.searchResultItem:last-child {
+    border-bottom: none;
+}
+
+.searchResultItem:hover {
+    background-color: #f8fafc;
+}
+
+.searchResultSchool {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.searchResultDate {
+    font-size: 0.875rem;
+    color: #64748b;
 }
 
 /* Action Bar */
