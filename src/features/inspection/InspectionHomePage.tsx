@@ -61,6 +61,8 @@ const InspectionHomePage: React.FC = () => {
     const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false)
     const [searchResults, setSearchResults] = React.useState<any[]>([])
     const [showDropdown, setShowDropdown] = React.useState(false)
+    const [showAllUpcoming, setShowAllUpcoming] = React.useState(false)
+    const [showAllCompleted, setShowAllCompleted] = React.useState(false)
     const canTriggerSync = isOnline && hasUnsynced && !isSyncing
 
     const syncBadgeColors = React.useMemo(() => {
@@ -333,8 +335,11 @@ const InspectionHomePage: React.FC = () => {
                 <section className={classes.section}>
                     <div className={classes.sectionHeader}>
                         <h2 className={classes.sectionTitle}>Upcoming inspections</h2>
-                        <button className={classes.seeAllLink}>
-                            See all upcoming inspections ▾
+                        <button 
+                            className={classes.seeAllLink}
+                            onClick={() => setShowAllUpcoming(!showAllUpcoming)}
+                        >
+                            {showAllUpcoming ? 'Show less ▴' : 'See all upcoming inspections ▾'}
                         </button>
                     </div>
 
@@ -351,7 +356,7 @@ const InspectionHomePage: React.FC = () => {
                     )}
 
                     <div className={classes.inspectionCards}>
-                        {upcomingInspections.slice(0, 3).map((inspection) => {
+                        {(showAllUpcoming ? upcomingInspections : upcomingInspections.slice(0, 3)).map((inspection) => {
                             const { days } = getDaysRelative(inspection.eventDate)
                             const isSynced = inspection.syncStatus === 'synced'
 
@@ -408,8 +413,11 @@ const InspectionHomePage: React.FC = () => {
                 <section className={classes.section}>
                     <div className={classes.sectionHeader}>
                         <h2 className={classes.sectionTitle}>Completed inspections</h2>
-                        <button className={classes.seeAllLink}>
-                            See all previous inspections ▾
+                        <button 
+                            className={classes.seeAllLink}
+                            onClick={() => setShowAllCompleted(!showAllCompleted)}
+                        >
+                            {showAllCompleted ? 'Show less ▴' : 'See all previous inspections ▾'}
                         </button>
                     </div>
 
@@ -420,7 +428,7 @@ const InspectionHomePage: React.FC = () => {
                     )}
 
                     <div className={classes.inspectionCards}>
-                        {finishedInspections.slice(0, 3).map((inspection) => {
+                        {(showAllCompleted ? finishedInspections : finishedInspections.slice(0, 3)).map((inspection) => {
                             const { days } = getDaysRelative(inspection.eventDate)
                             const isSynced = inspection.syncStatus === 'synced'
 
