@@ -147,23 +147,27 @@ export async function syncInspectionToDHIS2(
         const isUpdate = Boolean(inspection.dhis2EventId)
 
         // Use DHIS2 App Runtime engine to make the mutation
+        // For Tracker API, wrap events in an array
         const response = await engine.mutate({
-            resource: isUpdate ? `events/${inspection.dhis2EventId}` : 'events',
+            resource: isUpdate ? `tracker/events/${inspection.dhis2EventId}` : 'tracker/events',
             type: isUpdate ? 'update' : 'create',
-            data: eventPayload,
+            data: isUpdate ? eventPayload : { events: [eventPayload] },
         })
 
         // Check if the response contains the event ID (for creates)
         let eventId = inspection.dhis2EventId
 
         if (!isUpdate) {
+            // Tracker API response structure
             eventId =
                 response?.response?.importSummaries?.[0]?.reference ??
                 response?.importSummaries?.[0]?.reference ??
+                response?.bundleReport?.typeReportMap?.EVENT?.objectReports?.[0]?.uid ??
                 null
         }
 
         if (!eventId) {
+            console.error('No event ID in response:', JSON.stringify(response, null, 2))
             return {
                 success: false,
                 error: 'No event ID returned from DHIS2',

@@ -125,7 +125,6 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
                 status: 'scheduled',
                 formData: {
                     textbooks: 0,
-                    desks: 0,
                     chairs: 0,
                     totalStudents: '',
                     maleStudents: '',
@@ -200,6 +199,7 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
                                 }}
                                 selected={selectedOrgUnit ? [selectedOrgUnit.id] : []}
                                 singleSelection
+                                roots={['ImspTQPwCqd']}
                             />
                         </div>
                         {selectedOrgUnit && (
@@ -292,9 +292,14 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
                             color: '#4a5568',
                         }}
                     >
-                        {i18n.t(
-                            'The inspection will be created with empty form data. You can fill in the details during the inspection.'
-                        )}
+                        <strong>{i18n.t('Data to be collected during inspection:')}</strong>
+                        <ul style={{ marginTop: '8px', marginBottom: 0, paddingLeft: '20px' }}>
+                            <li>{i18n.t('Staff: Total staff count')}</li>
+                            <li>{i18n.t('Resources: Textbooks and chairs')}</li>
+                            <li>{i18n.t('Students: Total, male, and female student counts')}</li>
+                            <li>{i18n.t('Facilities: Number of classrooms')}</li>
+                            <li>{i18n.t('Additional notes (optional)')}</li>
+                        </ul>
                     </div>
                 </div>
             </ModalContent>

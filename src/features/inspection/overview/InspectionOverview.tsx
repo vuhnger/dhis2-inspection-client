@@ -1,9 +1,10 @@
 import i18n from '@dhis2/d2-i18n'
 import { Button, InputField, NoticeBox, TextAreaField, Tooltip, CircularLoader } from '@dhis2/ui'
 import React from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 
 import { useInspection } from '../../../shared/hooks/useInspections'
+import { useSync } from '../../../shared/hooks/useSync'
 
 import classes from './InspectionOverview.module.css'
 
@@ -22,7 +23,6 @@ const CATEGORY_LABELS: Record<Category, string> = {
 type FormState = {
     // Resources form fields (using numbers)
     textbooks: number
-    desks: number
     chairs: number
 
     // Students form fields
@@ -30,18 +30,19 @@ type FormState = {
     maleStudents: string
     femaleStudents: string
 
-    // Staff form fields (placeholder)
+    // Staff form fields
     staffCount: string
 
-    // Facilities form fields (placeholder)
+    // Facilities form fields
     classroomCount: string
 
+    // Notes
     testFieldNotes: string
 }
 
 // Map each category to its fields
 const CATEGORY_FIELDS: Record<Category, Array<keyof FormState>> = {
-    resources: ['textbooks', 'desks', 'chairs'],
+    resources: ['textbooks', 'chairs'],
     students: ['totalStudents', 'maleStudents', 'femaleStudents'],
     staff: ['staffCount'],
     facilities: ['classroomCount'],
@@ -49,7 +50,6 @@ const CATEGORY_FIELDS: Record<Category, Array<keyof FormState>> = {
 
 const DEFAULT_FORM: FormState = {
     textbooks: 0,
-    desks: 0,
     chairs: 0,
     totalStudents: '',
     maleStudents: '',
@@ -61,13 +61,16 @@ const DEFAULT_FORM: FormState = {
 
 const InspectionOverview: React.FC = () => {
     const { id } = useParams<{ id: string }>()
+    const navigate = useNavigate()
     const { inspection, loading: inspectionLoading, updateInspection } = useInspection(id || null)
+    const { isSyncing, triggerSync, syncError } = useSync()
 
     const [selectedCategory, setSelectedCategory] = React.useState<Category>('resources')
     const [form, setForm] = React.useState<FormState>(DEFAULT_FORM)
     const [errors, setErrors] = React.useState<Partial<Record<keyof FormState, string>>>({})
     const [wasSubmitted, setWasSubmitted] = React.useState(false)
     const [showSummary, setShowSummary] = React.useState(false)
+    const [isOnline, setIsOnline] = React.useState(navigator.onLine)
 
     // Load form data from inspection when available
     React.useEffect(() => {
@@ -75,6 +78,20 @@ const InspectionOverview: React.FC = () => {
             setForm(inspection.formData)
         }
     }, [inspection])
+
+    // Track online/offline status
+    React.useEffect(() => {
+        const handleOnline = () => setIsOnline(true)
+        const handleOffline = () => setIsOnline(false)
+
+        window.addEventListener('online', handleOnline)
+        window.addEventListener('offline', handleOffline)
+
+        return () => {
+            window.removeEventListener('online', handleOnline)
+            window.removeEventListener('offline', handleOffline)
+        }
+    }, [])
 
     const schoolName = inspection?.orgUnitName || 'School Name'
     const inspectionDate = React.useMemo(
@@ -100,10 +117,6 @@ const InspectionOverview: React.FC = () => {
         if (category === 'resources') {
             if (state.textbooks < 0) {
                 nextErrors.textbooks = i18n.t('Enter a non-negative number')
-            }
-
-            if (state.desks < 0) {
-                nextErrors.desks = i18n.t('Enter a non-negative number')
             }
 
             if (state.chairs < 0) {
@@ -288,27 +301,32 @@ const InspectionOverview: React.FC = () => {
                     syncStatus: 'not_synced', // Mark as not synced until pushed to DHIS2
                 })
                 console.log('Form submitted successfully and saved to local database')
+
+                // Redirect to home page after successful submission
+                setTimeout(() => {
+                    navigate('/')
+                }, 1500) // Give user time to see success message
             } catch (error) {
                 console.error('Failed to save inspection:', error)
             }
         }
     }
 
-    const handleIncrement = (field: 'textbooks' | 'desks' | 'chairs') => {
+    const handleIncrement = (field: 'textbooks' | 'chairs') => {
         updateForm(prev => ({
             ...prev,
             [field]: prev[field] + 1,
         }))
     }
 
-    const handleDecrement = (field: 'textbooks' | 'desks' | 'chairs') => {
+    const handleDecrement = (field: 'textbooks' | 'chairs') => {
         updateForm(prev => ({
             ...prev,
             [field]: Math.max(0, prev[field] - 1),
         }))
     }
 
-    const handleCounterChange = (field: 'textbooks' | 'desks' | 'chairs') =>
+    const handleCounterChange = (field: 'textbooks' | 'chairs') =>
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const value = parseInt(e.target.value) || 0
             updateForm(prev => ({
@@ -346,36 +364,6 @@ const InspectionOverview: React.FC = () => {
                                     className={classes.counterButton}
                                     onClick={() => handleIncrement('textbooks')}
                                     aria-label={i18n.t('Increase textbooks')}
-                                >
-                                    +
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Desks Counter */}
-                        <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Desks')}</label>
-                            <div className={classes.counterControl}>
-                                <button
-                                    type="button"
-                                    className={classes.counterButton}
-                                    onClick={() => handleDecrement('desks')}
-                                    aria-label={i18n.t('Decrease desks')}
-                                >
-                                    −
-                                </button>
-                                <input
-                                    type="number"
-                                    className={classes.counterInput}
-                                    value={form.desks}
-                                    onChange={handleCounterChange('desks')}
-                                    min="0"
-                                />
-                                <button
-                                    type="button"
-                                    className={classes.counterButton}
-                                    onClick={() => handleIncrement('desks')}
-                                    aria-label={i18n.t('Increase desks')}
                                 >
                                     +
                                 </button>
@@ -675,10 +663,6 @@ const InspectionOverview: React.FC = () => {
                                     <dd className={classes.summaryValue}>{form.textbooks}</dd>
                                 </div>
                                 <div className={classes.summaryItem}>
-                                    <dt className={classes.summaryLabel}>{i18n.t('Desks')}</dt>
-                                    <dd className={classes.summaryValue}>{form.desks}</dd>
-                                </div>
-                                <div className={classes.summaryItem}>
                                     <dt className={classes.summaryLabel}>{i18n.t('Chairs')}</dt>
                                     <dd className={classes.summaryValue}>{form.chairs}</dd>
                                 </div>
@@ -771,6 +755,27 @@ const InspectionOverview: React.FC = () => {
                             </Tooltip>
                         ) : (
                             <span className={classes.buttonWrapper}>{submitButton}</span>
+                        )}
+                        {inspection?.status === 'completed' && inspection?.syncStatus !== 'synced' && (
+                            <Button
+                                className={classes.nextButton}
+                                onClick={async () => {
+                                    await triggerSync()
+                                }}
+                                disabled={!isOnline || isSyncing}
+                                loading={isSyncing}
+                            >
+                                {isSyncing
+                                    ? i18n.t('Syncing...')
+                                    : isOnline
+                                    ? i18n.t('Sync to DHIS2')
+                                    : i18n.t('Offline - Cannot Sync')}
+                            </Button>
+                        )}
+                        {syncError && (
+                            <NoticeBox error title={i18n.t('Sync Error')}>
+                                {syncError}
+                            </NoticeBox>
                         )}
                     </>
                 )}

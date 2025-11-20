@@ -7,11 +7,11 @@ export type SyncStatus = 'synced' | 'not_synced' | 'sync_failed'
 
 /**
  * Form data matching InspectionOverview form structure
+ * Based on data-mappings.json - only includes fields that sync to DHIS2
  */
 export interface InspectionFormData {
     // Resources
     textbooks: number
-    desks: number
     chairs: number
     testFieldNotes: string
 
