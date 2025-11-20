@@ -4,6 +4,28 @@ This project was bootstrapped with [DHIS2 Application Platform](https://github.c
 
 We are building an **offline-first** DHIS2 web application aimed at tablet usage by school inspectors. All inspection workflows must function without connectivity; when online, the app will synchronise cached inspections and enrich comparisons with the latest DHIS2 data.
 
+## 📚 Documentation
+
+All technical documentation is in the [`docs/`](./docs/) folder:
+
+- **[DHIS2 Sync Guide](./docs/dhis2-sync-guide.md)** - Complete guide for implementing DHIS2 sync
+- **[Sync Implementation Example](./docs/sync-implementation-example.md)** - Working code examples
+- **[Data Mappings](./docs/data-mappings.json)** - JSON configuration for local↔DHIS2 mapping
+- **[Architecture](./docs/architecture.md)** - App architecture overview
+- **[All Docs](./docs/README.md)** - Full documentation index
+
+### Quick Start for Developers
+
+```typescript
+// Sync inspection to DHIS2
+import { useSyncInspection } from './services/sync/useSyncInspection';
+
+const { syncInspection } = useSyncInspection();
+const eventId = await syncInspection(inspection);
+```
+
+See [docs/sync-implementation-example.md](./docs/sync-implementation-example.md) for complete implementation.
+
 ## Available Scripts
 
 In the project directory, you can run:
