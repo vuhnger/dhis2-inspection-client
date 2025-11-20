@@ -32,6 +32,12 @@ Our inspection system uses a **simple event program** in DHIS2. This means:
 }
 ```
 
+> If the Tracker import API returns `Could not find Program: UxK2o06ScIe` or `Could not find ProgramStage: eJiBjm9Rl7E`, your backend is using different IDs. Query the API for actual values:
+> ```
+> GET /api/programs.json?fields=id,displayName,programStages[id,displayName]&paging=false
+> ```
+> Then set `VITE_DHIS2_PROGRAM_UID`, `VITE_DHIS2_PROGRAM_STAGE_UID`, and `VITE_DHIS2_ROOT_OU_UID` in your `.env` to match. Default root OU is `plNY03ITg7K` (Albion Cluster, Banjul) – a unit assigned to the program.
+
 ---
 
 ## DHIS2 Configuration

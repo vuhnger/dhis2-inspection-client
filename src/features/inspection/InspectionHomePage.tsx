@@ -4,6 +4,7 @@ import { CircularLoader } from '@dhis2/ui'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import { DHIS2_PROGRAM_UID } from '../../shared/config/dhis2'
 import { useInspections } from '../../shared/hooks/useInspections'
 import { useSync } from '../../shared/hooks/useSync'
 
@@ -39,7 +40,7 @@ const eventsQuery = {
     events: {
         resource: 'tracker/events',
         params: {
-            program: 'UxK2o06ScIe', // School Inspection program UID
+            program: DHIS2_PROGRAM_UID, // School Inspection program UID (configurable)
             fields: 'event,orgUnit,orgUnitName,eventDate,status,dataValues[dataElement,value]',
             order: 'eventDate:desc',
             pageSize: 50,

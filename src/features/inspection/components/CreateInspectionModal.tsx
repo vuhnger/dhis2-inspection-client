@@ -12,6 +12,7 @@ import {
 } from '@dhis2/ui'
 import React from 'react'
 
+import { DHIS2_ROOT_OU_UID } from '../../../shared/config/dhis2'
 import { useInspections } from '../../../shared/hooks/useInspections'
 
 import type { CreateInspectionInput } from '../../../shared/types/inspection'
@@ -199,7 +200,7 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
                                 }}
                                 selected={selectedOrgUnit ? [selectedOrgUnit.id] : []}
                                 singleSelection
-                                roots={['ImspTQPwCqd']}
+                                roots={[DHIS2_ROOT_OU_UID]}
                             />
                         </div>
                         {selectedOrgUnit && (

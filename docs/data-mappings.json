@@ -11,7 +11,8 @@
       "programStageId": "eJiBjm9Rl7E",
       "programType": "WITHOUT_REGISTRATION",
       "description": "School inspection program (event program - no enrollment required)",
-      "endpoint": "/api/events"
+      "endpoint": "/api/events",
+      "override": "Set VITE_DHIS2_PROGRAM_UID and VITE_DHIS2_PROGRAM_STAGE_UID in .env to match your DHIS2 instance if these IDs differ."
     }
   },
 

@@ -3,6 +3,7 @@
  */
 
 import { updateInspection, getInspectionsBySyncStatus } from '../db/indexedDB'
+import { DHIS2_PROGRAM_STAGE_UID, DHIS2_PROGRAM_UID } from '../config/dhis2'
 
 import type { Inspection } from '../types/inspection'
 
@@ -16,9 +17,6 @@ type DataEngine = {
     }) => Promise<any>
     query: (query: unknown) => Promise<any>
 }
-
-const PROGRAM_UID = 'UxK2o06ScIe' // School Inspection program UID
-const PROGRAM_STAGE_UID = 'eJiBjm9Rl7E' // School Inspection program stage UID
 
 /**
  * Map inspection form data to DHIS2 data elements
@@ -112,16 +110,18 @@ function inspectionToDHIS2Event(inspection: Inspection) {
         })
     }
 
-    // Map status - DHIS2 event program uses COMPLETED for finished events
+    // Map status - DHIS2 event program status values
+    // Note: SCHEDULE is for scheduled events, but DHIS2 might require ACTIVE or COMPLETED
+    // For now, we'll use ACTIVE for scheduled/in_progress, COMPLETED for completed
     const statusMap = {
-        scheduled: 'SCHEDULE',
+        scheduled: 'ACTIVE',
         in_progress: 'ACTIVE',
         completed: 'COMPLETED',
     }
 
     const payload: Record<string, unknown> = {
-        program: PROGRAM_UID,
-        programStage: PROGRAM_STAGE_UID,
+        program: DHIS2_PROGRAM_UID,
+        programStage: DHIS2_PROGRAM_STAGE_UID,
         orgUnit: inspection.orgUnit,
         eventDate: inspection.eventDate.split('T')[0], // YYYY-MM-DD format
         status: statusMap[inspection.status],
@@ -146,23 +146,40 @@ export async function syncInspectionToDHIS2(
         const eventPayload = inspectionToDHIS2Event(inspection)
         const isUpdate = Boolean(inspection.dhis2EventId)
 
-        // Use DHIS2 App Runtime engine to make the mutation
-        // For Tracker API, wrap events in an array
-        const response = await engine.mutate({
-            resource: isUpdate ? `tracker/events/${inspection.dhis2EventId}` : 'tracker/events',
-            type: isUpdate ? 'update' : 'create',
-            data: isUpdate ? eventPayload : { events: [eventPayload] },
+        console.log('Syncing inspection to DHIS2:', {
+            inspectionId: inspection.id,
+            isUpdate,
+            payload: eventPayload,
         })
 
-        // Check if the response contains the event ID (for creates)
+        // Use DHIS2 App Runtime engine to make the mutation
+        // App Runtime automatically prepends /api/ to the resource
+        // New Tracker API (v2.36+): Use '/api/tracker' endpoint with events wrapped in array
+        // This replaces the old /api/events endpoint
+        const trackerPayload = {
+            events: [eventPayload],
+        }
+
+        const response = await engine.mutate({
+            resource: 'tracker',
+            type: 'create',
+            params: {
+                async: false, // Synchronous import
+            },
+            data: trackerPayload,
+        })
+
+        console.log('DHIS2 sync response:', response)
+
+        // Check if the response contains the event ID
+        // New tracker API response structure
         let eventId = inspection.dhis2EventId
 
         if (!isUpdate) {
-            // Tracker API response structure
+            // Try multiple possible response paths for new tracker API
             eventId =
-                response?.response?.importSummaries?.[0]?.reference ??
-                response?.importSummaries?.[0]?.reference ??
                 response?.bundleReport?.typeReportMap?.EVENT?.objectReports?.[0]?.uid ??
+                response?.response?.bundleReport?.typeReportMap?.EVENT?.objectReports?.[0]?.uid ??
                 null
         }
 
@@ -184,6 +201,14 @@ export async function syncInspectionToDHIS2(
     } catch (error) {
         console.error('Failed to sync inspection to DHIS2:', error)
 
+        // Try to extract DHIS2 error details
+        let errorMessage = 'Unknown error'
+        if (error instanceof Error) {
+            errorMessage = error.message
+            // Log the full error object to see DHIS2's response
+            console.error('Full error object:', JSON.stringify(error, null, 2))
+        }
+
         // Update inspection sync status to failed
         await updateInspection(inspection.id, {
             syncStatus: 'sync_failed',
@@ -191,7 +216,7 @@ export async function syncInspectionToDHIS2(
 
         return {
             success: false,
-            error: error instanceof Error ? error.message : 'Unknown error',
+            error: errorMessage,
         }
     }
 }

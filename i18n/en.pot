@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-20T11:23:56.502Z\n"
-"PO-Revision-Date: 2025-11-20T11:23:56.502Z\n"
+"POT-Creation-Date: 2025-11-20T16:11:11.848Z\n"
+"PO-Revision-Date: 2025-11-20T16:11:11.849Z\n"
 
 msgid "Syncing..."
 msgstr "Syncing..."
@@ -181,8 +181,8 @@ msgstr ""
 "When online, the app will compare against DHIS2 baselines so you can "
 "explain changes to the head teacher in the field."
 
-msgid "School name is required"
-msgstr "School name is required"
+msgid "Please select a school"
+msgstr "Please select a school"
 
 msgid "Inspection date is required"
 msgstr "Inspection date is required"
@@ -208,8 +208,8 @@ msgstr "Schedule New Inspection"
 msgid "Error"
 msgstr "Error"
 
-msgid "School Name"
-msgstr "School Name"
+msgid "Select School"
+msgstr "Select School"
 
 msgid "Inspection Date"
 msgstr "Inspection Date"
@@ -220,12 +220,8 @@ msgstr "Start Time"
 msgid "End Time"
 msgstr "End Time"
 
-msgid ""
-"The inspection will be created with empty form data. You can fill in the "
-"details during the inspection."
-msgstr ""
-"The inspection will be created with empty form data. You can fill in the "
-"details during the inspection."
+msgid "Additional notes (optional)"
+msgstr "Additional notes (optional)"
 
 msgid "Cancel"
 msgstr "Cancel"
@@ -259,15 +255,6 @@ msgstr "Decrease textbooks"
 
 msgid "Increase textbooks"
 msgstr "Increase textbooks"
-
-msgid "Desks"
-msgstr "Desks"
-
-msgid "Decrease desks"
-msgstr "Decrease desks"
-
-msgid "Increase desks"
-msgstr "Increase desks"
 
 msgid "Chairs"
 msgstr "Chairs"
@@ -352,3 +339,12 @@ msgstr "Report Submitted"
 
 msgid "Your inspection report has been submitted successfully."
 msgstr "Your inspection report has been submitted successfully."
+
+msgid "Sync to DHIS2"
+msgstr "Sync to DHIS2"
+
+msgid "Offline - Cannot Sync"
+msgstr "Offline - Cannot Sync"
+
+msgid "Sync Error"
+msgstr "Sync Error"

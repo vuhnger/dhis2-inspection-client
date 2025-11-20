@@ -25,13 +25,14 @@ If you're implementing DHIS2 sync, start here:
   "programStageId": "eJiBjm9Rl7E"
 }
 ```
+> Override via env if your backend uses different IDs: set `VITE_DHIS2_PROGRAM_UID`, `VITE_DHIS2_PROGRAM_STAGE_UID`, and `VITE_DHIS2_ROOT_OU_UID` (default: `plNY03ITg7K`, Albion Cluster) in your `.env`.
 
 **Quick Example**:
 ```typescript
 // Create inspection event in DHIS2
 const payload = {
-  program: "UxK2o06ScIe",
-  programStage: "eJiBjm9Rl7E",
+  program: "UxK2o06ScIe",      // or import.meta.env.VITE_DHIS2_PROGRAM_UID
+  programStage: "eJiBjm9Rl7E",  // or import.meta.env.VITE_DHIS2_PROGRAM_STAGE_UID
   orgUnit: "SCHOOL_ORG_UNIT_ID",
   eventDate: "2025-01-15",
   status: "COMPLETED",
