@@ -30,6 +30,8 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
 
     // Form state
     const [schoolName, setSchoolName] = React.useState('')
+    // TODO: Replace with OrganisationUnitTree component to select actual DHIS2 org units
+    // For now, using a placeholder that will be replaced with proper org unit selection
     const [orgUnit, setOrgUnit] = React.useState('')
     const [eventDate, setEventDate] = React.useState('')
     const [startTime, setStartTime] = React.useState('16:00')
@@ -109,6 +111,8 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
             const dateTimeString = `${eventDate}T${startTime}:00`
 
             const inspectionInput: CreateInspectionInput = {
+                // TODO: Replace 'local-org-unit' with actual DHIS2 org unit ID from OrganisationUnitTree
+                // For now, using placeholder until proper org unit selection is implemented
                 orgUnit: orgUnit || 'local-org-unit',
                 orgUnitName: schoolName.trim(),
                 eventDate: dateTimeString,

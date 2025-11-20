@@ -5,24 +5,35 @@
 import { updateInspection, getInspectionsBySyncStatus } from '../db/indexedDB'
 
 import type { Inspection } from '../types/inspection'
-import type { DataEngine } from '@dhis2/app-runtime'
+
+// Define the engine type based on useDataEngine return type
+type DataEngine = {
+    mutate: (mutation: {
+        resource: string
+        type: 'create' | 'update' | 'delete'
+        data?: unknown
+        params?: Record<string, unknown>
+    }) => Promise<any>
+    query: (query: unknown) => Promise<any>
+}
 
 const PROGRAM_UID = 'UxK2o06ScIe' // School Inspection program UID
+const PROGRAM_STAGE_UID = 'eJiBjm9Rl7E' // School Inspection program stage UID
 
 /**
  * Map inspection form data to DHIS2 data elements
- * TODO: Replace these UIDs with actual data element UIDs from your DHIS2 instance
+ * Based on data-mappings.json
  */
 const DATA_ELEMENT_MAP = {
-    textbooks: 'TEXTBOOKS_DE_UID',
-    desks: 'DESKS_DE_UID',
-    chairs: 'CHAIRS_DE_UID',
-    totalStudents: 'TOTAL_STUDENTS_DE_UID',
-    maleStudents: 'MALE_STUDENTS_DE_UID',
-    femaleStudents: 'FEMALE_STUDENTS_DE_UID',
-    staffCount: 'STAFF_COUNT_DE_UID',
-    classroomCount: 'CLASSROOM_COUNT_DE_UID',
-    testFieldNotes: 'NOTES_DE_UID',
+    textbooks: 'xiaOnejpgdY', // CHK English Textbooks
+    desks: '', // NOT FOUND in DHIS2 - will be skipped during sync
+    chairs: 'mAtab30vU5g', // Number of Chairs
+    totalStudents: 'EaWxWo27lm3', // Total Students
+    maleStudents: 'h4XENZX2UMf', // Male Students
+    femaleStudents: 'DM707Od7el4', // Female Students
+    staffCount: 'ooYtEgJUuRM', // Staff Count
+    classroomCount: 'ya5SyA5hej4', // CHK number of classrooms
+    testFieldNotes: 'KrijJzaqMAU', // Inspection Notes
 }
 
 /**
@@ -33,62 +44,75 @@ function inspectionToDHIS2Event(inspection: Inspection) {
 
     // Add data values from form data
     const formData = inspection.formData
-    if (formData.textbooks !== 0) {
+
+    // Textbooks
+    if (formData.textbooks !== 0 && DATA_ELEMENT_MAP.textbooks) {
         dataValues.push({
             dataElement: DATA_ELEMENT_MAP.textbooks,
             value: formData.textbooks.toString(),
         })
     }
-    if (formData.desks !== 0) {
-        dataValues.push({
-            dataElement: DATA_ELEMENT_MAP.desks,
-            value: formData.desks.toString(),
-        })
-    }
-    if (formData.chairs !== 0) {
+
+    // Desks - SKIP because not found in DHIS2
+    // if (formData.desks !== 0 && DATA_ELEMENT_MAP.desks) { ... }
+
+    // Chairs
+    if (formData.chairs !== 0 && DATA_ELEMENT_MAP.chairs) {
         dataValues.push({
             dataElement: DATA_ELEMENT_MAP.chairs,
             value: formData.chairs.toString(),
         })
     }
-    if (formData.totalStudents) {
+
+    // Total Students
+    if (formData.totalStudents && DATA_ELEMENT_MAP.totalStudents) {
         dataValues.push({
             dataElement: DATA_ELEMENT_MAP.totalStudents,
             value: formData.totalStudents,
         })
     }
-    if (formData.maleStudents) {
+
+    // Male Students
+    if (formData.maleStudents && DATA_ELEMENT_MAP.maleStudents) {
         dataValues.push({
             dataElement: DATA_ELEMENT_MAP.maleStudents,
             value: formData.maleStudents,
         })
     }
-    if (formData.femaleStudents) {
+
+    // Female Students
+    if (formData.femaleStudents && DATA_ELEMENT_MAP.femaleStudents) {
         dataValues.push({
             dataElement: DATA_ELEMENT_MAP.femaleStudents,
             value: formData.femaleStudents,
         })
     }
-    if (formData.staffCount) {
+
+    // Staff Count
+    if (formData.staffCount && DATA_ELEMENT_MAP.staffCount) {
         dataValues.push({
             dataElement: DATA_ELEMENT_MAP.staffCount,
             value: formData.staffCount,
         })
     }
-    if (formData.classroomCount) {
+
+    // Classroom Count
+    if (formData.classroomCount && DATA_ELEMENT_MAP.classroomCount) {
         dataValues.push({
             dataElement: DATA_ELEMENT_MAP.classroomCount,
             value: formData.classroomCount,
         })
     }
-    if (formData.testFieldNotes) {
+
+    // Notes
+    if (formData.testFieldNotes && DATA_ELEMENT_MAP.testFieldNotes) {
         dataValues.push({
             dataElement: DATA_ELEMENT_MAP.testFieldNotes,
             value: formData.testFieldNotes,
         })
     }
 
-    // Map status
+    // Map status - DHIS2 event program uses COMPLETED for finished events
     const statusMap = {
         scheduled: 'SCHEDULE',
         in_progress: 'ACTIVE',
@@ -97,6 +121,7 @@ function inspectionToDHIS2Event(inspection: Inspection) {
 
     const payload: Record<string, unknown> = {
         program: PROGRAM_UID,
+        programStage: PROGRAM_STAGE_UID,
         orgUnit: inspection.orgUnit,
         eventDate: inspection.eventDate.split('T')[0], // YYYY-MM-DD format
         status: statusMap[inspection.status],
