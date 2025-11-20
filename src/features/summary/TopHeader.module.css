@@ -1,11 +1,8 @@
 .header {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 24px 24px 16px;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  /* Light blue header background like the mockup */
+  background: #e6f3ff;
+  padding: 20px 20px 18px;
+  border-radius: 0 0 24px 24px;
 }
 
 /* Top row */
@@ -14,18 +11,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 24px;
+  gap: 18px;
 }
 
 .titleBlock {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
+/* Circle icon on the left */
 .logoWrapper {
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   border-radius: 9999px;
   background: linear-gradient(135deg, #2563eb, #06b6d4);
   display: flex;
@@ -36,32 +34,35 @@
 }
 
 .logoWrapper img {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   object-fit: contain;
 }
 
 .textBlock {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
+/* "Summary: Edutopia school 1" */
 .headerTitle {
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-  color: #0f172a;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #111827;
 }
 
 .schoolName {
-  font-weight: 700;
+  font-weight: 500;
 }
 
+/* "Date: 13.sep.2025" */
 .dateRow {
   margin: 0;
   font-size: 13px;
-  color: #64748b;
+  color: #6b7280;
 }
 
 .dateLabel {
@@ -69,15 +70,15 @@
 }
 
 .dateValue {
-  font-weight: 600;
+  font-weight: 500;
 }
 
-/* Right side: synced chip + avatar */
+/* Right side: Synced chip + avatar */
 
 .rightBlock {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .syncedChip {
@@ -86,11 +87,11 @@
   gap: 6px;
   padding: 4px 10px;
   border-radius: 9999px;
-  background: #ecfdf3;
+  background: #d1fae5;
   border: 1px solid #bbf7d0;
   font-size: 12px;
   font-weight: 500;
-  color: #166534;
+  color: #15803d;
 }
 
 .syncedDot {
@@ -101,8 +102,8 @@
 }
 
 .userAvatar {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: 9999px;
   border: none;
   background: #e0f2fe;
@@ -115,37 +116,38 @@
   cursor: pointer;
 }
 
-/* Tabs row */
+/* Tabs row: centered pills */
 
 .tabRow {
+  margin-top: 18px;
   display: flex;
-  justify-content: center; 
-  align-items: center;
+  justify-content: center;
   gap: 12px;
-  width: 100%;
-  margin-top: 12px;
 }
 
-
+/* Base pill style */
 .tab {
-  padding: 8px 18px;
+  min-width: 160px;
+  padding: 9px 22px;
   border-radius: 9999px;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
   font-size: 13px;
   font-weight: 500;
-  color: #475569;
+  color: #4b5563;
   cursor: pointer;
   transition: all 0.15s ease-in-out;
+  box-shadow: 0 4px 8px rgba(15, 23, 42, 0.05);
 }
 
 .tab:hover {
-  background: #e2e8f0;
+  background: #f3f4f6;
 }
 
+/* Active = dark pill (Current inspection) */
 .tabActive {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: #101827;
+  border-color: #101827;
   color: #ffffff;
-  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.4);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.35);
 }

@@ -1,0 +1,33 @@
+// studentMetrics.ts
+import type { ObtainedInspectionData } from "./useInspection";
+import type { MetricCardProps } from "./MetricCard";
+import { evaluateMetric } from "./EvaluationHelpers";
+
+export function buildStudentMetrics(
+  summary: ObtainedInspectionData
+): MetricCardProps[] {
+  const { femaleStudents, maleStudents, genderGpi } = summary;
+
+  const gpiEval = evaluateMetric("gpiLearners", Number(genderGpi));
+
+  return [
+    {
+      label: "Females",
+      value: femaleStudents,
+      status: "info",
+      statusText: "+ 20%", // placeholder for trend
+    },
+    {
+      label: "Males",
+      value: maleStudents,
+      status: "error",
+      statusText: "- 15%",
+    },
+    {
+      label: "Gender GPI",
+      value: genderGpi.toFixed(2),
+      status: gpiEval.status,
+      statusText: gpiEval.statusText,
+    },
+  ];
+}

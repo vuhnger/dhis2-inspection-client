@@ -5,6 +5,104 @@ import type { Inspection } from "../../shared/types/inspection";
 
 export type InspectionFetchStatus = "loading" | "success" | "error";
 
+export const INSPECTION_STANDARDS = {
+  seatToLearner: {
+    label: "Seat-to-learner ratio",
+    comparator: "equal" as const,
+    target: 1, // 1:1
+  },
+  textbookToLearner: {
+    label: "Textbook-to-learner ratio",
+    comparator: "equal" as const,
+    target: 1, // 1:1
+  },
+  learnerToClassroom: {
+    label: "Learner-to-classroom ratio",
+    comparator: "lessThan" as const,
+    target: 53, // <53:1
+  },
+  learnerToTeacher: {
+    label: "Learner-to-teacher ratio",
+    comparator: "lessThan" as const,
+    target: 45, // <45:1
+  },
+  learnerToToilet: {
+    label: "Learner-to-toilet ratio",
+    comparator: "lessThan" as const,
+    target: 25, // <25:1
+  },
+  gpiLearners: {
+    label: "Gender Parity Index (learners)",
+    comparator: "equal" as const,
+    target: 1, // female learners / male learners
+  },
+  gpiTeachers: {
+    label: "Gender Parity Index (teachers)",
+    comparator: "equal" as const,
+    target: 1, // female teachers / male teachers
+  },
+}
+
+// Type: "seatToLearner" | "textbookToLearner" | ... etc.
+export type StandardKey = keyof typeof INSPECTION_STANDARDS;
+
+// Type of one standard object
+export type StandardConfig = (typeof INSPECTION_STANDARDS)[StandardKey];
+
+export const PROGRESS_TAGS = {
+  ABOVE_REQUIREMENT: {
+    id: "above-requirement",
+    label: "Above requirement",
+  },
+  MEETS_REQUIREMENT: {
+    id: "meets-requirement",
+    label: "Meets requirement",
+  },
+  BELOW_REQUIREMENT: {
+    id: "below-requirement",
+    label: "Below requirement",
+  },
+}
+
+// Type for a tag object
+export type ProgressTag =
+  (typeof PROGRESS_TAGS)[keyof typeof PROGRESS_TAGS];
+
+export type MetricStatus = "success" | "warning" | "error" | "info";
+
+/**
+ * Converts a ProgressTag into the status + statusText
+ * used by MetricCard.
+ */
+export function mapProgressTagToMetricStatus(
+  tag: ProgressTag
+): { status: MetricStatus; statusText: string } {
+  switch (tag.id) {
+    case PROGRESS_TAGS.BELOW_REQUIREMENT.id:
+      return {
+        status: "error",
+        statusText: "Below requirement",
+      };
+    case PROGRESS_TAGS.ABOVE_REQUIREMENT.id:
+      return {
+        status: "info",
+        statusText: "Above requirement",
+      };
+    case PROGRESS_TAGS.MEETS_REQUIREMENT.id:
+      return {
+        status: "success",
+        statusText: "Meets requirement",
+      };
+    default:
+      return {
+        status: "info",
+        statusText: tag.label,
+      };
+  }
+}
+
+
+
 interface UseInspectionResult {
   inspection: Inspection | null;
   status: InspectionFetchStatus;
