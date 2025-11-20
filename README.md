@@ -26,20 +26,33 @@ const eventId = await syncInspection(inspection);
 
 See [docs/sync-implementation-example.md](./docs/sync-implementation-example.md) for complete implementation.
 
+## DHIS2 Instance Credentials
+
+**Development/Testing Instance**: `https://research.im.dhis2.org/in5320g16/`
+
+**API Credentials:**
+- **Username**: `in5320`
+- **Password**: `P1@tform`
+
+These credentials are used for:
+- Logging into the DHIS2 instance during development
+- API requests to create/update inspection events
+- Fetching organization units (schools) for the inspection form
+
+**Note**: The DHIS2 App Platform automatically handles authentication when you run `yarn start` and log in. All API calls made through `useDataEngine()` will use your logged-in session.
+
 ## Available Scripts
 
 In the project directory, you can run:
-
-### npx dhis-portal --target=https://data.research.dhis2.org/in5320/
 
 ### `yarn start`
 
 Runs the app in the development mode.<br />
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-You can log into this instance with the credentials:
-Username: admin
-Password: district
+**Login with these credentials:**
+- **Username**: `in5320`
+- **Password**: `P1@tform`
 
 The page will reload if you make edits.<br />
 You will also see any lint errors in the console.

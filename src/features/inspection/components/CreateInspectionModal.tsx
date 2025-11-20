@@ -8,6 +8,7 @@ import {
     ButtonStrip,
     InputField,
     NoticeBox,
+    OrganisationUnitTree,
 } from '@dhis2/ui'
 import React from 'react'
 
@@ -29,10 +30,10 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
     const { createInspection } = useInspections()
 
     // Form state
-    const [schoolName, setSchoolName] = React.useState('')
-    // TODO: Replace with OrganisationUnitTree component to select actual DHIS2 org units
-    // For now, using a placeholder that will be replaced with proper org unit selection
-    const [orgUnit, setOrgUnit] = React.useState('')
+    const [selectedOrgUnit, setSelectedOrgUnit] = React.useState<{
+        id: string
+        displayName: string
+    } | null>(null)
     const [eventDate, setEventDate] = React.useState('')
     const [startTime, setStartTime] = React.useState('16:00')
     const [endTime, setEndTime] = React.useState('17:30')
@@ -41,7 +42,7 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
 
     // Validation errors
     const [errors, setErrors] = React.useState<{
-        schoolName?: string
+        orgUnit?: string
         eventDate?: string
         startTime?: string
         endTime?: string
@@ -50,8 +51,7 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
     // Reset form when modal closes
     React.useEffect(() => {
         if (!isOpen) {
-            setSchoolName('')
-            setOrgUnit('')
+            setSelectedOrgUnit(null)
             setEventDate('')
             setStartTime('16:00')
             setEndTime('17:30')
@@ -65,8 +65,8 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
     const validate = (): boolean => {
         const newErrors: typeof errors = {}
 
-        if (!schoolName.trim()) {
-            newErrors.schoolName = i18n.t('School name is required')
+        if (!selectedOrgUnit) {
+            newErrors.orgUnit = i18n.t('Please select a school')
         }
 
         if (!eventDate) {
@@ -107,14 +107,18 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
         setError(null)
 
         try {
+            // Ensure we have a selected org unit (validation should catch this, but double-check)
+            if (!selectedOrgUnit) {
+                setError(i18n.t('Please select a school'))
+                return
+            }
+
             // Combine date and start time into ISO string
             const dateTimeString = `${eventDate}T${startTime}:00`
 
             const inspectionInput: CreateInspectionInput = {
-                // TODO: Replace 'local-org-unit' with actual DHIS2 org unit ID from OrganisationUnitTree
-                // For now, using placeholder until proper org unit selection is implemented
-                orgUnit: orgUnit || 'local-org-unit',
-                orgUnitName: schoolName.trim(),
+                orgUnit: selectedOrgUnit.id,
+                orgUnitName: selectedOrgUnit.displayName,
                 eventDate: dateTimeString,
                 scheduledStartTime: startTime,
                 scheduledEndTime: endTime,
@@ -163,21 +167,67 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
                 )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <InputField
-                        label={i18n.t('School Name')}
-                        name="schoolName"
-                        value={schoolName}
-                        onChange={({ value }: { value?: string }) => {
-                            setSchoolName(value || '')
-                            if (errors.schoolName) {
-                                setErrors({ ...errors, schoolName: undefined })
-                            }
-                        }}
-                        error={Boolean(errors.schoolName)}
-                        validationText={errors.schoolName}
-                        required
-                        disabled={loading}
-                    />
+                    <div>
+                        <label
+                            style={{
+                                display: 'block',
+                                fontSize: '14px',
+                                fontWeight: 500,
+                                marginBottom: '8px',
+                                color: '#212934',
+                            }}
+                        >
+                            {i18n.t('Select School')} <span style={{ color: '#d32f2f' }}>*</span>
+                        </label>
+                        <div
+                            style={{
+                                border: errors.orgUnit ? '1px solid #d32f2f' : '1px solid #a0adba',
+                                borderRadius: '4px',
+                                padding: '8px',
+                                maxHeight: '200px',
+                                overflowY: 'auto',
+                            }}
+                        >
+                            <OrganisationUnitTree
+                                onChange={(orgUnit: { id: string; displayName?: string; path?: string }) => {
+                                    setSelectedOrgUnit({
+                                        id: orgUnit.id,
+                                        displayName: orgUnit.displayName || orgUnit.path || orgUnit.id,
+                                    })
+                                    if (errors.orgUnit) {
+                                        setErrors({ ...errors, orgUnit: undefined })
+                                    }
+                                }}
+                                selected={selectedOrgUnit ? [selectedOrgUnit.id] : []}
+                                singleSelection
+                            />
+                        </div>
+                        {selectedOrgUnit && (
+                            <div
+                                style={{
+                                    marginTop: '8px',
+                                    padding: '8px 12px',
+                                    backgroundColor: '#f4f6f8',
+                                    borderRadius: '4px',
+                                    fontSize: '14px',
+                                    color: '#4a5568',
+                                }}
+                            >
+                                {i18n.t('Selected: {{school}}', { school: selectedOrgUnit.displayName })}
+                            </div>
+                        )}
+                        {errors.orgUnit && (
+                            <div
+                                style={{
+                                    marginTop: '4px',
+                                    fontSize: '12px',
+                                    color: '#d32f2f',
+                                }}
+                            >
+                                {errors.orgUnit}
+                            </div>
+                        )}
+                    </div>
 
                     <InputField
                         label={i18n.t('Inspection Date')}
