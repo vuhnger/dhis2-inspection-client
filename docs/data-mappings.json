@@ -1,0 +1,206 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Mapping between local inspection form fields and DHIS2 tracked entities, attributes, and data elements",
+  "version": "1.0.0",
+
+  "note": "This is an event program (WITHOUT_REGISTRATION). Schools are organization units, not tracked entities. No enrollment needed.",
+
+  "programs": {
+    "schoolInspection": {
+      "programId": "UxK2o06ScIe",
+      "programStageId": "eJiBjm9Rl7E",
+      "programType": "WITHOUT_REGISTRATION",
+      "description": "School inspection program (event program - no enrollment required)",
+      "endpoint": "/api/events"
+    }
+  },
+
+  "dataElements": {
+    "description": "Data elements collected during inspection events",
+    "resources": {
+      "textbooks": {
+        "localField": "formData.textbooks",
+        "localType": "number",
+        "dhis2Id": "xiaOnejpgdY",
+        "dhis2ValueType": "INTEGER",
+        "description": "CHK English Textbooks",
+        "required": true
+      },
+      "desks": {
+        "localField": "formData.desks",
+        "localType": "number",
+        "dhis2Id": "",
+        "dhis2ValueType": "INTEGER",
+        "description": "Number of desks available",
+        "required": true
+      },
+      "chairs": {
+        "localField": "formData.chairs",
+        "localType": "number",
+        "dhis2Id": "mAtab30vU5g",
+        "dhis2ValueType": "INTEGER",
+        "description": "Number of Chairs",
+        "required": true
+      },
+      "testFieldNotes": {
+        "localField": "formData.testFieldNotes",
+        "localType": "string",
+        "dhis2Id": "KrijJzaqMAU",
+        "dhis2ValueType": "TEXT",
+        "description": "Inspection Notes",
+        "required": false
+      }
+    },
+    "students": {
+      "totalStudents": {
+        "localField": "formData.totalStudents",
+        "localType": "string",
+        "dhis2Id": "EaWxWo27lm3",
+        "dhis2ValueType": "INTEGER",
+        "description": "Total Students",
+        "required": true,
+        "validation": {
+          "shouldEqual": "maleStudents + femaleStudents"
+        }
+      },
+      "maleStudents": {
+        "localField": "formData.maleStudents",
+        "localType": "string",
+        "dhis2Id": "h4XENZX2UMf",
+        "dhis2ValueType": "INTEGER",
+        "description": "Male Students",
+        "required": true
+      },
+      "femaleStudents": {
+        "localField": "formData.femaleStudents",
+        "localType": "string",
+        "dhis2Id": "DM707Od7el4",
+        "dhis2ValueType": "INTEGER",
+        "description": "Female Students",
+        "required": true
+      }
+    },
+    "staff": {
+      "staffCount": {
+        "localField": "formData.staffCount",
+        "localType": "string",
+        "dhis2Id": "ooYtEgJUuRM",
+        "dhis2ValueType": "INTEGER",
+        "description": "Staff Count",
+        "required": true
+      }
+    },
+    "facilities": {
+      "classroomCount": {
+        "localField": "formData.classroomCount",
+        "localType": "string",
+        "dhis2Id": "ya5SyA5hej4",
+        "dhis2ValueType": "INTEGER",
+        "description": "CHK number of classrooms",
+        "required": true
+      }
+    }
+  },
+
+  "metadata": {
+    "orgUnit": {
+      "localField": "orgUnit",
+      "description": "DHIS2 organization unit ID (school ID)",
+      "required": true,
+      "howToFind": [
+        "Use OrganisationUnitTree component from @dhis2/ui",
+        "Query: GET /api/organisationUnits?fields=id,displayName&filter=level:eq:4",
+        "Get from user's assigned org units: GET /api/me?fields=organisationUnits[id,displayName]",
+        "Search by name: GET /api/organisationUnits?filter=displayName:ilike:SchoolName"
+      ],
+      "example": "l9Z5RQXMYGu"
+    },
+    "eventDate": {
+      "localField": "eventDate",
+      "description": "Inspection date in ISO 8601 format",
+      "required": true,
+      "format": "YYYY-MM-DD",
+      "example": "2025-01-15"
+    },
+    "dhis2EventId": {
+      "localField": "dhis2EventId",
+      "description": "DHIS2 event ID (populated after successful sync)",
+      "required": false,
+      "example": "abc123xyz"
+    }
+  },
+
+  "transformations": {
+    "description": "Data transformations needed before sending to DHIS2",
+    "stringToNumber": [
+      "formData.totalStudents",
+      "formData.maleStudents",
+      "formData.femaleStudents",
+      "formData.staffCount",
+      "formData.classroomCount"
+    ]
+  },
+
+  "notMapped": {
+    "description": "Local fields that are NOT synced to DHIS2",
+    "fields": [
+      {
+        "localField": "formData.desks",
+        "reason": "Data element not found in DHIS2 instance",
+        "note": "This field is collected locally but will not be synced"
+      }
+    ]
+  },
+
+  "apiUsageGuide": {
+    "description": "How to use this mapping file for DHIS2 API calls",
+    "note": "This is an event program (WITHOUT_REGISTRATION) - no enrollment needed, just create events directly",
+    "createEvent": {
+      "endpoint": "POST /api/events",
+      "description": "Create a new inspection event",
+      "payload": {
+        "program": "UxK2o06ScIe",
+        "programStage": "eJiBjm9Rl7E",
+        "orgUnit": "metadata.orgUnit value (school's org unit ID)",
+        "eventDate": "metadata.eventDate value (ISO 8601 format)",
+        "status": "COMPLETED",
+        "dataValues": [
+          {
+            "dataElement": "dataElements.{category}.{field}.dhis2Id",
+            "value": "formData.{field} value (after transformation)"
+          }
+        ]
+      },
+      "example": {
+        "program": "UxK2o06ScIe",
+        "programStage": "eJiBjm9Rl7E",
+        "orgUnit": "l9Z5RQXMYGu",
+        "eventDate": "2025-01-15",
+        "status": "COMPLETED",
+        "dataValues": [
+          { "dataElement": "xiaOnejpgdY", "value": "50" },
+          { "dataElement": "mAtab30vU5g", "value": "30" },
+          { "dataElement": "EaWxWo27lm3", "value": "120" },
+          { "dataElement": "h4XENZX2UMf", "value": "60" },
+          { "dataElement": "DM707Od7el4", "value": "60" },
+          { "dataElement": "ooYtEgJUuRM", "value": "8" },
+          { "dataElement": "ya5SyA5hej4", "value": "6" },
+          { "dataElement": "KrijJzaqMAU", "value": "Good condition" }
+        ]
+      }
+    },
+    "updateEvent": {
+      "endpoint": "PUT /api/events/{eventId}",
+      "description": "Update an existing inspection event",
+      "example": "Use metadata.dhis2EventId for updates"
+    },
+    "queryEvents": {
+      "endpoint": "GET /api/events",
+      "description": "Query inspection events",
+      "examples": [
+        "GET /api/events?program=UxK2o06ScIe&orgUnit={orgUnitId}",
+        "GET /api/events?program=UxK2o06ScIe&startDate=2025-01-01&endDate=2025-12-31"
+      ]
+    }
+  }
+}
