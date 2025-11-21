@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { Edit3, FileText, RotateCcw } from "lucide-react";
 import styles from "./TopHeader.module.css";
 
@@ -9,7 +9,17 @@ interface HeaderProps {
   pageTitle?: string;
   isSynced?: boolean;
   userInitials?: string;
+
+  /**
+   * Optional override for which tab is active.
+   * If not provided, TopHeader will infer it from the URL.
+   */
   activeTab?: "current" | "recount";
+
+  /**
+   * Optional callback when a tab is clicked.
+   * Navigation is handled inside TopHeader, this is just for side-effects.
+   */
   onTabChange?: (tab: "current" | "recount") => void;
 }
 
@@ -19,19 +29,37 @@ const TopHeader: React.FC<HeaderProps> = ({
   pageTitle = "Summary",
   isSynced = true,
   userInitials = "LH",
-  activeTab = "current",
+  activeTab,
   onTabChange,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { id } = useParams<{ id: string }>();
 
-  const handleTabClick = (tab: "current" | "recount") => {
+  // Infer which tab is active from the current URL if not explicitly provided
+  const inferredActiveTab: "current" | "recount" =
+    location.pathname.includes("/RecountData") ? "recount" : "current";
+
+  const currentActiveTab = activeTab ?? inferredActiveTab;
+
+  const goToTab = (tab: "current" | "recount") => {
+    if (!id) {
+      // No id – nothing to navigate to
+      return;
+    }
+
+    if (tab === "current") {
+      navigate(`/summary/${id}`);
+    } else {
+      navigate(`/summary/${id}/RecountData`);
+    }
+
     onTabChange?.(tab);
   };
 
   return (
     <header className={styles.header}>
       <div className={styles.topRow}>
-
         {/* LEFT SIDE — ONLY TITLE + DATE */}
         <div className={styles.textBlock}>
           <h1 className={styles.headerTitle}>
@@ -45,7 +73,7 @@ const TopHeader: React.FC<HeaderProps> = ({
           <button
             type="button"
             className={styles.editButton}
-            onClick={() => navigate("/inspection")}
+            onClick={() => id && navigate(`/inspection/${id}`)}
             aria-label="Edit"
           >
             <Edit3 size={18} />
@@ -66,7 +94,6 @@ const TopHeader: React.FC<HeaderProps> = ({
             {userInitials}
           </button>
         </div>
-
       </div>
 
       {/* TABS */}
@@ -74,9 +101,9 @@ const TopHeader: React.FC<HeaderProps> = ({
         <button
           type="button"
           className={`${styles.tab} ${
-            activeTab === "current" ? styles.tabActive : ""
+            currentActiveTab === "current" ? styles.tabActive : ""
           }`}
-          onClick={() => handleTabClick("current")}
+          onClick={() => goToTab("current")}
         >
           <span className={styles.tabInner}>
             <FileText size={16} className={styles.tabIcon} />
@@ -87,9 +114,9 @@ const TopHeader: React.FC<HeaderProps> = ({
         <button
           type="button"
           className={`${styles.tab} ${
-            activeTab === "recount" ? styles.tabActive : ""
+            currentActiveTab === "recount" ? styles.tabActive : ""
           }`}
-          onClick={() => handleTabClick("recount")}
+          onClick={() => goToTab("recount")}
         >
           <span className={styles.tabInner}>
             <RotateCcw size={16} className={styles.tabIcon} />

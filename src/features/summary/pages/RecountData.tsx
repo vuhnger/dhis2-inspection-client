@@ -336,7 +336,6 @@ const RecountDataScreen: React.FC = () => {
         </div>
       </div>
 
-      <BottomNavBar />
     </div>
   );
 };
