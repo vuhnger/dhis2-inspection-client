@@ -33,6 +33,7 @@ const SummaryScreen: React.FC = () => {
 
   const resourceMetrics = buildResourceMetrics(summary);
   const studentMetrics = buildStudentMetrics(summary);
+  // const studentMetrics = buildStudentMetrics(summary, previousSummary); // need to fecth previous (as of now, this parameter is optional as displays 0% change as default)
   const staffMetrics = buildStaffMetrics(summary);
 
   return (
