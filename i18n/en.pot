@@ -5,6 +5,7 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
+<<<<<<< HEAD
 "POT-Creation-Date: 2025-11-19T13:21:01.586Z\n"
 "PO-Revision-Date: 2025-11-19T13:21:01.586Z\n"
 
@@ -59,6 +60,10 @@ msgstr "Cancel"
 
 msgid "Create Inspection"
 msgstr "Create Inspection"
+=======
+"POT-Creation-Date: 2025-11-20T11:23:56.502Z\n"
+"PO-Revision-Date: 2025-11-20T11:23:56.502Z\n"
+>>>>>>> b524ff4b96221babbc46de2bc4f7ccfe0b6a8c7d
 
 msgid "Syncing..."
 msgstr "Syncing..."
@@ -352,3 +357,178 @@ msgid ""
 msgstr ""
 "When online, the app will compare against DHIS2 baselines so you can "
 "explain changes to the head teacher in the field."
+<<<<<<< HEAD
+=======
+
+msgid "School name is required"
+msgstr "School name is required"
+
+msgid "Inspection date is required"
+msgstr "Inspection date is required"
+
+msgid "Inspection date cannot be in the past"
+msgstr "Inspection date cannot be in the past"
+
+msgid "Start time is required"
+msgstr "Start time is required"
+
+msgid "End time is required"
+msgstr "End time is required"
+
+msgid "End time must be after start time"
+msgstr "End time must be after start time"
+
+msgid "Failed to create inspection. Please try again."
+msgstr "Failed to create inspection. Please try again."
+
+msgid "Schedule New Inspection"
+msgstr "Schedule New Inspection"
+
+msgid "Error"
+msgstr "Error"
+
+msgid "School Name"
+msgstr "School Name"
+
+msgid "Inspection Date"
+msgstr "Inspection Date"
+
+msgid "Start Time"
+msgstr "Start Time"
+
+msgid "End Time"
+msgstr "End Time"
+
+msgid ""
+"The inspection will be created with empty form data. You can fill in the "
+"details during the inspection."
+msgstr ""
+"The inspection will be created with empty form data. You can fill in the "
+"details during the inspection."
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Create Inspection"
+msgstr "Create Inspection"
+
+msgid "Total student count is required"
+msgstr "Total student count is required"
+
+msgid "Male student count is required"
+msgstr "Male student count is required"
+
+msgid "Female student count is required"
+msgstr "Female student count is required"
+
+msgid "Total students cannot be less than male + female students"
+msgstr "Total students cannot be less than male + female students"
+
+msgid "Staff count is required"
+msgstr "Staff count is required"
+
+msgid "Classroom count is required"
+msgstr "Classroom count is required"
+
+msgid "Textbooks"
+msgstr "Textbooks"
+
+msgid "Decrease textbooks"
+msgstr "Decrease textbooks"
+
+msgid "Increase textbooks"
+msgstr "Increase textbooks"
+
+msgid "Desks"
+msgstr "Desks"
+
+msgid "Decrease desks"
+msgstr "Decrease desks"
+
+msgid "Increase desks"
+msgstr "Increase desks"
+
+msgid "Chairs"
+msgstr "Chairs"
+
+msgid "Decrease chairs"
+msgstr "Decrease chairs"
+
+msgid "Increase chairs"
+msgstr "Increase chairs"
+
+msgid "Test field"
+msgstr "Test field"
+
+msgid "Optional"
+msgstr "Optional"
+
+msgid "Additional notes on resources"
+msgstr "Additional notes on resources"
+
+msgid "Total Students"
+msgstr "Total Students"
+
+msgid "Male Students"
+msgstr "Male Students"
+
+msgid "Female Students"
+msgstr "Female Students"
+
+msgid "Total Staff Count"
+msgstr "Total Staff Count"
+
+msgid "Number of Classrooms"
+msgstr "Number of Classrooms"
+
+msgid "Inspection not found"
+msgstr "Inspection not found"
+
+msgid "The requested inspection could not be found."
+msgstr "The requested inspection could not be found."
+
+msgid "Hide summary"
+msgstr "Hide summary"
+
+msgid "See summary"
+msgstr "See summary"
+
+msgid "Submit Report"
+msgstr "Submit Report"
+
+msgid "Information about the school"
+msgstr "Information about the school"
+
+msgid "Staff"
+msgstr "Staff"
+
+msgid "Resources"
+msgstr "Resources"
+
+msgid "Students"
+msgstr "Students"
+
+msgid "Facilities"
+msgstr "Facilities"
+
+msgid "Inspection summary"
+msgstr "Inspection summary"
+
+msgid "Staff & facilities"
+msgstr "Staff & facilities"
+
+msgid "Additional notes"
+msgstr "Additional notes"
+
+msgid "Validation Required"
+msgstr "Validation Required"
+
+msgid "Please complete all categories before submitting."
+msgstr "Please complete all categories before submitting."
+
+msgid "Report Submitted"
+msgstr "Report Submitted"
+
+msgid "Your inspection report has been submitted successfully."
+msgstr "Your inspection report has been submitted successfully."
+>>>>>>> b524ff4b96221babbc46de2bc4f7ccfe0b6a8c7d

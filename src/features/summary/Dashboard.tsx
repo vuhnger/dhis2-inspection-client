@@ -1,3 +1,4 @@
+// Dashboard.tsx (SummaryScreen)
 import React from "react";
 import TopHeader from "./TopHeader";
 import LevelSelector from "./LevelSelector";
@@ -6,7 +7,8 @@ import MetricCard from "./MetricCard";
 import { useInspectionSummary } from "./useInspection";
 import { buildResourceMetrics } from "./resourceMetrics";
 import { buildStudentMetrics } from "./studentMetrics";
-import styles from "./Dashboard.module.css"; 
+import { buildStaffMetrics } from "./staffMetrics";
+import styles from "./Dashboard.module.css";
 
 const SummaryScreen: React.FC = () => {
   const { summary, status, error } = useInspectionSummary();
@@ -21,6 +23,7 @@ const SummaryScreen: React.FC = () => {
 
   const resourceMetrics = buildResourceMetrics(summary);
   const studentMetrics = buildStudentMetrics(summary);
+  const staffMetrics = buildStaffMetrics(summary); 
 
   return (
     <div className={styles.summaryContainer}>
@@ -32,21 +35,26 @@ const SummaryScreen: React.FC = () => {
       <div className={styles.content}>
         <LevelSelector />
 
-        {/* Resources section */}
+        {/* Resources */}
         <SummarySection title="Resources">
           {resourceMetrics.map((metric) => (
             <MetricCard key={metric.label} {...metric} />
           ))}
         </SummarySection>
 
-        {/* Students section */}
+        {/* Students */}
         <SummarySection title="Students">
           {studentMetrics.map((metric) => (
             <MetricCard key={metric.label} {...metric} />
           ))}
         </SummarySection>
 
-        {/* Facilities / Staff sections can be added here later */}
+        {/* Staff */}
+        <SummarySection title="Staff">
+          {staffMetrics.map((metric) => (
+            <MetricCard key={metric.label} {...metric} />
+          ))}
+        </SummarySection>
       </div>
     </div>
   );

@@ -14,7 +14,7 @@ export function buildStudentMetrics(
       label: "Females",
       value: femaleStudents,
       status: "info",
-      statusText: "+ 20%", // placeholder for trend
+      statusText: "+ 20%", // need to compare with previous inspection
     },
     {
       label: "Males",
