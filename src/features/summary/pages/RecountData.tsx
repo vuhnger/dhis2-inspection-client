@@ -31,6 +31,8 @@ interface ResourceItem {
 
 interface ResourceRecountTableProps {
   data: ResourceItem[];
+  schoolName: string;
+  inspectionDate: string;
 }
 
 /* ----- Status helpers ----- */
@@ -123,12 +125,14 @@ const ResourceRow: React.FC<ResourceRowProps> = ({
 };
 
 /* ----- Table ----- */
-
 const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
   data,
+  schoolName,
+  inspectionDate,
 }) => {
   const [notes, setNotes] = useState("");
   const [rows, setRows] = useState<ResourceItem[]>(data);
+  // const [showSuccess, setShowSuccess] = useState(false);  
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
@@ -147,21 +151,23 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
     );
   };
 
-  const handleSave = () => {
-    if (!id) {
-      console.error(
-        "No inspection id in URL, cannot navigate to submitted view."
-      );
-      return;
-    }
+const handleSave = () => {
+  if (!id) {
+    console.error(
+      "No inspection id in URL, cannot navigate to submitted view."
+    );
+    return;
+  }
 
-    navigate(`/summary/${id}/RecountDataSubmitted`, {
-      state: {
-        notes,
-        data: rows,
-      },
-    });
-  };
+  navigate(`/summary/${id}/RecountDataSubmitted`, {
+    state: {
+      notes,
+      data: rows,
+      schoolName,
+      inspectionDate,
+    },
+  });
+};
 
   return (
     <div className={styles.resourceRecountCard}>
@@ -210,9 +216,12 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
           </Button>
         </div>
       </div>
+
     </div>
   );
 };
+
+
 
 /* ----- Fetch Inspection and build initial data ----- */
 const RecountDataScreen: React.FC = () => {
@@ -344,138 +353,11 @@ const RecountDataScreen: React.FC = () => {
             <Info size={16} className={styles.infoIcon} />
           </div>
 
-          <ResourceRecountTable data={resourceData} />
-        </div>
-      </div>
-
-      <BottomNavBar />
-    </div>
-  );
-};
-
-export default RecountDataScreen;
-
-
-
-
-/*
-const RecountDataScreen: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-
-  const [inspection, setInspection] = useState<Inspection | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!id) {
-      setLoadError("No inspection id provided in the URL.");
-      setLoading(false);
-      return;
-    }
-
-    let isMounted = true;
-
-    getInspectionById(id)
-      .then((result: Inspection | null) => {
-        if (!isMounted) return;
-        if (!result) {
-          setLoadError("Inspection not found.");
-        } else {
-          setInspection(result);
-        }
-      })
-      .catch((err: unknown) => {
-        if (!isMounted) return;
-        console.error("Failed to load inspection", err);
-        setLoadError("Failed to load inspection.");
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [id]);
-
-  if (loading) {
-    return (
-      <div className={styles.dashboardContainer}>
-        Loading inspection...
-      </div>
-    );
-  }
-
-  if (loadError || !inspection) {
-    return (
-      <div className={styles.dashboardContainer}>
-        <TopHeader
-          schoolName="Unknown school"
-          inspectionDate=""
-          pageTitle="Recount Data"
-        />
-        <div className={styles.content}>
-          <p>{loadError ?? "Inspection could not be loaded."}</p>
-        </div>
-        <BottomNavBar />
-      </div>
-    );
-  }
-
-  const { formData } = inspection;
-  const schoolName = inspection.orgUnitName;
-  const inspectionDate = new Date(inspection.eventDate).toLocaleDateString();
-
-  // TODO: hook this up to a *previous* inspection.
-  // For now, "previous" == current values, but the structure
-  // makes it easy to swap in real previous values later.
-  const resourceData: ResourceItem[] = [
-    {
-      item: "Textbooks",
-      previous: formData.textbooks,
-      recount: formData.textbooks,
-      status: "ok",
-    },
-    {
-      item: "Desks",
-      previous: formData.desks,
-      recount: formData.desks,
-      status: "ok",
-    },
-    {
-      item: "Chairs",
-      previous: formData.chairs,
-      recount: formData.chairs,
-      status: "ok",
-    },
-    {
-      item: "Teachers",
-      previous: Number(formData.staffCount ?? 0),
-      recount: Number(formData.staffCount ?? 0),
-      status: "ok",
-    },
-  ];
-
-  return (
-    <div className={styles.dashboardContainer}>
-      <TopHeader
-        schoolName={schoolName}
-        inspectionDate={inspectionDate}
-        pageTitle="Summary"
-      />
-
-      <div className={styles.levelRow}>
-        <LevelSelector />
-      </div>
-
-      <div className={styles.content}>
-        <div className={styles.contentInner}>
-          <div className={styles.recountHeaderRow}>
-            <h2 className={styles.recountTitle}>Resource recount</h2>
-            <Info size={16} className={styles.infoIcon} />
-          </div>
-
-          <ResourceRecountTable data={resourceData} />
+          <ResourceRecountTable
+            data={resourceData}
+            schoolName={displaySchoolName}
+            inspectionDate={displayDate}
+          />
         </div>
       </div>
 
@@ -484,5 +366,3 @@ const RecountDataScreen: React.FC = () => {
 };
 
 export default RecountDataScreen;
-
-*/

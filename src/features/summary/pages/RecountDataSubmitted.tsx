@@ -18,8 +18,8 @@ import {
   Layers,
 } from "lucide-react";
 
-import styles from "./RecountDataSubmitted.module.css";
-import BottomNavBar from "./BottomNavBar";
+import styles from "../RecountDataSubmitted.module.css";
+import TopHeader from "../components/TopHeader/TopHeader";
 
 interface HeaderProps {
     schoolName: string;
@@ -35,24 +35,7 @@ interface SubmittedItemRowProps {
     status: string;
 }
 
-const TopHeader: React.FC<HeaderProps> = ({schoolName, inspectionDate, logoSrc, pageTitle = "Inspection Summary"}) => {
-  
-  return (
-    <div className={styles.header}>
-      <div className={styles.headerContent}>
-        <div className={styles.headerIcon}>
-          {logoSrc ? (<img src={logoSrc} alt="School logo" />) :
-           ( <Layers size={32} color="white" /> )}
-        </div>
-        <div className={styles.headerText}>
-          <h1 className={styles.headerTitle}>{pageTitle}</h1>
-          <p className={styles.schoolName}>{schoolName}</p>
-          <p className={styles.inspectionDate}>{inspectionDate}</p>
-        </div>
-      </div>
-    </div>
-  );
-};
+
 
 const SubmittedItemRow: React.FC<SubmittedItemRowProps> = ({
     item,
@@ -107,23 +90,21 @@ const SubmittedItemsList: React.FC<{ data: any[] }> = ({ data }) => {
 
 
 const RecountDataSubmitted: React.FC = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    // data passed from RecountData screen
-    const { state } = useLocation();
-    const submittedData = state?.data ?? [];
-    const notes = state?.notes ?? "";
+  // data passed from RecountData screen
+  const { state } = useLocation();
+  const submittedData = state?.data ?? [];
+  const notes = state?.notes ?? "";
 
-    const schoolData = {
-        schoolName: "Edutopia school 1",
-        inspectionDate: "04.11.2025",
-    };
+  const schoolName = state?.schoolName ?? "Unknown school";
+  const inspectionDate = state?.inspectionDate ?? "";
 
     return (
         <div className={styles.container}>
             <TopHeader
-                schoolName={schoolData.schoolName}
-                inspectionDate={schoolData.inspectionDate}
+                schoolName={schoolName}
+                inspectionDate={inspectionDate}
                 pageTitle="Recount Submitted"
             />
 
@@ -146,15 +127,13 @@ const RecountDataSubmitted: React.FC = () => {
                 )}
 
                 <Button
-                    secondary
+                    className={styles.backButton}
                     icon={<IconArrowLeft24 />}
-                    onClick={() => navigate("/")}
-                >
+                    onClick={() => navigate("/")}>
                     Back to Inspection Homepage
                 </Button>
             </div>
 
-            <BottomNavBar />
         </div>
     );
 };

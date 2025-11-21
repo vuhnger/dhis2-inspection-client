@@ -2,6 +2,8 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    background-color: #e6f3ff;
+    padding-bottom: 2rem; 
 }
 
 .header {
@@ -80,24 +82,51 @@
     text-align: center;
 }
 
-.card {
-    padding: 16px;
-    margin-bottom: 16px;
+.card, .successCard {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06); 
+}
+
+.successCard {
+    text-align: center;
 }
 
 .row {
     display: flex;
     justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #ddd;
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .rowLeft p {
     margin: 0;
-    color: #666;
+    color: #555;
 }
 
 .diff {
     margin-right: 8px;
     font-weight: bold;
+}
+
+.backButton {
+    background: #0f172a !important;
+    color: white !important;
+    border-radius: 9999px !important;
+    padding: 10px 20px !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.backButton:hover {
+    background: #1e293b !important;
+}
+
+.backButton:active {
+    transform: scale(0.98);
 }
