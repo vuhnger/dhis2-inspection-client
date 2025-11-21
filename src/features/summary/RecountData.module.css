@@ -1,12 +1,11 @@
-
 .dashboardContainer {
   min-height: 100vh;
-  background-color: #f3f4f6;
+  background-color: #e6f3ff;
   padding-bottom: 2rem;
 }
 
 .content {
-  padding: 24px;
+  padding: 8px 24px 24px;
   display: flex;
   justify-content: center;
 }
@@ -143,31 +142,34 @@
 }
 
 .recountInput {
-  background: #f5f6fa;
+  background: #ffffff;             
   border-radius: 10px;
-  border: none;
+  border: 1px solid #e5e7eb;     
   padding: 6px 12px;
   min-width: 64px;
   text-align: center;
   font-size: 14px;
   outline: none;
+  color: #111827;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .recountInput:focus {
-  background: #eef3ff;
-  box-shadow: 0 0 0 1px #1a73e8;
+  border-color: #3b82f6;              
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.25);
 }
 
 .diffPositive {
-  color: #0f9d58;
+  color: #16a34a;
 }
 
 .diffNegative {
-  color: #ea4335;
+  color: #dc2626;
 }
 
 .diffNeutral {
-  color: #5f6368;
+  color: #6b7280;
 }
 
 .statusCell {
@@ -210,29 +212,50 @@
   display: block;
 }
 
+.notesLabelRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.notesLabelMain {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.notesLabelOptional {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: #e5f0ff;
+  color: #2563eb;
+}
+
 .notesTextArea textarea {
   background: #f5f6fa;
 }
 
 .saveButtonWrapper {
   display: flex;
-  justify-content: center;   /* centers button horizontally */
+  justify-content: center; 
   margin-top: 16px;
 }
 
 .roundSaveButton {
-  width: 60%;                  
+  width: 180px;
   background: #0a66ff;
   color: white;
-  padding: 10px 0;              
+  padding: 10px 0;
   border: none;
-  border-radius: 30px;       
-  font-size: 0.95rem;          
+  border-radius: 9999px;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  margin: 16px auto 0 auto;     
+  margin: 16px auto 0 auto;
   display: block;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   transition: background 0.2s ease, transform 0.1s ease;
 }
 
@@ -243,4 +266,9 @@
 .roundSaveButton:active {
   background: #004ecc;
   transform: scale(0.98);
+}
+
+
+.levelRow {
+  padding: 0 24px 8px;
 }

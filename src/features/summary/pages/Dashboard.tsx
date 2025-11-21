@@ -8,7 +8,7 @@ import { useInspectionSummary } from "../hooks/useInspection";
 import { buildResourceMetrics } from "../domain/resourceMetrics";
 import { buildStudentMetrics } from "../domain/studentMetrics";
 import { buildStaffMetrics } from "../domain/staffMetrics";
-import styles from "./Dashboard.module.css";
+import styles from "../Dashboard.module.css";
 
 const SummaryScreen: React.FC = () => {
   const { summary, status, error } = useInspectionSummary();

@@ -170,9 +170,6 @@
   flex-shrink: 0;
 }
 
-.tab:hover {
-  background: #f3f4f6;
-}
 
 /* Active = dark pill (Current inspection) */
 .tabActive {

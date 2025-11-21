@@ -1,69 +1,48 @@
 import React, { useState, useEffect } from "react";
-import { Layers, Info, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import { Info, CheckCircle2, XCircle, AlertTriangle, RotateCcw, FileText } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import styles from "./RecountData.module.css";
-import { Button, TextArea } from '@dhis2/ui';
-import BottomNavBar from "./BottomNavBar"; 
+import styles from "../RecountData.module.css";
+import { Button, TextArea } from "@dhis2/ui";
 
-import { getInspectionById } from "../../shared/db";
-import type { Inspection } from "../../shared/types/inspection";
+import BottomNavBar from "../components/BottomNavBar/BottomNavBar";
+import TopHeader from "../components/TopHeader/TopHeader";
+import LevelSelector from "../components/LevelSelector/LevelSelector";
 
-/* Interfaces */
-interface HeaderProps {
-  schoolName: string;
-  inspectionDate: string;
-  logoSrc?: string;
-  pageTitle?: string;
-}
+import { getInspectionById } from "../../../shared/db";
+import type { Inspection } from "../../../shared/types/inspection";
+
+
+type RowStatus = "ok" | "warning" | "error";
 
 interface ResourceRowProps {
   item: string;
   previous: number;
   recount: number;
-  status: "ok" | "warning" | "error";
-  onRecountChange: (newRecount: number ) => void;
+  status: RowStatus;
+  onRecountChange: (newRecount: number) => void;
 }
 
 interface ResourceItem {
   item: string;
   previous: number;
   recount: number;
-  status: "ok" | "warning" | "error";
+  status: RowStatus;
 }
 
 interface ResourceRecountTableProps {
   data: ResourceItem[];
 }
 
-// Dummy data
-const resourceData: ResourceItem[] = [
-  { item: "Textbooks", previous: 120, recount: 95, status: "error" },
-  { item: "Desks", previous: 40, recount: 45, status: "ok" },
-  { item: "Chairs", previous: 45, recount: 38, status: "warning" },
-  { item: "Teachers", previous: 40, recount: 40, status: "ok" },
-];
+/* ----- Status helpers ----- */
 
-/* Header */
-const TopHeader: React.FC<HeaderProps> = ({schoolName, inspectionDate, logoSrc, pageTitle = "Inspection Summary"}) => {
-  return (
-    <div className={styles.header}>
-      <div className={styles.headerContent}>
-        <div className={styles.headerIcon}>
-          {logoSrc ? (<img src={logoSrc} alt="School logo" />) :
-           ( <Layers size={32} color="white" /> )}
-        </div>
-        <div className={styles.headerText}>
-          <h1 className={styles.headerTitle}>{pageTitle}</h1>
-          <p className={styles.schoolName}>{schoolName}</p>
-          <p className={styles.inspectionDate}>{inspectionDate}</p>
-        </div>
-      </div>
-    </div>
-  );
-};
+function getStatusFromPercentDiff(percentDiff: number): RowStatus {
+  // percentDiff is e.g. -25, +5, 0
+  if (percentDiff <= -20) return "error";   // big drop
+  if (percentDiff < 0) return "warning";    // small drop
+  return "ok";                              // same or increase
+}
 
-/* Row Status Icon*/
-const getStatusIcon = (status: ResourceRowProps["status"]) => {
+const getStatusIcon = (status: RowStatus) => {
   switch (status) {
     case "ok":
       return (
@@ -88,15 +67,25 @@ const getStatusIcon = (status: ResourceRowProps["status"]) => {
   }
 };
 
-/* Table Row */
-const ResourceRow: React.FC<ResourceRowProps> = ({ item, previous, recount, status, onRecountChange }) => {
-  const difference = recount - previous;
-  const formattedDiff = difference > 0 ? `+${difference}` : `${difference}`;
+/* ----- Single table row ----- */
+
+const ResourceRow: React.FC<ResourceRowProps> = ({
+  item,
+  previous,
+  recount,
+  status,
+  onRecountChange,
+}) => {
+  const rawDiff =
+    previous > 0 ? ((recount - previous) / previous) * 100 : 0; // in %
+  const roundedDiff = Math.round(rawDiff);
+  const formattedDiff =
+    roundedDiff > 0 ? `+${roundedDiff}%` : `${roundedDiff}%`;
 
   const diffClass =
-    difference > 0
+    roundedDiff > 0
       ? styles.diffPositive
-      : difference < 0
+      : roundedDiff < 0
       ? styles.diffNegative
       : styles.diffNeutral;
 
@@ -106,115 +95,126 @@ const ResourceRow: React.FC<ResourceRowProps> = ({ item, previous, recount, stat
 
       <td className={styles.numberCell}>
         <div className={styles.valueChip}>{previous}</div>
-        </td>
+      </td>
 
       <td className={styles.numberCell}>
         <input
           type="number"
           className={styles.recountInput}
-          value={recount}
+          value={Number.isNaN(recount) ? "" : recount}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             const val = e.target.value;
-
             if (val === "") {
-                onRecountChange(null as any);
-                return
-            } 
-            
+              onRecountChange(NaN);
+              return;
+            }
             const num = Number(val);
-            if (!Number.isNaN(num)) onRecountChange(num)
-
+            if (!Number.isNaN(num)) onRecountChange(num);
           }}
         />
       </td>
 
-      <td className={`${styles.numberCell} ${diffClass}`}>{formattedDiff}</td>
+      <td className={`${styles.numberCell} ${diffClass}`}>
+        {formattedDiff}
+      </td>
       <td className={styles.statusCell}>{getStatusIcon(status)}</td>
     </tr>
   );
 };
 
-/* Table */ 
-const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({ data }) => {
-    const [notes, setNotes] = useState("");
-    const [rows, setRows] = useState<ResourceItem[]>(data);
-    const navigate = useNavigate();
-    const { id } = useParams<{ id: string }>(); 
+/* ----- Table ----- */
 
-    const handleRecountChange = (index: number, newRecount: number) => {
-        setRows((prev) =>
-        prev.map((row, i) =>
-            i === index ? { ...row, recount: newRecount } : row
-            )
-        );
-    };
+const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
+  data,
+}) => {
+  const [notes, setNotes] = useState("");
+  const [rows, setRows] = useState<ResourceItem[]>(data);
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
 
-    const handleSave = () => {
-      if (!id) {
-          console.error("No inspection id in URL, cannot navigate to submitted view.");
-          return;
-        }
+  const handleRecountChange = (index: number, newRecount: number) => {
+    setRows((prev) =>
+      prev.map((row, i) => {
+        if (i !== index) return row;
 
+        const prevVal = row.previous;
+        const percentDiff =
+          prevVal > 0 ? ((newRecount - prevVal) / prevVal) * 100 : 0;
+        const status = getStatusFromPercentDiff(percentDiff);
 
-    navigate(`/summary/${id}/RecountDataSubmitted`,  {
-        state: {
-            notes,
-            data: rows,
-        },
+        return { ...row, recount: newRecount, status };
+      })
+    );
+  };
+
+  const handleSave = () => {
+    if (!id) {
+      console.error(
+        "No inspection id in URL, cannot navigate to submitted view."
+      );
+      return;
+    }
+
+    navigate(`/summary/${id}/RecountDataSubmitted`, {
+      state: {
+        notes,
+        data: rows,
+      },
     });
   };
 
-    return (
+  return (
     <div className={styles.resourceRecountCard}>
-        
-        <table className={styles.table}>
+      <table className={styles.table}>
         <thead>
-            <tr>
+          <tr>
             <th className={styles.itemHead}>Item</th>
             <th>Previous</th>
             <th>Recount</th>
             <th>Difference</th>
             <th>Status</th>
-            </tr>
+          </tr>
         </thead>
 
         <tbody>
-            {rows.map((resource, index) => (
-            <ResourceRow 
-            key={index} 
-            {...resource}
-            onRecountChange={(newVal) => handleRecountChange(index, newVal)}
+          {rows.map((resource, index) => (
+            <ResourceRow
+              key={resource.item}
+              {...resource}
+              onRecountChange={(newVal) => handleRecountChange(index, newVal)}
             />
-            ))}
+          ))}
         </tbody>
+      </table>
 
-        </table>
-
-
-        <div className={styles.notesSection}>
-            <label htmlFor="notes" className={styles.notesLabel}>
-                Notes (optional)
-            </label>
-            <TextArea
-            name="notes"
-            value={notes}
-            onChange={({value}) => setNotes(value ?? "")}
-            placeholder="Add any comments or observations..."
-            />
-
-            <div className={styles.saveButtonWrapper}>
-                <Button primary className={styles.roundSaveButton} onClick={handleSave}>
-                Save
-                </Button>
-
-            </div>
+      <div className={styles.notesSection}>
+        <div className={styles.notesLabelRow}>
+          <span className={styles.notesLabelMain}>Summary note</span>
+          <span className={styles.notesLabelOptional}>Optional</span>
         </div>
+
+        <TextArea
+          name="notes"
+          value={notes}
+          onChange={({ value }) => setNotes(value ?? "")}
+          placeholder="Additional note."
+        />
+
+        <div className={styles.saveButtonWrapper}>
+          <Button
+            primary
+            className={styles.roundSaveButton}
+            onClick={handleSave}
+          >
+            Save summary
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
 
-
-/* Fetch Inspection and build data  */
+/* ----- Fetch Inspection and build initial data ----- */
 
 const RecountDataScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -255,9 +255,12 @@ const RecountDataScreen: React.FC = () => {
     };
   }, [id]);
 
-  // Loading / error UI
   if (loading) {
-    return <div className={styles.dashboardContainer}>Loading inspection...</div>;
+    return (
+      <div className={styles.dashboardContainer}>
+        Loading inspection...
+      </div>
+    );
   }
 
   if (loadError || !inspection) {
@@ -266,7 +269,6 @@ const RecountDataScreen: React.FC = () => {
         <TopHeader
           schoolName="Unknown school"
           inspectionDate=""
-          logoSrc={undefined}
           pageTitle="Recount Data"
         />
         <div className={styles.content}>
@@ -277,14 +279,13 @@ const RecountDataScreen: React.FC = () => {
     );
   }
 
-  // We now have the SAME inspection object that Dashboard uses
   const { formData } = inspection;
-
   const schoolName = inspection.orgUnitName;
   const inspectionDate = new Date(inspection.eventDate).toLocaleDateString();
 
-  // Build resource rows from inspection data
-  // (previous = original value, recount = same at start; user can change recount)
+  // TODO: hook this up to a *previous* inspection.
+  // For now, "previous" == current values, but the structure
+  // makes it easy to swap in real previous values later.
   const resourceData: ResourceItem[] = [
     {
       item: "Textbooks",
@@ -317,9 +318,12 @@ const RecountDataScreen: React.FC = () => {
       <TopHeader
         schoolName={schoolName}
         inspectionDate={inspectionDate}
-        logoSrc={undefined}
-        pageTitle="Recount Data"
+        pageTitle="Summary"
       />
+
+      <div className={styles.levelRow}>
+        <LevelSelector />
+      </div>
 
       <div className={styles.content}>
         <div className={styles.contentInner}>
@@ -335,6 +339,6 @@ const RecountDataScreen: React.FC = () => {
       <BottomNavBar />
     </div>
   );
-}
+};
 
 export default RecountDataScreen;
