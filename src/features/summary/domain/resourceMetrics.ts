@@ -1,7 +1,7 @@
-import type { ObtainedInspectionData } from "./useInspection";
-import { evaluateMetric } from "./EvaluationHelpers";
-import type { MetricCardProps } from "./MetricCard";
-import type { StandardKey } from "./useInspection";
+import type { ObtainedInspectionData } from "../hooks/useInspection";
+import { evaluateMetric } from "../EvaluationHelpers";
+import type { MetricCardProps } from "../components/MetricCard/MetricCard";
+import type { StandardKey } from "../hooks/useInspection";
 
 type ResourceMetricConfig =
   | {

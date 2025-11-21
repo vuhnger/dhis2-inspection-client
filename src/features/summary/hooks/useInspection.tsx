@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useParams } from "react-router-dom";
-import { getInspectionById } from "../../shared/db";
-import type { Inspection } from "../../shared/types/inspection";
+import { getInspectionById } from "../../../shared/db";
+import type { Inspection } from "../../../shared/types/inspection";
 
 export type InspectionFetchStatus = "loading" | "success" | "error";
 

@@ -1,6 +1,6 @@
-import type { ObtainedInspectionData } from "./useInspection";
-import { evaluateMetric } from "./EvaluationHelpers";
-import type { MetricCardProps } from "./MetricCard";
+import type { ObtainedInspectionData } from "../hooks/useInspection";
+import { evaluateMetric } from "../EvaluationHelpers";
+import type { MetricCardProps } from "../components/MetricCard/MetricCard";
 
 /**
  * Build staff-related MetricCards.

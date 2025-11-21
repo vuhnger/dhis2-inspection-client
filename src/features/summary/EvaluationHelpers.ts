@@ -3,9 +3,9 @@ import {
     PROGRESS_TAGS,
     mapProgressTagToMetricStatus, 
     type StandardKey 
-} from "./useInspection";
-import type { ProgressTag } from "./useInspection";
-import type { MetricCardProps } from "./MetricCard"; // adjust path
+} from "./hooks/useInspection";
+import type { ProgressTag } from "./hooks/useInspection";
+import type { MetricCardProps } from "./components/MetricCard/MetricCard"; // adjust path
 
 export function evaluateMetric(
   key: StandardKey,

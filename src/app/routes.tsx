@@ -3,9 +3,9 @@ import React from 'react'
 // Feature components - using lazy loading for code splitting
 const InspectionHome = React.lazy(() => import('../features/inspection/InspectionHomePage'))
 const InspectionOverviewPage = React.lazy(() => import('../features/inspection/overview/InspectionOverview'))
-const SummaryPage = React.lazy(() => import('../features/summary/Dashboard'))
-const RecountPage = React.lazy(() => import('../features/summary/RecountData'))
-const RecountPageSubmitted = React.lazy(() => import('../features/summary/RecountDataSubmitted'))
+const SummaryPage = React.lazy(() => import('../features/summary/pages/Dashboard'))
+const RecountPage = React.lazy(() => import('../features/summary/pages/RecountData'))
+const RecountPageSubmitted = React.lazy(() => import('../features/summary/pages/RecountDataSubmitted'))
 
 export type AppRoute = {
     path: string

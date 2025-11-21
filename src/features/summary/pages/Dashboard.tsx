@@ -1,13 +1,13 @@
 // Dashboard.tsx (SummaryScreen)
 import React from "react";
-import TopHeader from "./TopHeader";
-import LevelSelector from "./LevelSelector";
-import SummarySection from "./SummarySection";
-import MetricCard from "./MetricCard";
-import { useInspectionSummary } from "./useInspection";
-import { buildResourceMetrics } from "./resourceMetrics";
-import { buildStudentMetrics } from "./studentMetrics";
-import { buildStaffMetrics } from "./staffMetrics";
+import TopHeader from "../components/TopHeader/TopHeader";
+import LevelSelector from "../components/LevelSelector/LevelSelector";
+import SummarySection from "../components/SummarySection/SummarySection";
+import MetricCard from "../components/MetricCard/MetricCard";
+import { useInspectionSummary } from "../hooks/useInspection";
+import { buildResourceMetrics } from "../domain/resourceMetrics";
+import { buildStudentMetrics } from "../domain/studentMetrics";
+import { buildStaffMetrics } from "../domain/staffMetrics";
 import styles from "./Dashboard.module.css";
 
 const SummaryScreen: React.FC = () => {

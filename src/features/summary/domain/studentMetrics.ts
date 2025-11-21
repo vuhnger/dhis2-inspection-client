@@ -1,6 +1,6 @@
-import type { ObtainedInspectionData } from "./useInspection";
-import type { MetricCardProps } from "./MetricCard";
-import { evaluateMetric } from "./EvaluationHelpers";
+import type { ObtainedInspectionData } from "../hooks/useInspection";
+import type { MetricCardProps } from "../components/MetricCard/MetricCard";
+import { evaluateMetric } from "../EvaluationHelpers";
 
 export function buildStudentMetrics(
   summary: ObtainedInspectionData
