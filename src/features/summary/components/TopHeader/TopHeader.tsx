@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { Edit3, FileText, RotateCcw } from "lucide-react";
+import { Edit3, Check, FileText, RotateCcw } from "lucide-react";
 import styles from "./TopHeader.module.css";
 
 interface HeaderProps {
@@ -10,17 +10,17 @@ interface HeaderProps {
   isSynced?: boolean;
   userInitials?: string;
 
-  /**
-   * Optional override for which tab is active.
-   * If not provided, TopHeader will infer it from the URL.
-   */
+  /** Optional override for active tab; otherwise inferred from URL */
   activeTab?: "current" | "recount";
 
-  /**
-   * Optional callback when a tab is clicked.
-   * Navigation is handled inside TopHeader, this is just for side-effects.
-   */
+  /** Optional side-effect callback when tab changes (navigation is internal) */
   onTabChange?: (tab: "current" | "recount") => void;
+
+  /**
+   * Optional callback when the user finishes editing the header.
+   * You can use this later to persist changes to DB.
+   */
+  onHeaderChange?: (schoolName: string, inspectionDate: string) => void;
 }
 
 const TopHeader: React.FC<HeaderProps> = ({
@@ -31,22 +31,20 @@ const TopHeader: React.FC<HeaderProps> = ({
   userInitials = "LH",
   activeTab,
   onTabChange,
+  onHeaderChange,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
 
-  // Infer which tab is active from the current URL if not explicitly provided
+  // ----- Tab handling -----
   const inferredActiveTab: "current" | "recount" =
     location.pathname.includes("/RecountData") ? "recount" : "current";
 
   const currentActiveTab = activeTab ?? inferredActiveTab;
 
   const goToTab = (tab: "current" | "recount") => {
-    if (!id) {
-      // No id – nothing to navigate to
-      return;
-    }
+    if (!id) return;
 
     if (tab === "current") {
       navigate(`/summary/${id}`);
@@ -57,26 +55,69 @@ const TopHeader: React.FC<HeaderProps> = ({
     onTabChange?.(tab);
   };
 
+  // ----- Inline editing state -----
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [draftSchoolName, setDraftSchoolName] = React.useState(schoolName);
+  const [draftDate, setDraftDate] = React.useState(inspectionDate);
+
+  // If props change from outside while not editing, sync the drafts
+  React.useEffect(() => {
+    if (!isEditing) {
+      setDraftSchoolName(schoolName);
+      setDraftDate(inspectionDate);
+    }
+  }, [schoolName, inspectionDate, isEditing]);
+
+  const handleEditClick = () => {
+    if (isEditing) {
+      // Save edits
+      onHeaderChange?.(draftSchoolName, draftDate);
+    }
+    setIsEditing((prev) => !prev);
+  };
+
   return (
     <header className={styles.header}>
       <div className={styles.topRow}>
-        {/* LEFT SIDE — ONLY TITLE + DATE */}
+        {/* LEFT SIDE — title + date (editable) */}
         <div className={styles.textBlock}>
-          <h1 className={styles.headerTitle}>
-            {pageTitle}: <span className={styles.schoolName}>{schoolName}</span>
-          </h1>
-          <p className={styles.dateRow}>Date: {inspectionDate}</p>
+          {isEditing ? (
+            <>
+              <div className={styles.editTitleRow}>
+                <input
+                  className={styles.titleInput}
+                  value={draftSchoolName}
+                  onChange={(e) => setDraftSchoolName(e.target.value)}
+                />
+              </div>
+              <input
+                className={styles.dateInput}
+                value={draftDate}
+                onChange={(e) => setDraftDate(e.target.value)}
+              />
+            </>
+          ) : (
+            <>
+              <h1 className={styles.headerTitle}>
+                {pageTitle}:{" "}
+                <span className={styles.schoolName}>{schoolName}</span>
+              </h1>
+              <p className={styles.dateRow}>Date: {inspectionDate}</p>
+            </>
+          )}
         </div>
 
         {/* RIGHT SIDE — EDIT + SYNC + AVATAR */}
         <div className={styles.rightBlock}>
           <button
             type="button"
-            className={styles.editButton}
-            onClick={() => id && navigate(`/inspection/${id}`)}
-            aria-label="Edit"
+            className={`${styles.editButton} ${
+              isEditing ? styles.editButtonActive : ""
+            }`}
+            onClick={handleEditClick}
+            aria-label={isEditing ? "Save header" : "Edit header"}
           >
-            <Edit3 size={18} />
+            {isEditing ? <Check size={18} /> : <Edit3 size={18} />}
           </button>
 
           {isSynced && (

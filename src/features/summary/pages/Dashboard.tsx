@@ -1,4 +1,3 @@
-// Dashboard.tsx (SummaryScreen)
 import React from "react";
 import TopHeader from "../components/TopHeader/TopHeader";
 import LevelSelector from "../components/LevelSelector/LevelSelector";
@@ -13,6 +12,17 @@ import styles from "../Dashboard.module.css";
 const SummaryScreen: React.FC = () => {
   const { summary, status, error } = useInspectionSummary();
 
+  // Local editable header state
+  const [displaySchoolName, setDisplaySchoolName] = React.useState("");
+  const [displayDate, setDisplayDate] = React.useState("");
+
+  React.useEffect(() => {
+    if (summary) {
+      setDisplaySchoolName(summary.schoolName);
+      setDisplayDate(summary.inspectionDate);
+    }
+  }, [summary]);
+
   if (status === "loading") {
     return <div>Loading inspection…</div>;
   }
@@ -23,33 +33,35 @@ const SummaryScreen: React.FC = () => {
 
   const resourceMetrics = buildResourceMetrics(summary);
   const studentMetrics = buildStudentMetrics(summary);
-  const staffMetrics = buildStaffMetrics(summary); 
+  const staffMetrics = buildStaffMetrics(summary);
 
   return (
     <div className={styles.summaryContainer}>
       <TopHeader
-        schoolName={summary.schoolName}
-        inspectionDate={summary.inspectionDate}
+        schoolName={displaySchoolName}
+        inspectionDate={displayDate}
+        onHeaderChange={(name, date) => {
+          setDisplaySchoolName(name);
+          setDisplayDate(date);
+          // TODO: later – persist to DB / DHIS2 here
+        }}
       />
 
       <div className={styles.content}>
         <LevelSelector />
 
-        {/* Resources */}
         <SummarySection title="Resources">
           {resourceMetrics.map((metric) => (
             <MetricCard key={metric.label} {...metric} />
           ))}
         </SummarySection>
 
-        {/* Students */}
         <SummarySection title="Students">
           {studentMetrics.map((metric) => (
             <MetricCard key={metric.label} {...metric} />
           ))}
         </SummarySection>
 
-        {/* Staff */}
         <SummarySection title="Staff">
           {staffMetrics.map((metric) => (
             <MetricCard key={metric.label} {...metric} />

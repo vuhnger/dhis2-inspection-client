@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Info, CheckCircle2, XCircle, AlertTriangle, RotateCcw, FileText } from "lucide-react";
+import { Info, CheckCircle2, XCircle, AlertTriangle, } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import styles from "../RecountData.module.css";
 import { Button, TextArea } from "@dhis2/ui";
@@ -215,7 +215,150 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
 };
 
 /* ----- Fetch Inspection and build initial data ----- */
+const RecountDataScreen: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
 
+  const [inspection, setInspection] = useState<Inspection | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Local editable header state
+  const [displaySchoolName, setDisplaySchoolName] = useState("");
+  const [displayDate, setDisplayDate] = useState("");
+
+  useEffect(() => {
+    if (!id) {
+      setLoadError("No inspection id provided in the URL.");
+      setLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+
+    getInspectionById(id)
+      .then((result: Inspection | null) => {
+        if (!isMounted) return;
+        if (!result) {
+          setLoadError("Inspection not found.");
+        } else {
+          setInspection(result);
+
+          // Initialize editable header fields
+          setDisplaySchoolName(result.orgUnitName);
+          const formattedDate = new Date(
+            result.eventDate
+          ).toLocaleDateString();
+          setDisplayDate(formattedDate);
+        }
+      })
+      .catch((err: unknown) => {
+        if (!isMounted) return;
+        console.error("Failed to load inspection", err);
+        setLoadError("Failed to load inspection.");
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className={styles.dashboardContainer}>Loading inspection...</div>
+    );
+  }
+
+  if (loadError || !inspection) {
+    return (
+      <div className={styles.dashboardContainer}>
+        <TopHeader
+          schoolName={displaySchoolName || "Unknown school"}
+          inspectionDate={displayDate}
+          pageTitle="Recount Data"
+          onHeaderChange={(name, date) => {
+            setDisplaySchoolName(name);
+            setDisplayDate(date);
+          }}
+        />
+        <div className={styles.content}>
+          <p>{loadError ?? "Inspection could not be loaded."}</p>
+        </div>
+        
+      </div>
+    );
+  }
+
+  const { formData } = inspection;
+
+  const resourceData: ResourceItem[] = [
+    {
+      item: "Textbooks",
+      previous: formData.textbooks,
+      recount: formData.textbooks,
+      status: "ok",
+    },
+    {
+      item: "Desks",
+      previous: formData.desks,
+      recount: formData.desks,
+      status: "ok",
+    },
+    {
+      item: "Chairs",
+      previous: formData.chairs,
+      recount: formData.chairs,
+      status: "ok",
+    },
+    {
+      item: "Teachers",
+      previous: Number(formData.staffCount ?? 0),
+      recount: Number(formData.staffCount ?? 0),
+      status: "ok",
+    },
+  ];
+
+  return (
+    <div className={styles.dashboardContainer}>
+      <TopHeader
+        schoolName={displaySchoolName}
+        inspectionDate={displayDate}
+        pageTitle="Summary"
+        onHeaderChange={(name, date) => {
+          setDisplaySchoolName(name);
+          setDisplayDate(date);
+          // TODO: later – persist to DB / DHIS2 here as well
+        }}
+      />
+
+      <div className={styles.levelRow}>
+        <LevelSelector />
+      </div>
+
+      <div className={styles.content}>
+        <div className={styles.contentInner}>
+          <div className={styles.recountHeaderRow}>
+            <h2 className={styles.recountTitle}>Resource recount</h2>
+            <Info size={16} className={styles.infoIcon} />
+          </div>
+
+          <ResourceRecountTable data={resourceData} />
+        </div>
+      </div>
+
+      <BottomNavBar />
+    </div>
+  );
+};
+
+export default RecountDataScreen;
+
+
+
+
+/*
 const RecountDataScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
 
@@ -341,3 +484,5 @@ const RecountDataScreen: React.FC = () => {
 };
 
 export default RecountDataScreen;
+
+*/
