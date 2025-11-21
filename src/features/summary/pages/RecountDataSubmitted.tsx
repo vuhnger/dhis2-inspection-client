@@ -1,32 +1,8 @@
 import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import {
-    Card,
-    Button,
-    Tag,
-    colors,
-    spacers,
-} from "@dhis2/ui";
-
-import {
-    IconCheckmarkCircle24,
-    IconArrowLeft24,
-    IconApps24,
-} from "@dhis2/ui";
-
-import {
-  Layers,
-} from "lucide-react";
-
+import { useLocation, useNavigate, } from "react-router-dom";
+import { Card, Button, Tag, colors, IconCheckmarkCircle24, IconArrowLeft24, } from "@dhis2/ui";
 import styles from "../RecountDataSubmitted.module.css";
 import TopHeader from "../components/TopHeader/TopHeader";
-
-interface HeaderProps {
-    schoolName: string;
-    inspectionDate: string;
-    logoSrc?: string;
-    pageTitle?: string;
-}
 
 interface SubmittedItemRowProps {
     item: string;
@@ -34,8 +10,6 @@ interface SubmittedItemRowProps {
     recount: number;
     status: string;
 }
-
-
 
 const SubmittedItemRow: React.FC<SubmittedItemRowProps> = ({
     item,
@@ -80,7 +54,7 @@ const SubmittedItemRow: React.FC<SubmittedItemRowProps> = ({
 const SubmittedItemsList: React.FC<{ data: any[] }> = ({ data }) => {
     return (
         <Card className={styles.card}>
-            <h2>Submitted items</h2>
+            <h2>Submitted Metrics</h2>
             {data.map((r, i) => (
                 <SubmittedItemRow key={i} {...r} />
             ))}

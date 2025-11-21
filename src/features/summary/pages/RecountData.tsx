@@ -4,7 +4,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import styles from "../RecountData.module.css";
 import { Button, TextArea } from "@dhis2/ui";
 
-import BottomNavBar from "../components/BottomNavBar/BottomNavBar";
 import TopHeader from "../components/TopHeader/TopHeader";
 import LevelSelector from "../components/LevelSelector/LevelSelector";
 
