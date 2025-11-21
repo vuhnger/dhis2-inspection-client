@@ -1,26 +1,30 @@
 .header {
-  /* Light blue header background like the mockup */
   background: #e6f3ff;
-  padding: 20px 20px 18px;
+  padding: 28px 28px 22px;
   border-radius: 0 0 24px 24px;
 }
 
 /* Top row */
-
 .topRow {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 18px;
+  align-items: flex-start;
+}
+
+/* Title + icon + edit */
+.leftGroup {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .titleBlock {
   display: flex;
-  align-items: center;
   gap: 14px;
+  align-items: flex-start;
 }
 
-/* Circle icon on the left */
+/* Circle gradient icon */
 .logoWrapper {
   width: 48px;
   height: 48px;
@@ -43,52 +47,66 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  margin-top: 4px;
 }
 
-/* "Summary: Edutopia school 1" */
+
 .headerTitle {
   margin: 0;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.2px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
   color: #111827;
 }
 
 .schoolName {
   font-weight: 500;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  letter-spacing: -0.2px;
 }
 
-/* "Date: 13.sep.2025" */
+/* Date on next line, slightly indented look */
 .dateRow {
-  margin: 0;
+  margin: 2px 0 0;
   font-size: 13px;
   color: #6b7280;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
 }
 
-.dateLabel {
-  font-weight: 500;
+.editButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid #111827;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #111827;
+  transition: 0.15s ease;
 }
 
-.dateValue {
-  font-weight: 500;
+.editButton:hover {
+  background: rgba(0, 0, 0, 0.07);
 }
-
-/* Right side: Synced chip + avatar */
 
 .rightBlock {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
-
 .syncedChip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
   border-radius: 9999px;
-  background: #d1fae5;
-  border: 1px solid #bbf7d0;
+  background: #c4f4d8;
   font-size: 12px;
   font-weight: 500;
   color: #15803d;
@@ -116,18 +134,18 @@
   cursor: pointer;
 }
 
-/* Tabs row: centered pills */
-
 .tabRow {
-  margin-top: 18px;
+  margin-top: 20px;
   display: flex;
-  justify-content: center;
-  gap: 12px;
+  justify-content: flex-start;
+  gap: 14px;
+  padding-left: 0;
+  margin-left: 0;
 }
 
 /* Base pill style */
 .tab {
-  min-width: 160px;
+  min-width: 170px;
   padding: 9px 22px;
   border-radius: 9999px;
   border: 1px solid #e5e7eb;
@@ -138,6 +156,18 @@
   cursor: pointer;
   transition: all 0.15s ease-in-out;
   box-shadow: 0 4px 8px rgba(15, 23, 42, 0.05);
+}
+
+/* Icon + label inside tab */
+.tabInner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.tabIcon {
+  flex-shrink: 0;
 }
 
 .tab:hover {

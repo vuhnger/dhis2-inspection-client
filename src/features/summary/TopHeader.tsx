@@ -1,15 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Layers } from "lucide-react";
-// If you use @dhis2/ui you can swap the buttons/chip with those components later
-// import { Button, Chip } from '@dhis2/ui';
-
+import { Edit3, FileText, RotateCcw } from "lucide-react";
 import styles from "./TopHeader.module.css";
 
 interface HeaderProps {
   schoolName: string;
   inspectionDate: string;
-  logoSrc?: string;
   pageTitle?: string;
   isSynced?: boolean;
   userInitials?: string;
@@ -20,7 +16,6 @@ interface HeaderProps {
 const TopHeader: React.FC<HeaderProps> = ({
   schoolName,
   inspectionDate,
-  logoSrc,
   pageTitle = "Summary",
   isSynced = true,
   userInitials = "LH",
@@ -35,29 +30,27 @@ const TopHeader: React.FC<HeaderProps> = ({
 
   return (
     <header className={styles.header}>
-      {/* Top row: icon + title + date + status */}
       <div className={styles.topRow}>
-        <div className={styles.titleBlock}>
-          <div className={styles.logoWrapper}>
-            {logoSrc ? (
-              <img src={logoSrc} alt="School logo" />
-            ) : (
-              <Layers size={24} color="#ffffff" />
-            )}
-          </div>
 
-          <div className={styles.textBlock}>
-            <h1 className={styles.headerTitle}>
-              {pageTitle}: <span className={styles.schoolName}>{schoolName}</span>
-            </h1>
-            <p className={styles.dateRow}>
-              <span className={styles.dateLabel}>Date:</span>{" "}
-              <span className={styles.dateValue}>{inspectionDate}</span>
-            </p>
-          </div>
+        {/* LEFT SIDE — ONLY TITLE + DATE */}
+        <div className={styles.textBlock}>
+          <h1 className={styles.headerTitle}>
+            {pageTitle}: <span className={styles.schoolName}>{schoolName}</span>
+          </h1>
+          <p className={styles.dateRow}>Date: {inspectionDate}</p>
         </div>
 
+        {/* RIGHT SIDE — EDIT + SYNC + AVATAR */}
         <div className={styles.rightBlock}>
+          <button
+            type="button"
+            className={styles.editButton}
+            onClick={() => navigate("/inspection")}
+            aria-label="Edit"
+          >
+            <Edit3 size={18} />
+          </button>
+
           {isSynced && (
             <div className={styles.syncedChip}>
               <span className={styles.syncedDot} />
@@ -73,9 +66,10 @@ const TopHeader: React.FC<HeaderProps> = ({
             {userInitials}
           </button>
         </div>
+
       </div>
 
-      {/* Second row: pill tabs (Current inspection / Recount data) */}
+      {/* TABS */}
       <div className={styles.tabRow}>
         <button
           type="button"
@@ -84,7 +78,10 @@ const TopHeader: React.FC<HeaderProps> = ({
           }`}
           onClick={() => handleTabClick("current")}
         >
-          Current inspection
+          <span className={styles.tabInner}>
+            <FileText size={16} className={styles.tabIcon} />
+            <span>Current inspection</span>
+          </span>
         </button>
 
         <button
@@ -94,7 +91,10 @@ const TopHeader: React.FC<HeaderProps> = ({
           }`}
           onClick={() => handleTabClick("recount")}
         >
-          Recount data
+          <span className={styles.tabInner}>
+            <RotateCcw size={16} className={styles.tabIcon} />
+            <span>Recount data</span>
+          </span>
         </button>
       </div>
     </header>

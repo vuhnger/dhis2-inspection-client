@@ -1,4 +1,3 @@
-// resourceMetrics.ts
 import type { ObtainedInspectionData } from "./useInspection";
 import { evaluateMetric } from "./EvaluationHelpers";
 import type { MetricCardProps } from "./MetricCard";

@@ -6,6 +6,7 @@ import MetricCard from "./MetricCard";
 import { useInspectionSummary } from "./useInspection";
 import { buildResourceMetrics } from "./resourceMetrics";
 import { buildStudentMetrics } from "./studentMetrics";
+import styles from "./Dashboard.module.css"; 
 
 const SummaryScreen: React.FC = () => {
   const { summary, status, error } = useInspectionSummary();
@@ -18,48 +19,35 @@ const SummaryScreen: React.FC = () => {
     return <div>{error || "Unable to load inspection."}</div>;
   }
 
-  // At this point we have real inspection data in `summary`
   const resourceMetrics = buildResourceMetrics(summary);
   const studentMetrics = buildStudentMetrics(summary);
-  // const facilitiesMetrics = buildFacilitiesMetrics(summary); // when you add toilets etc.
-  // const staffMetrics = buildStaffMetrics(summary); // when you want staff section
 
   return (
-    <div>
+    <div className={styles.summaryContainer}>
       <TopHeader
         schoolName={summary.schoolName}
         inspectionDate={summary.inspectionDate}
       />
 
-      <LevelSelector />
+      <div className={styles.content}>
+        <LevelSelector />
 
-      {/* Resources section */}
-      <SummarySection title="Resources">
-        {resourceMetrics.map((metric) => (
-          <MetricCard key={metric.label} {...metric} />
-        ))}
-      </SummarySection>
+        {/* Resources section */}
+        <SummarySection title="Resources">
+          {resourceMetrics.map((metric) => (
+            <MetricCard key={metric.label} {...metric} />
+          ))}
+        </SummarySection>
 
-      {/* Students section */}
-      <SummarySection title="Students">
-        {studentMetrics.map((metric) => (
-          <MetricCard key={metric.label} {...metric} />
-        ))}
-      </SummarySection>
+        {/* Students section */}
+        <SummarySection title="Students">
+          {studentMetrics.map((metric) => (
+            <MetricCard key={metric.label} {...metric} />
+          ))}
+        </SummarySection>
 
-      {/* Later: Facilities */}
-      {/* <SummarySection title="Facilities">
-        {facilitiesMetrics.map((metric) => (
-          <MetricCard key={metric.label} {...metric} />
-        ))}
-      </SummarySection> */}
-
-      {/* Later: Staff */}
-      {/* <SummarySection title="Staff">
-        {staffMetrics.map((metric) => (
-          <MetricCard key={metric.label} {...metric} />
-        ))}
-      </SummarySection> */}
+        {/* Facilities / Staff sections can be added here later */}
+      </div>
     </div>
   );
 };

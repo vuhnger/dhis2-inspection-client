@@ -145,3 +145,13 @@
   color: #ffffff;
   box-shadow: 0 6px 14px rgba(37, 99, 235, 0.4);
 }
+
+.summaryContainer {
+  background-color: #e6f3ff;
+  min-height: 100vh;
+}
+
+
+.content {
+  padding: 16px 24px 40px;
+}

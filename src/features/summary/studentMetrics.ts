@@ -1,4 +1,3 @@
-// studentMetrics.ts
 import type { ObtainedInspectionData } from "./useInspection";
 import type { MetricCardProps } from "./MetricCard";
 import { evaluateMetric } from "./EvaluationHelpers";
