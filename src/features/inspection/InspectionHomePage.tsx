@@ -44,14 +44,19 @@ const InspectionHomePage: React.FC = () => {
     const [remoteLoading, setRemoteLoading] = React.useState(false)
     const [remoteError, setRemoteError] = React.useState<string | null>(null)
     const { inspections: localInspections, loading: localLoading, refetch: refetchInspections } = useInspections()
-    const { hasUnsynced, isSyncing, triggerSync } = useSync()
+    const { hasUnsynced, isSyncing, triggerSync, checkUnsyncedStatus } = useSync()
     const [isOnline, setIsOnline] = React.useState(navigator.onLine)
     const [searchQuery, setSearchQuery] = React.useState('')
     const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false)
     const [isConfirmClearOpen, setIsConfirmClearOpen] = React.useState(false)
     const [isClearing, setIsClearing] = React.useState(false)
     const loading = remoteLoading
-    const canTriggerSync = isOnline && hasUnsynced && !isSyncing
+    const localHasUnsynced = React.useMemo(
+        () => localInspections.some((inspection) => inspection.syncStatus !== 'synced'),
+        [localInspections]
+    )
+    const effectiveHasUnsynced = hasUnsynced || localHasUnsynced
+    const canTriggerSync = isOnline && effectiveHasUnsynced && !isSyncing
 
     const syncBadgeColors = React.useMemo(() => {
         if (isSyncing) {
@@ -62,7 +67,7 @@ const InspectionHomePage: React.FC = () => {
             }
         }
 
-        if (hasUnsynced) {
+        if (effectiveHasUnsynced) {
             return {
                 background: '#F3F4F6',
                 color: '#4B5563',
@@ -75,7 +80,7 @@ const InspectionHomePage: React.FC = () => {
             color: '#047857',
             border: '1px solid #6EE7B7',
         }
-    }, [hasUnsynced, isSyncing])
+    }, [effectiveHasUnsynced, isSyncing])
 
     // Track online/offline status
     React.useEffect(() => {
@@ -90,6 +95,13 @@ const InspectionHomePage: React.FC = () => {
             window.removeEventListener('offline', handleOffline)
         }
     }, [])
+
+    // Re-check unsynced state whenever local inspections change
+    React.useEffect(() => {
+        checkUnsyncedStatus().catch(err => {
+            console.error('Failed to refresh sync status:', err)
+        })
+    }, [localInspections, checkUnsyncedStatus])
 
     // Load DHIS2 events once per mount (or when online changes to true)
     React.useEffect(() => {
@@ -251,7 +263,7 @@ const InspectionHomePage: React.FC = () => {
                                 </svg>
                                     <span>{i18n.t('Syncing...')}</span>
                                 </>
-                            ) : hasUnsynced ? (
+                            ) : effectiveHasUnsynced ? (
                                 <>
                                     <svg
                                         width="24"

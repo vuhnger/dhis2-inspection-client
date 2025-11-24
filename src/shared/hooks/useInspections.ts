@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Inspection, CreateInspectionInput, UpdateInspectionInput } from '../types/inspection'
 import * as db from '../db/indexedDB'
+import { INSPECTIONS_CHANGED_EVENT } from '../db/indexedDB'
 
 export function useInspections() {
     const [inspections, setInspections] = useState<Inspection[]>([])
@@ -28,6 +29,20 @@ export function useInspections() {
 
     useEffect(() => {
         loadInspections()
+    }, [loadInspections])
+
+    // Listen for external DB changes (e.g., sync updates) to refresh state
+    useEffect(() => {
+        if (typeof window === 'undefined') {
+            return
+        }
+        const handler = () => {
+            loadInspections()
+        }
+        window.addEventListener(INSPECTIONS_CHANGED_EVENT, handler)
+        return () => {
+            window.removeEventListener(INSPECTIONS_CHANGED_EVENT, handler)
+        }
     }, [loadInspections])
 
     // Create a new inspection

@@ -9,6 +9,14 @@ const DB_NAME = 'InspectionDB'
 // Current schema version. Only bump this number forward; lowering it causes IndexedDB VersionError
 const DB_VERSION = 2
 const STORE_NAME = 'inspections'
+export const INSPECTIONS_CHANGED_EVENT = 'inspections:changed'
+
+function emitInspectionsChanged() {
+    if (typeof window === 'undefined') {
+        return
+    }
+    window.dispatchEvent(new Event(INSPECTIONS_CHANGED_EVENT))
+}
 
 /**
  * Initialize IndexedDB database and create object stores
@@ -153,6 +161,7 @@ export async function createInspection(input: CreateInspectionInput): Promise<In
 
         request.onsuccess = () => {
             resolve(inspection)
+            emitInspectionsChanged()
         }
 
         request.onerror = () => {
@@ -188,6 +197,7 @@ export async function updateInspection(id: string, updates: UpdateInspectionInpu
 
         request.onsuccess = () => {
             resolve(updated)
+            emitInspectionsChanged()
         }
 
         request.onerror = () => {
@@ -209,6 +219,7 @@ export async function deleteInspection(id: string): Promise<void> {
 
         request.onsuccess = () => {
             resolve()
+            emitInspectionsChanged()
         }
 
         request.onerror = () => {
@@ -276,6 +287,7 @@ export async function clearAllInspections(): Promise<void> {
         request.onsuccess = () => {
             console.log('All inspections cleared from database')
             db.close()
+            emitInspectionsChanged()
             resolve()
         }
 

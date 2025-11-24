@@ -2,7 +2,7 @@
  * Sync Service - Handles synchronization of local inspections to DHIS2
  */
 
-import { updateInspection, getInspectionsBySyncStatus } from '../db/indexedDB'
+import { updateInspection, getInspectionsBySyncStatus, getAllInspections } from '../db/indexedDB'
 import { DHIS2_PROGRAM_STAGE_UID, DHIS2_PROGRAM_UID } from '../config/dhis2'
 import { getAuthHeader, getApiBase } from '../utils/auth'
 
@@ -305,9 +305,16 @@ export async function syncAllInspections(engine: DataEngine): Promise<{
  */
 export async function hasUnsyncedInspections(): Promise<boolean> {
     try {
-        const unsynced = await getInspectionsBySyncStatus('not_synced')
-        const failed = await getInspectionsBySyncStatus('sync_failed')
-        return unsynced.length > 0 || failed.length > 0
+        // Treat missing syncStatus as unsynced to be safe
+        const [unsynced, failed, all] = await Promise.all([
+            getInspectionsBySyncStatus('not_synced'),
+            getInspectionsBySyncStatus('sync_failed'),
+            getAllInspections(),
+        ])
+        const missingStatus = all.filter(
+            (inspection) => !inspection.syncStatus || inspection.syncStatus === 'in_progress'
+        )
+        return unsynced.length > 0 || failed.length > 0 || missingStatus.length > 0
     } catch (error) {
         console.error('Error checking for unsynced inspections:', error)
         return false

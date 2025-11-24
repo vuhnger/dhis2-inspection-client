@@ -19,6 +19,17 @@ type OrgUnitsQueryResponse = {
     }>
 }
 
+type MeOrgUnitsResponse = {
+    organisationUnits: Array<{
+        id: string
+        name: string
+        displayName?: string
+        path?: string
+        level?: number
+    }>
+    dataViewOrganisationUnits?: Array<{ id: string; path?: string }>
+}
+
 const STORAGE_KEY = 'group16:orgUnits:cache'
 
 const loadCachedOrgUnits = (): AccessibleOrgUnit[] => {
@@ -71,23 +82,50 @@ export const useAccessibleOrgUnits = () => {
         try {
             // Fetch org units actually assigned to the inspection program. The
             // /organisationUnits?program=... endpoint does not consistently filter.
-            const url = `${apiBase}/programs/${DHIS2_PROGRAM_UID}?fields=organisationUnits[id,name,displayName,path,level]`
-            const res = await fetch(url, {
-                headers: {
-                    Authorization: getAuthHeader(),
-                },
-                cache: 'no-store',
-            })
-            if (!res.ok) {
-                throw new Error(`${res.status} ${res.statusText}`)
+            const programUrl = `${apiBase}/programs/${DHIS2_PROGRAM_UID}?fields=organisationUnits[id,name,displayName,path,level]`
+            const meUrl = `${apiBase}/me?fields=organisationUnits[id,path],dataViewOrganisationUnits[id,path]`
+
+            const [programRes, meRes] = await Promise.all([
+                fetch(programUrl, {
+                    headers: {
+                        Authorization: getAuthHeader(),
+                    },
+                    cache: 'no-store',
+                }),
+                fetch(meUrl, {
+                    headers: {
+                        Authorization: getAuthHeader(),
+                    },
+                    cache: 'no-store',
+                }),
+            ])
+
+            if (!programRes.ok) {
+                throw new Error(`${programRes.status} ${programRes.statusText}`)
             }
-            const data: OrgUnitsQueryResponse = await res.json()
+            if (!meRes.ok) {
+                throw new Error(`User access check failed: ${meRes.status} ${meRes.statusText}`)
+            }
+
+            const data: OrgUnitsQueryResponse = await programRes.json()
+            const me: MeOrgUnitsResponse = await meRes.json()
             const rootPrefix = DHIS2_ROOT_OU_UID ? `/${DHIS2_ROOT_OU_UID}` : null
 
+            const userOuPrefixes = [
+                ...(me.organisationUnits || []),
+                ...(me.dataViewOrganisationUnits || []),
+            ]
+                .map((ou) => ou.path)
+                .filter(Boolean)
+
             const normalised: AccessibleOrgUnit[] = (data.organisationUnits || [])
-                .filter((orgUnit) =>
-                    rootPrefix ? orgUnit.path?.startsWith(rootPrefix) : true
-                )
+                .filter((orgUnit) => {
+                    const underRoot = rootPrefix ? orgUnit.path?.startsWith(rootPrefix) : true
+                    const withinUserHierarchy = userOuPrefixes.length
+                        ? userOuPrefixes.some((prefix) => orgUnit.path?.startsWith(prefix))
+                        : true
+                    return underRoot && withinUserHierarchy
+                })
                 .map((orgUnit) => ({
                     id: orgUnit.id,
                     name: (orgUnit as any).displayName ?? orgUnit.name,
