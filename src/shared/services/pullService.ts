@@ -77,7 +77,31 @@ export async function pullRemoteInspections(limit = 100): Promise<{
     }
 
     const body = await res.json()
-    const events: TrackerEvent[] = body?.events?.instances || []
+    // Support both shapes: { events: [...] } and { events: { instances: [...] } }
+    const events: TrackerEvent[] =
+        (Array.isArray(body?.events) ? body.events : body?.events?.instances) ||
+        body?.instances ||
+        []
+    const orgUnitIds = Array.from(new Set(events.map((e) => e.orgUnit))).filter(Boolean)
+    const orgUnitMap: Record<string, string> = {}
+
+    if (orgUnitIds.length) {
+        const ouParams = new URLSearchParams()
+        ouParams.set('paging', 'false')
+        ouParams.set('fields', 'id,displayName,name')
+        ouParams.set('filter', `id:in:[${orgUnitIds.join(',')}]`)
+        const ouRes = await fetch(`${apiBase}/organisationUnits?${ouParams.toString()}`, {
+            headers: {
+                Authorization: getAuthHeader(),
+            },
+        })
+        if (ouRes.ok) {
+            const ouBody = await ouRes.json()
+            for (const ou of ouBody?.organisationUnits || []) {
+                orgUnitMap[ou.id] = ou.displayName || ou.name || ou.id
+            }
+        }
+    }
     const existing = await getAllInspections()
     const byEventId = new Map<string, Inspection>()
     const byDhId = new Map<string, Inspection>()
@@ -96,6 +120,7 @@ export async function pullRemoteInspections(limit = 100): Promise<{
         const status = DHIS_STATUS_MAP[event.status || ''] || 'in_progress'
         const formData = mapRemoteEventToFormData(event)
         const occurredAt = event.occurredAt || new Date().toISOString()
+        const orgUnitName = orgUnitMap[event.orgUnit] || event.orgUnitName || 'School'
         const existingMatch =
             byEventId.get(eventId) ||
             byDhId.get(eventId) ||
@@ -104,7 +129,7 @@ export async function pullRemoteInspections(limit = 100): Promise<{
         if (existingMatch) {
             await updateInspection(existingMatch.id, {
                 orgUnit: event.orgUnit,
-                orgUnitName: event.orgUnitName || existingMatch.orgUnitName,
+                orgUnitName,
                 eventDate: occurredAt,
                 status,
                 formData,
@@ -118,7 +143,7 @@ export async function pullRemoteInspections(limit = 100): Promise<{
             const inspection: Inspection = {
                 id: eventId,
                 orgUnit: event.orgUnit,
-                orgUnitName: event.orgUnitName || 'School',
+                orgUnitName,
                 eventDate: occurredAt,
                 status,
                 syncStatus: 'synced',

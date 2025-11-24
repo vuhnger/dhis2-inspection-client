@@ -117,6 +117,16 @@ const InspectionHomePage: React.FC = () => {
         pullRemote()
     }, [isOnline, pullRemote])
 
+    const handleSyncAndPull = React.useCallback(async () => {
+        try {
+            await triggerSync()
+            await pullRemote()
+        } catch (error) {
+            console.error('Sync/pull failed', error)
+            setRemoteError(error instanceof Error ? error.message : 'Sync failed')
+        }
+    }, [pullRemote, triggerSync])
+
     // Parse local inspections and DHIS2 events into upcoming vs finished
     const { upcomingInspections, finishedInspections } = React.useMemo(() => {
         const now = new Date()
@@ -258,7 +268,7 @@ const InspectionHomePage: React.FC = () => {
                                 ...syncBadgeColors,
                                 cursor: canTriggerSync ? 'pointer' : 'default',
                             }}
-                            onClick={canTriggerSync ? triggerSync : undefined}
+                            onClick={canTriggerSync ? handleSyncAndPull : undefined}
                             role={canTriggerSync ? 'button' : undefined}
                             tabIndex={canTriggerSync ? 0 : undefined}
                             onKeyDown={(event) => {
@@ -267,7 +277,7 @@ const InspectionHomePage: React.FC = () => {
                                 }
                                 if (event.key === 'Enter' || event.key === ' ') {
                                     event.preventDefault()
-                                    triggerSync()
+                                    handleSyncAndPull()
                                 }
                             }}
                             aria-live="polite"
