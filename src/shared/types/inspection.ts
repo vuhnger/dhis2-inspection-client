@@ -48,7 +48,8 @@ export interface Inspection {
     // School/org unit information
     orgUnit: string
     orgUnitName: string
-    orgUnitCategories?: OrgUnitCategory[] // Org unit groups (LBE/UBE/ECD/Tertiary)
+    orgUnitCategories?: OrgUnitCategory[]
+    source?: 'local' | 'server'
 
     // Scheduling information
     eventDate: string // ISO 8601 format

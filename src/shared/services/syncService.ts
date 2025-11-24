@@ -2,7 +2,7 @@
  * Sync Service - Handles synchronization of local inspections to DHIS2
  */
 
-import { updateInspection, getInspectionsBySyncStatus, getAllInspections } from '../db/indexedDB'
+import { updateInspection, getInspectionsBySyncStatus, getAllInspections, saveInspection } from '../db/indexedDB'
 import { DHIS2_PROGRAM_STAGE_UID, DHIS2_PROGRAM_UID } from '../config/dhis2'
 import { getAuthHeader, getApiBase } from '../utils/auth'
 
@@ -34,6 +34,14 @@ const DATA_ELEMENT_MAP = {
     classroomCount: 'ya5SyA5hej4', // CHK number of classrooms
     testFieldNotes: 'KrijJzaqMAU', // Inspection Notes
 }
+const DATA_ELEMENT_FIELD_MAP = Object.entries(DATA_ELEMENT_MAP).reduce<
+    Record<string, keyof InspectionFormData>
+>((acc, [field, id]) => {
+    if (id) {
+        acc[id] = field as keyof InspectionFormData
+    }
+    return acc
+}, {})
 
 /**
  * Convert local inspection to DHIS2 event payload

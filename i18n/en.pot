@@ -5,8 +5,10 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-24T18:51:24.077Z\n"
-"PO-Revision-Date: 2025-11-24T18:51:24.077Z\n"
+"POT-Creation-Date: 2025-11-24T19:09:52.983Z\n"
+"PO-Revision-Date: 2025-11-24T19:09:52.984Z\n"
+msgid "Never pulled"
+msgstr "Never pulled"
 
 msgid "Syncing..."
 msgstr "Syncing..."
@@ -23,11 +25,20 @@ msgstr "Connect to sync"
 msgid "Synced"
 msgstr "Synced"
 
+msgid "Pulling..."
+msgstr "Pulling..."
+
+msgid "Refresh from server"
+msgstr "Refresh from server"
+
 msgid "Reset all local data"
 msgstr "Reset all local data"
 
 msgid "No upcoming inspections scheduled"
 msgstr "No upcoming inspections scheduled"
+
+msgid "From server"
+msgstr "From server"
 
 msgid "No completed inspections yet"
 msgstr "No completed inspections yet"
@@ -399,3 +410,11 @@ msgstr "Offline - Cannot Sync"
 
 msgid "Sync Error"
 msgstr "Sync Error"
+
+msgctxt "Application title"
+msgid "__MANIFEST_APP_TITLE"
+msgstr "in5320-group-16"
+
+msgctxt "Application description"
+msgid "__MANIFEST_APP_DESCRIPTION"
+msgstr ""
