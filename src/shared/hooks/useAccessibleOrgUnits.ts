@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { DHIS2_PROGRAM_UID, DHIS2_ROOT_OU_UID } from '../config/dhis2'
 import { getApiBase, getAuthHeader } from '../utils/auth'
 
 export type AccessibleOrgUnit = {
@@ -13,7 +14,8 @@ type OrgUnitsQueryResponse = {
         id: string
         name: string
         displayName?: string
-        path: string
+        path?: string
+        level?: number
     }>
 }
 
@@ -67,26 +69,29 @@ export const useAccessibleOrgUnits = () => {
         setLoading(true)
         setError(null)
         try {
-            const params = new URLSearchParams()
-            params.set('fields', 'id,name,displayName,path')
-            params.set('paging', 'false')
-            params.set('withinUserHierarchy', 'true')
-            params.set('order', 'displayName:asc')
-            const url = `${apiBase}/organisationUnits?${params.toString()}`
+            // Fetch org units actually assigned to the inspection program. The
+            // /organisationUnits?program=... endpoint does not consistently filter.
+            const url = `${apiBase}/programs/${DHIS2_PROGRAM_UID}?fields=organisationUnits[id,name,displayName,path,level]`
             const res = await fetch(url, {
                 headers: {
                     Authorization: getAuthHeader(),
                 },
+                cache: 'no-store',
             })
             if (!res.ok) {
                 throw new Error(`${res.status} ${res.statusText}`)
             }
             const data: OrgUnitsQueryResponse = await res.json()
+            const rootPrefix = DHIS2_ROOT_OU_UID ? `/${DHIS2_ROOT_OU_UID}` : null
+
             const normalised: AccessibleOrgUnit[] = (data.organisationUnits || [])
+                .filter((orgUnit) =>
+                    rootPrefix ? orgUnit.path?.startsWith(rootPrefix) : true
+                )
                 .map((orgUnit) => ({
                     id: orgUnit.id,
                     name: (orgUnit as any).displayName ?? orgUnit.name,
-                    path: orgUnit.path,
+                    path: orgUnit.path ?? '',
                 }))
                 .sort((a, b) => a.name.localeCompare(b.name))
 
@@ -100,10 +105,8 @@ export const useAccessibleOrgUnits = () => {
     }, [apiBase])
 
     React.useEffect(() => {
-        if (!orgUnits.length) {
-            fetchOrgUnits()
-        }
-    }, [fetchOrgUnits, orgUnits.length])
+        fetchOrgUnits()
+    }, [fetchOrgUnits])
 
     return {
         orgUnits,

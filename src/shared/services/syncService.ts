@@ -173,14 +173,34 @@ export async function syncInspectionToDHIS2(
             body: JSON.stringify(trackerPayload),
         })
 
-        if (!fetchResponse.ok) {
-            const errorText = await fetchResponse.text()
-            throw new Error(
-                `${fetchResponse.status} ${fetchResponse.statusText}: ${errorText}`
-            )
+        let parsedBody: any = null
+        const rawBody = await fetchResponse.text()
+        try {
+            parsedBody = rawBody ? JSON.parse(rawBody) : null
+        } catch {
+            parsedBody = null
         }
 
-        const response = await fetchResponse.json()
+        if (!fetchResponse.ok) {
+            const validationMessage =
+                parsedBody?.validationReport?.errorReports?.[0]?.message ??
+                parsedBody?.message
+
+            let errorMessage = `${fetchResponse.status} ${fetchResponse.statusText}`
+            if (validationMessage) {
+                errorMessage += `: ${validationMessage}`
+            } else if (rawBody) {
+                errorMessage += `: ${rawBody}`
+            }
+
+            if (validationMessage?.includes('OrganisationUnit') && validationMessage.includes('do not match')) {
+                errorMessage = 'Selected school is not assigned to the School Inspection program. Please pick another school and try again.'
+            }
+
+            throw new Error(errorMessage)
+        }
+
+        const response = parsedBody ?? {}
 
         console.log('DHIS2 sync response:', response)
 
@@ -218,8 +238,8 @@ export async function syncInspectionToDHIS2(
         let errorMessage = 'Unknown error'
         if (error instanceof Error) {
             errorMessage = error.message
-            // Log the full error object to see DHIS2's response
-            console.error('Full error object:', JSON.stringify(error, null, 2))
+            // Log the full error message to see DHIS2's response
+            console.error('Sync error details:', error.message)
         }
 
         // Update inspection sync status to failed

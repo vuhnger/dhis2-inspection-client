@@ -49,27 +49,13 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
         setSchoolsLoading(true)
         setSchoolsError(null)
         try {
-            const filters = [
-                `organisationUnitGroups.id:in:[${SCHOOL_GROUP_IDS.join(',')}]`,
-                'level:ge:4',
-            ]
-            if (DHIS2_ROOT_OU_UID) {
-                filters.push(`path:like:/${DHIS2_ROOT_OU_UID}`)
-            }
-
-            const params = new URLSearchParams()
-            params.set('paging', 'false')
-            params.set('fields', 'id,displayName')
-            filters.forEach(f => params.append('filter', f))
-            params.set('program', DHIS2_PROGRAM_UID)
-            params.set('_', Date.now().toString()) // cache buster to avoid 304
-
-            const url = `${apiBase}/organisationUnits?${params.toString()}`
-            const res = await fetch(url, {
+            // Fetch org units that are actually assigned to the inspection program,
+            // then filter to school groups + level/root on the client. The server
+            // does not respect `program=` filtering on /organisationUnits.
+            const programUrl = `${apiBase}/programs/${DHIS2_PROGRAM_UID}?fields=organisationUnits[id,displayName,name,path,level,organisationUnitGroups[id]]`
+            const res = await fetch(programUrl, {
                 headers: {
                     Authorization: getAuthHeader(),
-                    'Cache-Control': 'no-cache',
-                    Pragma: 'no-cache',
                 },
                 cache: 'no-store',
             })
@@ -79,13 +65,41 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
             }
 
             const data = await res.json()
-            const list = data?.organisationUnits || []
+            const orgUnits = (data?.organisationUnits || []) as Array<{
+                id: string
+                displayName?: string
+                name?: string
+                path?: string
+                level?: number
+                organisationUnitGroups?: Array<{ id: string }>
+            }>
+
+            const schoolGroupSet = new Set(SCHOOL_GROUP_IDS)
+            const rootPrefix = DHIS2_ROOT_OU_UID ? `/${DHIS2_ROOT_OU_UID}` : null
+
+            const list = orgUnits.filter((ou) => {
+                const inSchoolGroup = (ou.organisationUnitGroups || []).some((g) =>
+                    schoolGroupSet.has(g.id)
+                )
+                const meetsLevel = typeof ou.level === 'number' ? ou.level >= 4 : true
+                const underRoot = rootPrefix ? ou.path?.startsWith(rootPrefix) : true
+                return inSchoolGroup && meetsLevel && underRoot
+            })
+
+            if (!list.length) {
+                throw new Error('No schools assigned to the School Inspection program')
+            }
+
             setSchoolOptions(
                 [...list]
-                    .sort((a: any, b: any) => a.displayName.localeCompare(b.displayName))
-                    .map((ou: any) => ({
+                    .map((ou) => ({
+                        ...ou,
+                        label: ou.displayName || ou.name || ou.id,
+                    }))
+                    .sort((a, b) => a.label.localeCompare(b.label))
+                    .map((ou) => ({
                         value: ou.id,
-                        label: ou.displayName,
+                        label: ou.label,
                     }))
             )
             setSchoolsLoadedOnce(true)
@@ -97,7 +111,7 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
             isFetchingRef.current = false
             setSchoolsLoading(false)
         }
-    }, [])
+    }, [apiBase])
 
     React.useEffect(() => {
         if (isOpen && !schoolsLoadedOnce) {

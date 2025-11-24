@@ -6,7 +6,8 @@
 import type { Inspection, CreateInspectionInput, UpdateInspectionInput } from '../types/inspection'
 
 const DB_NAME = 'InspectionDB'
-const DB_VERSION = 1
+// Current schema version. Only bump this number forward; lowering it causes IndexedDB VersionError
+const DB_VERSION = 2
 const STORE_NAME = 'inspections'
 
 /**
@@ -14,30 +15,65 @@ const STORE_NAME = 'inspections'
  */
 function openDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION)
-
-        request.onerror = () => {
-            reject(new Error('Failed to open IndexedDB'))
+        // Check if IndexedDB is available
+        if (!window.indexedDB) {
+            reject(new Error('IndexedDB is not supported in this browser'))
+            return
         }
 
-        request.onsuccess = () => {
-            resolve(request.result)
-        }
+        try {
+            const request = indexedDB.open(DB_NAME, DB_VERSION)
 
-        request.onupgradeneeded = (event) => {
-            const db = (event.target as IDBOpenDBRequest).result
+            request.onerror = (event) => {
+                const error = (event.target as IDBOpenDBRequest).error
+                const errorMessage = error ?
+                    `Failed to open IndexedDB: ${error.name} - ${error.message}` :
+                    'Failed to open IndexedDB: Unknown error'
 
-            // Create inspections store if it doesn't exist
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-                const objectStore = db.createObjectStore(STORE_NAME, { keyPath: 'id' })
+                console.error('IndexedDB error:', {
+                    name: error?.name,
+                    message: error?.message,
+                    code: (error as any)?.code,
+                    suggestion: 'Make sure you are not in Private/Incognito mode and have enough storage space'
+                })
 
-                // Create indexes for efficient querying
-                objectStore.createIndex('orgUnit', 'orgUnit', { unique: false })
-                objectStore.createIndex('eventDate', 'eventDate', { unique: false })
-                objectStore.createIndex('status', 'status', { unique: false })
-                objectStore.createIndex('syncStatus', 'syncStatus', { unique: false })
-                objectStore.createIndex('dhis2EventId', 'dhis2EventId', { unique: false })
+                reject(new Error(errorMessage))
             }
+
+            request.onsuccess = () => {
+                const db = request.result
+
+                // Add error handler for the database connection
+                db.onerror = (event) => {
+                    console.error('Database error:', event)
+                }
+
+                resolve(db)
+            }
+
+            request.onblocked = () => {
+                console.warn('IndexedDB is blocked - please close other tabs with this app')
+                reject(new Error('IndexedDB is blocked - please close other tabs with this app'))
+            }
+
+            request.onupgradeneeded = (event) => {
+                const db = (event.target as IDBOpenDBRequest).result
+
+                // Create inspections store if it doesn't exist
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                    const objectStore = db.createObjectStore(STORE_NAME, { keyPath: 'id' })
+
+                    // Create indexes for efficient querying
+                    objectStore.createIndex('orgUnit', 'orgUnit', { unique: false })
+                    objectStore.createIndex('eventDate', 'eventDate', { unique: false })
+                    objectStore.createIndex('status', 'status', { unique: false })
+                    objectStore.createIndex('syncStatus', 'syncStatus', { unique: false })
+                    objectStore.createIndex('dhis2EventId', 'dhis2EventId', { unique: false })
+                }
+            }
+        } catch (error) {
+            console.error('Error opening IndexedDB:', error)
+            reject(error)
         }
     })
 }
@@ -239,11 +275,89 @@ export async function clearAllInspections(): Promise<void> {
 
         request.onsuccess = () => {
             console.log('All inspections cleared from database')
+            db.close()
             resolve()
         }
 
         request.onerror = () => {
+            db.close()
             reject(new Error('Failed to clear inspections'))
         }
     })
+}
+
+/**
+ * Delete the entire IndexedDB database
+ * Use this to recover from a corrupted database state
+ */
+export async function deleteDatabase(): Promise<void> {
+    return new Promise((resolve, reject) => {
+        console.log('Attempting to delete IndexedDB database...')
+
+        const request = indexedDB.deleteDatabase(DB_NAME)
+
+        request.onsuccess = () => {
+            console.log('IndexedDB database deleted successfully')
+            resolve()
+        }
+
+        request.onerror = (event) => {
+            const error = (event.target as IDBOpenDBRequest).error
+            console.error('Failed to delete IndexedDB database:', error)
+            reject(new Error(`Failed to delete database: ${error?.message || 'Unknown error'}`))
+        }
+
+        request.onblocked = () => {
+            console.warn('Delete blocked - please close all other tabs with this app open')
+            reject(new Error('Database deletion blocked - close all other tabs and try again'))
+        }
+    })
+}
+
+/**
+ * Check if IndexedDB is available and working
+ */
+export async function checkIndexedDBHealth(): Promise<{
+    available: boolean
+    error?: string
+    details?: string
+}> {
+    try {
+        if (!window.indexedDB) {
+            return {
+                available: false,
+                error: 'IndexedDB not supported',
+                details: 'Your browser does not support IndexedDB'
+            }
+        }
+
+        // Try to open the database
+        const db = await openDB()
+        db.close()
+
+        return { available: true }
+    } catch (error) {
+        console.error('IndexedDB health check failed:', error)
+
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+
+        // Provide helpful suggestions based on the error
+        let details = 'Possible causes:\n'
+        if (errorMessage.includes('blocked')) {
+            details += '- Close other tabs with this app open\n'
+        }
+        if (errorMessage.includes('QuotaExceededError')) {
+            details += '- Your browser storage is full\n- Clear browser data and try again\n'
+        }
+        if (errorMessage.includes('UnknownError') || errorMessage.includes('InvalidStateError')) {
+            details += '- You may be in Private/Incognito mode\n- IndexedDB may be disabled in browser settings\n- Try a different browser\n'
+        }
+        details += '- Try deleting the database from DevTools > Application > IndexedDB'
+
+        return {
+            available: false,
+            error: errorMessage,
+            details
+        }
+    }
 }
