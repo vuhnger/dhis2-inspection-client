@@ -5,6 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 
 import { useInspection } from '../../../shared/hooks/useInspections'
 import { useSync } from '../../../shared/hooks/useSync'
+import { getApiBase, getAuthHeader } from '../../../shared/utils/auth'
 
 import classes from './InspectionOverview.module.css'
 
@@ -66,7 +67,7 @@ const InspectionOverview: React.FC = () => {
     const { isSyncing, triggerSync, syncError } = useSync()
 
     const [selectedCategory, setSelectedCategory] = React.useState<Category>('staff')
-    const [selectedLevel, setSelectedLevel] = React.useState<'LBE' | 'SSE' | 'UBE'>('LBE')
+    const [schoolCategories, setSchoolCategories] = React.useState<string[]>([])
     const [form, setForm] = React.useState<FormState>(DEFAULT_FORM)
     const [errors, setErrors] = React.useState<Partial<Record<keyof FormState, string>>>({})
     const [wasSubmitted, setWasSubmitted] = React.useState(false)
@@ -79,6 +80,39 @@ const InspectionOverview: React.FC = () => {
             setForm(inspection.formData)
         }
     }, [inspection])
+
+    // Load school categories (org unit groups)
+    React.useEffect(() => {
+        const fetchCategories = async () => {
+            if (!inspection?.orgUnit) {
+                setSchoolCategories([])
+                return
+            }
+            try {
+                const apiBase = getApiBase()
+                const res = await fetch(
+                    `${apiBase}/organisationUnits/${inspection.orgUnit}?fields=organisationUnitGroups[id,name,displayName]`,
+                    {
+                        headers: {
+                            Authorization: getAuthHeader(),
+                        },
+                    }
+                )
+                if (!res.ok) {
+                    throw new Error(`${res.status} ${res.statusText}`)
+                }
+                const data = await res.json()
+                const categories = (data?.organisationUnitGroups || []).map(
+                    (g: any) => g.displayName || g.name
+                )
+                setSchoolCategories(categories)
+            } catch (error) {
+                console.warn('Unable to fetch school categories', error)
+                setSchoolCategories([])
+            }
+        }
+        fetchCategories()
+    }, [inspection?.orgUnit])
 
     // Track online/offline status
     React.useEffect(() => {
@@ -354,7 +388,7 @@ const InspectionOverview: React.FC = () => {
                     <div className={classes.formFields}>
                         {/* Textbooks Counter */}
                         <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Textbooks')} {selectedLevel}</label>
+                            <label className={classes.counterLabel}>{i18n.t('Textbooks')}</label>
                             <div className={classes.counterControl}>
                                 <button
                                     type="button"
@@ -384,7 +418,7 @@ const InspectionOverview: React.FC = () => {
 
                         {/* Chairs Counter */}
                         <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Chairs')} {selectedLevel}</label>
+                            <label className={classes.counterLabel}>{i18n.t('Chairs')}</label>
                             <div className={classes.counterControl}>
                                 <button
                                     type="button"
@@ -435,7 +469,7 @@ const InspectionOverview: React.FC = () => {
                     <div className={classes.formFields}>
                         {/* Total Students Counter */}
                         <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Total Students')} {selectedLevel}</label>
+                            <label className={classes.counterLabel}>{i18n.t('Total Students')}</label>
                             <div className={classes.counterControl}>
                                 <button
                                     type="button"
@@ -468,7 +502,7 @@ const InspectionOverview: React.FC = () => {
 
                         {/* Male Students Counter */}
                         <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Male Students')} {selectedLevel}</label>
+                            <label className={classes.counterLabel}>{i18n.t('Male Students')}</label>
                             <div className={classes.counterControl}>
                                 <button
                                     type="button"
@@ -501,7 +535,7 @@ const InspectionOverview: React.FC = () => {
 
                         {/* Female Students Counter */}
                         <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Female Students')} {selectedLevel}</label>
+                            <label className={classes.counterLabel}>{i18n.t('Female Students')}</label>
                             <div className={classes.counterControl}>
                                 <button
                                     type="button"
@@ -539,7 +573,7 @@ const InspectionOverview: React.FC = () => {
                     <div className={classes.formFields}>
                         {/* Staff Count Counter */}
                         <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Total Staff Count')} {selectedLevel}</label>
+                            <label className={classes.counterLabel}>{i18n.t('Total Staff Count')}</label>
                             <div className={classes.counterControl}>
                                 <button
                                     type="button"
@@ -577,7 +611,7 @@ const InspectionOverview: React.FC = () => {
                     <div className={classes.formFields}>
                         {/* Classroom Count Counter */}
                         <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Number of Classrooms')} {selectedLevel}</label>
+                            <label className={classes.counterLabel}>{i18n.t('Number of Classrooms')}</label>
                             <div className={classes.counterControl}>
                                 <button
                                     type="button"
@@ -694,36 +728,12 @@ const InspectionOverview: React.FC = () => {
                 </div>
 
                 <div className={classes.schoolInfoDropdown}>
-                    <select className={classes.infoSelect}>
-                        <option>{i18n.t('Information about the school')}</option>
-                    </select>
-                </div>
-
-                {/* Level Selection */}
-                <div className={classes.levelSection}>
-                    <h3 className={classes.levelCaption}>Level</h3>
-                    <div className={classes.levelButtons}>
-                        <button
-                            type="button"
-                            className={`${classes.levelButton} ${selectedLevel === 'LBE' ? classes.levelButtonActive : ''}`}
-                            onClick={() => setSelectedLevel('LBE')}
-                        >
-                            LBE
-                        </button>
-                        <button
-                            type="button"
-                            className={`${classes.levelButton} ${selectedLevel === 'SSE' ? classes.levelButtonActive : ''}`}
-                            onClick={() => setSelectedLevel('SSE')}
-                        >
-                            SSE
-                        </button>
-                        <button
-                            type="button"
-                            className={`${classes.levelButton} ${selectedLevel === 'UBE' ? classes.levelButtonActive : ''}`}
-                            onClick={() => setSelectedLevel('UBE')}
-                        >
-                            UBE
-                        </button>
+                    <div className={classes.infoPillGroup} aria-label={i18n.t('School type')}>
+                        {(schoolCategories.length ? schoolCategories : [i18n.t('School type unknown')]).map((cat, idx) => (
+                            <span key={`${cat}-${idx}`} className={classes.infoPill}>
+                                {cat}
+                            </span>
+                        ))}
                     </div>
                 </div>
 
