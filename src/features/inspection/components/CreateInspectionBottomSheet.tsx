@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Button, InputField } from '@dhis2/ui';
+import { Button, InputField, SingleSelectField, SingleSelectOption } from '@dhis2/ui';
+import { useNavigate } from 'react-router-dom';
 import { useInspections } from '../../../shared/hooks/useInspections';
+import { useAccessibleOrgUnits } from '../../../shared/hooks/useAccessibleOrgUnits';
 import styles from './CreateInspectionBottomSheet.module.css';
 
 interface Props {
@@ -10,7 +12,7 @@ interface Props {
 }
 
 export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Props) => {
-    const [schoolName, setSchoolName] = useState('');
+    const [selectedOrgUnit, setSelectedOrgUnit] = useState('');
     const [eventDate, setEventDate] = useState('');
     const [startTime, setStartTime] = useState('16:00');
     const [endTime, setEndTime] = useState('17:30');
@@ -18,6 +20,8 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
     const [isCreating, setIsCreating] = useState(false);
     
     const { createInspection } = useInspections();
+    const { orgUnits, loading: orgUnitsLoading } = useAccessibleOrgUnits();
+    const navigate = useNavigate();
 
     // Handle escape key
     useEffect(() => {
@@ -45,8 +49,8 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
     const validateForm = (): boolean => {
         const newErrors: Record<string, string> = {};
 
-        if (!schoolName.trim()) {
-            newErrors.schoolName = 'School name is required';
+        if (!selectedOrgUnit) {
+            newErrors.selectedOrgUnit = 'School selection is required';
         }
 
         if (!eventDate) {
@@ -82,9 +86,14 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
         setIsCreating(true);
 
         try {
+            const selectedSchool = orgUnits.find(org => org.id === selectedOrgUnit);
+            if (!selectedSchool) {
+                throw new Error('Selected school not found');
+            }
+
             const inspectionInput = {
-                orgUnit: 'demo-school-' + Date.now(), // Generate a demo org unit ID
-                orgUnitName: schoolName,
+                orgUnit: selectedSchool.id,
+                orgUnitName: selectedSchool.name,
                 eventDate: eventDate + 'T' + startTime + ':00', // ISO 8601 format
                 scheduledStartTime: startTime,
                 scheduledEndTime: endTime,
@@ -102,12 +111,17 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
                 },
             };
 
-            await createInspection(inspectionInput);
+            const newInspection = await createInspection(inspectionInput);
 
             // Reset form
             resetForm();
             onSuccess();
             onClose();
+            
+            // Navigate to the newly created inspection
+            if (newInspection && newInspection.id) {
+                navigate(`/inspection/${newInspection.id}`);
+            }
         } catch (error) {
             console.error('Error creating inspection:', error);
             setErrors({ submit: 'Failed to start inspection. Please try again.' });
@@ -122,7 +136,7 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
     };
 
     const resetForm = () => {
-        setSchoolName('');
+        setSelectedOrgUnit('');
         setEventDate('');
         setStartTime('16:00');
         setEndTime('17:30');
@@ -154,21 +168,29 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
                 {/* Content */}
                 <div className={styles.content}>
                     <div className={styles.formGroup}>
-                        <InputField
-                            label="School Name"
-                            type="text"
-                            value={schoolName}
-                            onChange={({ value }) => {
-                                setSchoolName(value || '');
-                                if (errors.schoolName) {
-                                    setErrors({ ...errors, schoolName: '' });
+                        <SingleSelectField
+                            label="Select School"
+                            selected={selectedOrgUnit}
+                            onChange={({ selected }) => {
+                                setSelectedOrgUnit(selected);
+                                if (errors.selectedOrgUnit) {
+                                    setErrors({ ...errors, selectedOrgUnit: '' });
                                 }
                             }}
-                            error={!!errors.schoolName}
-                            validationText={errors.schoolName}
+                            error={!!errors.selectedOrgUnit}
+                            validationText={errors.selectedOrgUnit}
                             required
-                            disabled={isCreating}
-                        />
+                            disabled={isCreating || orgUnitsLoading}
+                            placeholder={orgUnitsLoading ? "Loading schools..." : "Choose a school"}
+                        >
+                            {orgUnits.map((orgUnit) => (
+                                <SingleSelectOption
+                                    key={orgUnit.id}
+                                    label={orgUnit.name}
+                                    value={orgUnit.id}
+                                />
+                            ))}
+                        </SingleSelectField>
 
                         <InputField
                             label="Date"
