@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-20T16:11:11.848Z\n"
-"PO-Revision-Date: 2025-11-20T16:11:11.849Z\n"
+"POT-Creation-Date: 2025-11-24T15:45:56.196Z\n"
+"PO-Revision-Date: 2025-11-24T15:45:56.196Z\n"
 
 msgid "Syncing..."
 msgstr "Syncing..."
@@ -210,6 +210,15 @@ msgstr "Error"
 
 msgid "Select School"
 msgstr "Select School"
+
+msgid "Loading schools..."
+msgstr "Loading schools..."
+
+msgid "Search schools"
+msgstr "Search schools"
+
+msgid "Failed to load schools. Please try again."
+msgstr "Failed to load schools. Please try again."
 
 msgid "Inspection Date"
 msgstr "Inspection Date"

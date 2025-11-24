@@ -21,20 +21,20 @@ const CATEGORY_LABELS: Record<Category, string> = {
 }
 
 type FormState = {
-    // Resources form fields (using numbers)
-    textbooks: number
-    chairs: number
+    // Resources form fields (using numbers or empty string for editing)
+    textbooks: number | string
+    chairs: number | string
 
     // Students form fields
-    totalStudents: string
-    maleStudents: string
-    femaleStudents: string
+    totalStudents: string | number
+    maleStudents: string | number
+    femaleStudents: string | number
 
     // Staff form fields
-    staffCount: string
+    staffCount: string | number
 
     // Facilities form fields
-    classroomCount: string
+    classroomCount: string | number
 
     // Notes
     testFieldNotes: string
@@ -65,7 +65,8 @@ const InspectionOverview: React.FC = () => {
     const { inspection, loading: inspectionLoading, updateInspection } = useInspection(id || null)
     const { isSyncing, triggerSync, syncError } = useSync()
 
-    const [selectedCategory, setSelectedCategory] = React.useState<Category>('resources')
+    const [selectedCategory, setSelectedCategory] = React.useState<Category>('staff')
+    const [selectedLevel, setSelectedLevel] = React.useState<'LBE' | 'SSE' | 'UBE'>('LBE')
     const [form, setForm] = React.useState<FormState>(DEFAULT_FORM)
     const [errors, setErrors] = React.useState<Partial<Record<keyof FormState, string>>>({})
     const [wasSubmitted, setWasSubmitted] = React.useState(false)
@@ -262,14 +263,8 @@ const InspectionOverview: React.FC = () => {
             return
         }
 
-        const targetIndex = CATEGORY_ORDER.indexOf(category)
-
-        if (targetIndex > currentCategoryIndex && !ensureCurrentCategoryValid()) {
-            return
-        }
-
         setSelectedCategory(category)
-    }, [selectedCategory, currentCategoryIndex, ensureCurrentCategoryValid])
+    }, [selectedCategory])
 
     const handleNextCategory = React.useCallback(() => {
         if (!nextCategory) {
@@ -312,27 +307,44 @@ const InspectionOverview: React.FC = () => {
         }
     }
 
-    const handleIncrement = (field: 'textbooks' | 'chairs') => {
-        updateForm(prev => ({
-            ...prev,
-            [field]: prev[field] + 1,
-        }))
-    }
-
-    const handleDecrement = (field: 'textbooks' | 'chairs') => {
-        updateForm(prev => ({
-            ...prev,
-            [field]: Math.max(0, prev[field] - 1),
-        }))
-    }
-
-    const handleCounterChange = (field: 'textbooks' | 'chairs') =>
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            const value = parseInt(e.target.value) || 0
-            updateForm(prev => ({
+    const handleIncrement = (field: keyof FormState) => {
+        updateForm(prev => {
+            const currentValue = typeof prev[field] === 'number' ? prev[field] : parseInt(String(prev[field])) || 0
+            return {
                 ...prev,
-                [field]: Math.max(0, value),
-            }))
+                [field]: currentValue + 1,
+            }
+        })
+    }
+
+    const handleDecrement = (field: keyof FormState) => {
+        updateForm(prev => {
+            const currentValue = typeof prev[field] === 'number' ? prev[field] : parseInt(String(prev[field])) || 0
+            return {
+                ...prev,
+                [field]: Math.max(0, currentValue - 1),
+            }
+        })
+    }
+
+    const handleCounterChange = (field: keyof FormState) =>
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value
+            // Allow empty string for easier editing
+            if (value === '') {
+                updateForm(prev => ({
+                    ...prev,
+                    [field]: '',
+                }))
+            } else {
+                const numValue = parseInt(value)
+                if (!isNaN(numValue) && numValue >= 0) {
+                    updateForm(prev => ({
+                        ...prev,
+                        [field]: numValue,
+                    }))
+                }
+            }
         }
 
     const renderCategoryForm = () => {
@@ -342,7 +354,7 @@ const InspectionOverview: React.FC = () => {
                     <div className={classes.formFields}>
                         {/* Textbooks Counter */}
                         <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Textbooks')}</label>
+                            <label className={classes.counterLabel}>{i18n.t('Textbooks')} {selectedLevel}</label>
                             <div className={classes.counterControl}>
                                 <button
                                     type="button"
@@ -372,7 +384,7 @@ const InspectionOverview: React.FC = () => {
 
                         {/* Chairs Counter */}
                         <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Chairs')}</label>
+                            <label className={classes.counterLabel}>{i18n.t('Chairs')} {selectedLevel}</label>
                             <div className={classes.counterControl}>
                                 <button
                                     type="button"
@@ -421,73 +433,180 @@ const InspectionOverview: React.FC = () => {
             case 'students':
                 return (
                     <div className={classes.formFields}>
-                        <InputField
-                            label={i18n.t('Total Students')}
-                            name="totalStudents"
-                            type="number"
-                            min="0"
-                            value={form.totalStudents}
-                            onChange={handleFieldChange('totalStudents')}
-                            required
-                            error={Boolean(errors.totalStudents)}
-                            validationText={errors.totalStudents}
-                        />
-                        <InputField
-                            label={i18n.t('Male Students')}
-                            name="maleStudents"
-                            type="number"
-                            min="0"
-                            value={form.maleStudents}
-                            onChange={handleFieldChange('maleStudents')}
-                            required
-                            error={Boolean(errors.maleStudents)}
-                            validationText={errors.maleStudents}
-                        />
-                        <InputField
-                            label={i18n.t('Female Students')}
-                            name="femaleStudents"
-                            type="number"
-                            min="0"
-                            value={form.femaleStudents}
-                            onChange={handleFieldChange('femaleStudents')}
-                            required
-                            error={Boolean(errors.femaleStudents)}
-                            validationText={errors.femaleStudents}
-                        />
+                        {/* Total Students Counter */}
+                        <div className={classes.counterField}>
+                            <label className={classes.counterLabel}>{i18n.t('Total Students')} {selectedLevel}</label>
+                            <div className={classes.counterControl}>
+                                <button
+                                    type="button"
+                                    className={classes.counterButton}
+                                    onClick={() => handleDecrement('totalStudents')}
+                                    aria-label={i18n.t('Decrease total students')}
+                                >
+                                    −
+                                </button>
+                                <input
+                                    type="number"
+                                    className={classes.counterInput}
+                                    value={form.totalStudents}
+                                    onChange={handleCounterChange('totalStudents')}
+                                    min="0"
+                                />
+                                <button
+                                    type="button"
+                                    className={classes.counterButton}
+                                    onClick={() => handleIncrement('totalStudents')}
+                                    aria-label={i18n.t('Increase total students')}
+                                >
+                                    +
+                                </button>
+                            </div>
+                            {errors.totalStudents && (
+                                <span className={classes.errorText}>{errors.totalStudents}</span>
+                            )}
+                        </div>
+
+                        {/* Male Students Counter */}
+                        <div className={classes.counterField}>
+                            <label className={classes.counterLabel}>{i18n.t('Male Students')} {selectedLevel}</label>
+                            <div className={classes.counterControl}>
+                                <button
+                                    type="button"
+                                    className={classes.counterButton}
+                                    onClick={() => handleDecrement('maleStudents')}
+                                    aria-label={i18n.t('Decrease male students')}
+                                >
+                                    -
+                                </button>
+                                <input
+                                    type="number"
+                                    className={classes.counterInput}
+                                    value={form.maleStudents}
+                                    onChange={handleCounterChange('maleStudents')}
+                                    min="0"
+                                />
+                                <button
+                                    type="button"
+                                    className={classes.counterButton}
+                                    onClick={() => handleIncrement('maleStudents')}
+                                    aria-label={i18n.t('Increase male students')}
+                                >
+                                    +
+                                </button>
+                            </div>
+                            {errors.maleStudents && (
+                                <span className={classes.errorText}>{errors.maleStudents}</span>
+                            )}
+                        </div>
+
+                        {/* Female Students Counter */}
+                        <div className={classes.counterField}>
+                            <label className={classes.counterLabel}>{i18n.t('Female Students')} {selectedLevel}</label>
+                            <div className={classes.counterControl}>
+                                <button
+                                    type="button"
+                                    className={classes.counterButton}
+                                    onClick={() => handleDecrement('femaleStudents')}
+                                    aria-label={i18n.t('Decrease female students')}
+                                >
+                                    −
+                                </button>
+                                <input
+                                    type="number"
+                                    className={classes.counterInput}
+                                    value={form.femaleStudents}
+                                    onChange={handleCounterChange('femaleStudents')}
+                                    min="0"
+                                />
+                                <button
+                                    type="button"
+                                    className={classes.counterButton}
+                                    onClick={() => handleIncrement('femaleStudents')}
+                                    aria-label={i18n.t('Increase female students')}
+                                >
+                                    +
+                                </button>
+                            </div>
+                            {errors.femaleStudents && (
+                                <span className={classes.errorText}>{errors.femaleStudents}</span>
+                            )}
+                        </div>
                     </div>
                 )
 
             case 'staff':
                 return (
                     <div className={classes.formFields}>
-                        <InputField
-                            label={i18n.t('Total Staff Count')}
-                            name="staffCount"
-                            type="number"
-                            min="0"
-                            value={form.staffCount}
-                            onChange={handleFieldChange('staffCount')}
-                            required
-                            error={Boolean(errors.staffCount)}
-                            validationText={errors.staffCount}
-                        />
+                        {/* Staff Count Counter */}
+                        <div className={classes.counterField}>
+                            <label className={classes.counterLabel}>{i18n.t('Total Staff Count')} {selectedLevel}</label>
+                            <div className={classes.counterControl}>
+                                <button
+                                    type="button"
+                                    className={classes.counterButton}
+                                    onClick={() => handleDecrement('staffCount')}
+                                    aria-label={i18n.t('Decrease staff count')}
+                                >
+                                    −
+                                </button>
+                                <input
+                                    type="number"
+                                    className={classes.counterInput}
+                                    value={form.staffCount}
+                                    onChange={handleCounterChange('staffCount')}
+                                    min="0"
+                                />
+                                <button
+                                    type="button"
+                                    className={classes.counterButton}
+                                    onClick={() => handleIncrement('staffCount')}
+                                    aria-label={i18n.t('Increase staff count')}
+                                >
+                                    +
+                                </button>
+                            </div>
+                            {errors.staffCount && (
+                                <span className={classes.errorText}>{errors.staffCount}</span>
+                            )}
+                        </div>
                     </div>
                 )
 
             case 'facilities':
                 return (
                     <div className={classes.formFields}>
-                        <InputField
-                            label={i18n.t('Number of Classrooms')}
-                            name="classroomCount"
-                            type="number"
-                            min="0"
-                            value={form.classroomCount}
-                            onChange={handleFieldChange('classroomCount')}
-                            required
-                            error={Boolean(errors.classroomCount)}
-                            validationText={errors.classroomCount}
-                        />
+                        {/* Classroom Count Counter */}
+                        <div className={classes.counterField}>
+                            <label className={classes.counterLabel}>{i18n.t('Number of Classrooms')} {selectedLevel}</label>
+                            <div className={classes.counterControl}>
+                                <button
+                                    type="button"
+                                    className={classes.counterButton}
+                                    onClick={() => handleDecrement('classroomCount')}
+                                    aria-label={i18n.t('Decrease classroom count')}
+                                >
+                                    −
+                                </button>
+                                <input
+                                    type="number"
+                                    className={classes.counterInput}
+                                    value={form.classroomCount}
+                                    onChange={handleCounterChange('classroomCount')}
+                                    min="0"
+                                />
+                                <button
+                                    type="button"
+                                    className={classes.counterButton}
+                                    onClick={() => handleIncrement('classroomCount')}
+                                    aria-label={i18n.t('Increase classroom count')}
+                                >
+                                    +
+                                </button>
+                            </div>
+                            {errors.classroomCount && (
+                                <span className={classes.errorText}>{errors.classroomCount}</span>
+                            )}
+                        </div>
                     </div>
                 )
         }
@@ -580,6 +699,34 @@ const InspectionOverview: React.FC = () => {
                     </select>
                 </div>
 
+                {/* Level Selection */}
+                <div className={classes.levelSection}>
+                    <h3 className={classes.levelCaption}>Level</h3>
+                    <div className={classes.levelButtons}>
+                        <button
+                            type="button"
+                            className={`${classes.levelButton} ${selectedLevel === 'LBE' ? classes.levelButtonActive : ''}`}
+                            onClick={() => setSelectedLevel('LBE')}
+                        >
+                            LBE
+                        </button>
+                        <button
+                            type="button"
+                            className={`${classes.levelButton} ${selectedLevel === 'SSE' ? classes.levelButtonActive : ''}`}
+                            onClick={() => setSelectedLevel('SSE')}
+                        >
+                            SSE
+                        </button>
+                        <button
+                            type="button"
+                            className={`${classes.levelButton} ${selectedLevel === 'UBE' ? classes.levelButtonActive : ''}`}
+                            onClick={() => setSelectedLevel('UBE')}
+                        >
+                            UBE
+                        </button>
+                    </div>
+                </div>
+
                 <div className={classes.categories}>
                     <button
                         type="button"
@@ -590,8 +737,8 @@ const InspectionOverview: React.FC = () => {
                         aria-label={i18n.t('Staff')}
                     >
                         <div className={classes.categoryIcon}>
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            <svg className={classes.staffLogo} width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19 4H14.82C14.4 2.84 13.3 2 12 2C10.7 2 9.6 2.84 9.18 4H5C3.9 4 3 4.9 3 6V20C3 21.1 3.9 22 5 22H19C20.1 22 21 21.1 21 20V6C21 4.9 20.1 4 19 4ZM12 3.75C12.22 3.75 12.41 3.85 12.55 4C12.67 4.13 12.75 4.31 12.75 4.5C12.75 4.91 12.41 5.25 12 5.25C11.59 5.25 11.25 4.91 11.25 4.5C11.25 4.31 11.33 4.13 11.45 4C11.59 3.85 11.78 3.75 12 3.75ZM19 20H5V6H19V20ZM12 7C10.35 7 9 8.35 9 10C9 11.65 10.35 13 12 13C13.65 13 15 11.65 15 10C15 8.35 13.65 7 12 7ZM12 11C11.45 11 11 10.55 11 10C11 9.45 11.45 9 12 9C12.55 9 13 9.45 13 10C13 10.55 12.55 11 12 11ZM6 17.47V19H18V17.47C18 14.97 14.03 13.89 12 13.89C9.97 13.89 6 14.96 6 17.47ZM8.31 17C9 16.44 10.69 15.88 12 15.88C13.31 15.88 15.01 16.44 15.69 17H8.31Z" fill="black"/>
                             </svg>
                         </div>
                         <span className={classes.categoryLabel}>{i18n.t('Staff')}</span>
@@ -605,8 +752,8 @@ const InspectionOverview: React.FC = () => {
                         aria-label={i18n.t('Resources')}
                     >
                         <div className={classes.categoryIcon}>
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+                            <svg className={classes.resourcesLogo} width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M17 10C18.1 10 19 9.1 19 8V5C19 3.9 18.1 3 17 3H7C5.9 3 5 3.9 5 5V8C5 9.1 5.9 10 7 10H8V12H7C5.9 12 5 12.9 5 14V21H7V18H17V21H19V14C19 12.9 18.1 12 17 12H16V10H17ZM7 8V5H17V8H7ZM17 16H7V14H17V16ZM14 12H10V10H14V12Z" fill="black"/>
                             </svg>
                         </div>
                         <span className={classes.categoryLabel}>{i18n.t('Resources')}</span>
@@ -620,9 +767,8 @@ const InspectionOverview: React.FC = () => {
                         aria-label={i18n.t('Students')}
                     >
                         <div className={classes.categoryIcon}>
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                                <circle cx="9" cy="9" r="4"/>
-                                <path d="M9 15c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm7.76-9.64c1.96.28 3.32 2.12 3.05 4.08-.22 1.57-1.28 2.93-2.73 3.47 1.43.43 3.02 1.19 4.2 2.37l.02.02c.15.15.38.06.38-.14v-2.5c-.01-2.4-1.67-4.47-4.02-4.97-.18-.04-.37.06-.43.23-.07.18.02.39.2.46z"/>
+                            <svg className={classes.studentsLogo} width="91" height="91" viewBox="0 0 91 91" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M38.7003 49.0833C38.7003 51.6885 36.586 53.8029 33.9808 53.8029C31.3756 53.8029 29.2612 51.6885 29.2612 49.0833C29.2612 46.4781 31.3756 44.3638 33.9808 44.3638C36.586 44.3638 38.7003 46.4781 38.7003 49.0833ZM56.6346 44.3638C54.0294 44.3638 51.9151 46.4781 51.9151 49.0833C51.9151 51.6885 54.0294 53.8029 56.6346 53.8029C59.2398 53.8029 61.3542 51.6885 61.3542 49.0833C61.3542 46.4781 59.2398 44.3638 56.6346 44.3638ZM83.0641 45.3077C83.0641 66.1492 66.1492 83.0641 45.3077 83.0641C24.4661 83.0641 7.55127 66.1492 7.55127 45.3077C7.55127 24.4661 24.4661 7.55127 45.3077 7.55127C66.1492 7.55127 83.0641 24.4661 83.0641 45.3077ZM40.2483 15.5556C45.5342 24.3151 55.1243 30.2051 66.0737 30.2051C67.8105 30.2051 69.5095 30.0163 71.1331 29.752C65.8472 20.9926 56.257 15.1026 45.3077 15.1026C43.5709 15.1026 41.8718 15.2913 40.2483 15.5556ZM16.6883 35.7553C23.1447 32.0929 28.1285 26.1274 30.5072 18.9915C24.0508 22.6538 19.067 28.6193 16.6883 35.7553ZM75.5128 45.3077C75.5128 42.3627 75.0597 39.531 74.2669 36.8502C71.6239 37.4166 68.9054 37.7564 66.0737 37.7564C54.256 37.7564 43.7219 32.3195 36.7747 23.8243C32.8103 33.4899 24.9192 41.079 15.1026 44.7791C15.1403 44.9301 15.1026 45.1189 15.1026 45.3077C15.1026 61.9583 28.6571 75.5128 45.3077 75.5128C61.9583 75.5128 75.5128 61.9583 75.5128 45.3077Z" fill="#007DEB"/>
                             </svg>
                         </div>
                         <span className={classes.categoryLabel}>{i18n.t('Students')}</span>
@@ -636,8 +782,9 @@ const InspectionOverview: React.FC = () => {
                         aria-label={i18n.t('Facilities')}
                     >
                         <div className={classes.categoryIcon}>
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/>
+                            <svg className={classes.facilitiesLogo} width="124" height="124" viewBox="0 0 124 124" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="62" cy="62" r="62" fill="#F1F9FF"/>
+                                <path d="M43.1217 55.8397H35.5705V82.2691H43.1217V55.8397ZM65.7756 55.8397H58.2243V82.2691H65.7756V55.8397ZM97.8685 89.8204H26.1313V97.3717H97.8685V89.8204ZM88.4294 55.8397H80.8781V82.2691H88.4294V55.8397ZM61.9999 30.3918L81.671 40.7371H42.3288L61.9999 30.3918ZM61.9999 21.8589L26.1313 40.7371V48.2884H97.8685V40.7371L61.9999 21.8589Z" fill="#007DEB"/>
                             </svg>
                         </div>
                         <span className={classes.categoryLabel}>{i18n.t('Facilities')}</span>

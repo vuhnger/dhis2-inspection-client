@@ -1,3 +1,9 @@
+/* Remove borders from all input fields */
+.form :global(input),
+.form :global(textarea) {
+  border: none !important;
+}
+
 /* DHIS2 Mobile Design System Colors */
 :root {
   --dhis2-blue-900: #093371;
@@ -40,13 +46,13 @@
   display: flex;
   flex-direction: column;
   max-width: 100%;
-  background: var(--dhis2-grey-100);
+  background: #E2F2FF;
   min-height: 100vh;
   padding-bottom: 88px; /* Space for fixed navigation buttons */
 }
 
 .header {
-  background: var(--dhis2-blue-700);
+  background: #E2F2FF;
   padding: var(--dhis2-space-24) var(--dhis2-space-16);
   display: flex;
   flex-direction: column;
@@ -71,7 +77,7 @@
   margin: 0;
   font-size: 18px;
   font-weight: 400;
-  color: var(--dhis2-white);
+  color: #000000;
   line-height: 1.3;
 }
 
@@ -98,10 +104,10 @@
 
 .inspectionDate {
   margin: 0;
-  color: var(--dhis2-white);
+  color: #000000;
   font-size: 13px;
   line-height: 1.4;
-  opacity: 0.9;
+  opacity: 0.7;
 }
 
 .schoolInfoDropdown {
@@ -111,21 +117,67 @@
 .infoSelect {
   width: 100%;
   padding: var(--dhis2-space-12);
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.5);
+  border: none;
   border-radius: 4px;
-  color: var(--dhis2-white);
+  color: #000000;
   font-size: 14px;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='black' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   cursor: pointer;
 }
 
 .infoSelect:focus {
-  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline: 2px solid rgba(0, 0, 0, 0.3);
   outline-offset: 2px;
+}
+
+/* Level Section */
+.levelSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dhis2-space-12);
+  margin-bottom: var(--dhis2-space-16);
+}
+
+.levelCaption {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.levelButtons {
+  display: flex;
+  gap: var(--dhis2-space-12);
+}
+
+.levelButton {
+  width: 132px;
+  height: 40px;
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.levelButton:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.levelButton.levelButtonActive {
+  background: #1D2B36 !important;
+  color: #F1F9FF !important;
+  border: 1px solid #1D2B36 !important;
 }
 
 .categories {
@@ -158,12 +210,98 @@
   color: var(--dhis2-grey-700);
   transition: all 0.15s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Staff icon - Outlined style */
+.staffLogo {
+  position: absolute;
+  left: 12.5%;
+  right: 12.5%;
+  top: 8.33%;
+  bottom: 8.33%;
+  width: 75%;
+  height: 83.34%;
+}
+
+.staffLogo path {
+  fill: #007DEB;
+}
+
+.categoryButton.active .staffLogo path {
+  fill: #F1F9FF;
+}
+
+/* Resources icon - Outlined style */
+.resourcesLogo {
+  position: absolute;
+  left: 20.83%;
+  right: 20.83%;
+  top: 12.5%;
+  bottom: 12.5%;
+  width: 58.34%;
+  height: 75%;
+}
+
+.resourcesLogo path {
+  fill: #007DEB;
+}
+
+.categoryButton.active .resourcesLogo path {
+  fill: #F1F9FF;
+}
+
+/* Students icon - Outlined style */
+.studentsLogo {
+  position: absolute;
+  left: 20.83%;
+  right: 20.83%;
+  top: 12.5%;
+  bottom: 12.5%;
+  width: 58.34%;
+  height: 75%;
+}
+
+.studentsLogo path {
+  fill: #007DEB;
+}
+
+.categoryButton.active .studentsLogo path {
+  fill: #F1F9FF;
+}
+
+/* Facilities icon - Outlined style */
+.facilitiesLogo {
+  position: absolute;
+  left: 20.83%;
+  right: 20.83%;
+  top: 12.5%;
+  bottom: 12.5%;
+  width: 58.34%;
+  height: 75%;
+}
+
+.facilitiesLogo circle {
+  fill: var(--dhis2-white);
+}
+
+.facilitiesLogo path {
+  fill: #007DEB;
+}
+
+.categoryButton.active .facilitiesLogo circle {
+  fill: var(--dhis2-grey-900);
+}
+
+.categoryButton.active .facilitiesLogo path {
+  fill: #F1F9FF;
 }
 
 .categoryButton.active .categoryIcon {
   background: var(--dhis2-grey-900);
   color: var(--dhis2-white);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: scale(1.25);
 }
 
 .categoryButton:hover .categoryIcon {
@@ -183,13 +321,13 @@
 .categoryLabel {
   text-align: center;
   line-height: 1.3;
-  color: var(--dhis2-white);
+  color: #000000;
   font-size: 13px;
   font-weight: 500;
 }
 
 .form {
-  background: var(--dhis2-blue-700);
+  background: #E2F2FF;
   padding: var(--dhis2-space-24) var(--dhis2-space-16);
   display: flex;
   flex-direction: column;
@@ -217,14 +355,14 @@
 }
 
 .summaryCard {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 16px;
   padding: var(--dhis2-space-16);
   display: flex;
   flex-direction: column;
   gap: var(--dhis2-space-16);
-  color: var(--dhis2-white);
+  color: #000000;
 }
 
 .summaryHeader {
@@ -275,7 +413,7 @@
   gap: 4px;
   padding: var(--dhis2-space-8);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .summaryLabel {
@@ -290,11 +428,11 @@
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: var(--dhis2-white);
+  color: #000000;
 }
 
 .summaryNotes {
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
   padding-top: var(--dhis2-space-12);
 }
 
@@ -313,17 +451,24 @@
 }
 
 .counterLabel {
-  color: var(--dhis2-white);
+  color: #000000;
   font-size: 14px;
   font-weight: 500;
+}
+
+.errorText {
+  color: #d32f2f;
+  font-size: 12px;
+  margin-top: 4px;
 }
 
 .counterControl {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.1);
+  background: transparent;
   border-radius: 4px;
   overflow: hidden;
+  border: none;
 }
 
 .counterButton {
@@ -332,36 +477,37 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
+  background: #FFFFFF;
   border: none;
-  color: var(--dhis2-white);
+  color: #000000;
   font-size: 24px;
   cursor: pointer;
   transition: background 0.15s ease;
 }
 
 .counterButton:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .counterButton:active {
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .counterInput {
   flex: 1;
   height: 48px;
   text-align: center;
-  background: transparent;
+  background: #FFFFFF;
   border: none;
-  color: var(--dhis2-white);
+  outline: none;
+  color: #000000;
   font-size: 18px;
   font-weight: 500;
 }
 
 .counterInput:focus {
   outline: none;
-  background: rgba(255, 255, 255, 0.05);
+  background: #FFFFFF;
 }
 
 /* Remove spinner from number input */
@@ -379,7 +525,7 @@
 .testFieldSection {
   margin-top: var(--dhis2-space-16);
   padding-top: var(--dhis2-space-16);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   gap: var(--dhis2-space-12);
@@ -392,14 +538,14 @@
 }
 
 .testFieldLabel {
-  color: var(--dhis2-white);
+  color: #000000;
   font-size: 14px;
   font-weight: 500;
 }
 
 .testFieldBadge {
-  background: rgba(255, 255, 255, 0.2);
-  color: var(--dhis2-white);
+  background: rgba(0, 0, 0, 0.1);
+  color: #000000;
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 12px;
@@ -425,6 +571,7 @@
   display: flex;
   justify-content: space-between;
   gap: var(--dhis2-space-12);
+  background-color: #E2F2FF;
 }
 
 .navigationButtons button {
@@ -449,27 +596,34 @@
 
 .previousButton,
 .nextButton {
-  display: inline-flex;
-  align-items: center;
+  display: flex;
+  flex-direction: row;
   justify-content: center;
-  gap: var(--dhis2-space-8);
-  padding: 0 var(--dhis2-space-16);
-  min-height: 48px;
-  border-radius: 999px !important;
+  align-items: center;
+  padding: 10px 24px 10px 16px;
+  gap: 8px;
+  width: 168px;
+  height: 40px;
+  border-radius: 100px !important;
   border: none !important;
   box-shadow: none;
   transition: background 150ms ease, color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
   isolation: isolate;
+  font-family: 'Roboto', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.1px;
 }
 
 .previousButton {
-  background: #f1f9ff !important;
-  color: var(--dhis2-blue-700) !important;
-  box-shadow: 0 1px 2px rgba(9, 51, 113, 0.08);
+  background: #1D2B36 !important;
+  color: #F1F9FF !important;
 }
 
 .previousButton:hover {
-  background: #e2f2ff;
+  background: rgba(29, 43, 54, 0.9) !important;
 }
 
 .previousButton:active {
@@ -482,13 +636,12 @@
 }
 
 .summaryButton {
-  background: rgba(255, 255, 255, 0.15) !important;
-  color: var(--dhis2-white) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  background: #1D2B36 !important;
+  color: #F1F9FF !important;
 }
 
 .summaryButton:hover {
-  background: rgba(255, 255, 255, 0.25) !important;
+  background: rgba(29, 43, 54, 0.9) !important;
 }
 
 .summaryButton:active {
@@ -496,14 +649,12 @@
 }
 
 .nextButton {
-  background: #1d2b36 !important;
-  color: var(--dhis2-white) !important;
-  box-shadow: 0 6px 12px rgba(9, 51, 113, 0.2);
+  background: #1D2B36 !important;
+  color: #F1F9FF !important;
 }
 
 .nextButton:hover {
-  background: #151f27;
-  box-shadow: 0 8px 16px rgba(20, 36, 48, 0.4);
+  background: rgba(29, 43, 54, 0.9) !important;
 }
 
 .nextButton:active {
@@ -533,5 +684,6 @@
     box-shadow: none;
     max-width: 768px;
     margin: 0 auto;
+    background-color: ;
   }
 }
