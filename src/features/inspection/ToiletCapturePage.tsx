@@ -315,14 +315,14 @@ const ToiletCapturePage: React.FC<ToiletCapturePageProps> = ({
         }
 
         if (ratio <= LEARNER_TO_TOILET_MAX_RATIO) {
-            return i18n.t('Learner-to-toilet ratio {{ratio}} meets the < {{limit}} target.', {
+            return i18n.t('Learner-to-toilet ratio {{ratio}} meets the under {{limit}} target.', {
                 ratio,
                 limit: LEARNER_TO_TOILET_MAX_RATIO,
             })
         }
 
         return i18n.t(
-            'Learner-to-toilet ratio {{ratio}} is above the < {{limit}} target. Flag for follow-up.',
+            'Learner-to-toilet ratio {{ratio}} is above the under {{limit}} target. Flag for follow-up.',
             {
                 ratio,
                 limit: LEARNER_TO_TOILET_MAX_RATIO,

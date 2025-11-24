@@ -21,7 +21,7 @@
     max-width: 100vw;
     margin: 0;
     padding: 0;
-    background: #1260BA;
+    background: #F5F5F5;
     min-height: 100vh;
     font-family: 'Roboto', sans-serif;
     width: 100%;
@@ -164,6 +164,15 @@
     flex: none;
     order: 2;
     flex-grow: 1;
+    position: relative;
+}
+
+.searchWrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    position: relative;
 }
 
 .searchInput {
@@ -195,6 +204,46 @@
 
 .searchIcon {
     font-size: 1.2rem;
+}
+
+.searchDropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.searchResultItem {
+    padding: 16px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.searchResultItem:last-child {
+    border-bottom: none;
+}
+
+.searchResultItem:hover {
+    background-color: #f8fafc;
+}
+
+.searchResultSchool {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.searchResultDate {
+    font-size: 0.875rem;
+    color: #64748b;
 }
 
 /* Action Bar */
@@ -246,13 +295,13 @@
     font-size: 1.3rem;
     font-weight: 200;
     margin: 0;
-    color: #ffffff;
+    color: #000000;
     font-family: 'Roboto Mono', monospace;
 }
 
 .seeAllLink {
-    background: #1260BA;
-    color: #ffffff;
+    background: #F5F5F5;
+    color: #000000;
     border: none;
     border-radius: 8px;
     padding: 8px 16px;
@@ -266,7 +315,7 @@
 }
 
 .seeAllLink:hover {
-    background: #1260BA;
+    background: #E5E5E5;
 }
 
 .badge {
@@ -298,7 +347,18 @@
 
 .inspectionCard {
     padding: 20px;
-    background: white;
+    background: #E2F2FF;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.inspectionCardCompleted {
+    padding: 20px;
+    background: #DDDDDD;
     border-radius: 12px;
     display: flex;
     flex-direction: row;
@@ -319,7 +379,7 @@
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: #E2F2FF;
+    background: #F1F9FF;
     color: #1260BA;
     display: flex;
     align-items: center;

@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-24T15:45:56.196Z\n"
-"PO-Revision-Date: 2025-11-24T15:45:56.196Z\n"
+"POT-Creation-Date: 2025-11-24T18:23:01.994Z\n"
+"PO-Revision-Date: 2025-11-24T18:23:01.995Z\n"
 
 msgid "Syncing..."
 msgstr "Syncing..."
@@ -23,11 +23,26 @@ msgstr "Connect to sync"
 msgid "Synced"
 msgstr "Synced"
 
+msgid "Reset all local data"
+msgstr "Reset all local data"
+
 msgid "No upcoming inspections scheduled"
 msgstr "No upcoming inspections scheduled"
 
 msgid "No completed inspections yet"
 msgstr "No completed inspections yet"
+
+msgid "Reset Local Data?"
+msgstr "Reset Local Data?"
+
+msgid "This will permanently delete all inspections stored on this device."
+msgstr "This will permanently delete all inspections stored on this device."
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Reset Data"
+msgstr "Reset Data"
 
 msgid ""
 "We could not save the draft on this device. Copy your notes before "
@@ -63,15 +78,15 @@ msgstr "Accessible toilets cannot exceed total toilets"
 msgid "Add learner and working toilet counts to see the ratio"
 msgstr "Add learner and working toilet counts to see the ratio"
 
-msgid "Learner-to-toilet ratio {{ratio}} meets the < {{limit}} target."
-msgstr "Learner-to-toilet ratio {{ratio}} meets the < {{limit}} target."
+msgid "Learner-to-toilet ratio {{ratio}} meets the under {{limit}} target."
+msgstr "Learner-to-toilet ratio {{ratio}} meets the under {{limit}} target."
 
 msgid ""
-"Learner-to-toilet ratio {{ratio}} is above the < {{limit}} target. Flag for "
-"follow-up."
+"Learner-to-toilet ratio {{ratio}} is above the under {{limit}} target. Flag "
+"for follow-up."
 msgstr ""
-"Learner-to-toilet ratio {{ratio}} is above the < {{limit}} target. Flag for "
-"follow-up."
+"Learner-to-toilet ratio {{ratio}} is above the under {{limit}} target. Flag "
+"for follow-up."
 
 msgid "Toilet capture"
 msgstr "Toilet capture"
@@ -232,9 +247,6 @@ msgstr "End Time"
 msgid "Additional notes (optional)"
 msgstr "Additional notes (optional)"
 
-msgid "Cancel"
-msgstr "Cancel"
-
 msgid "Create Inspection"
 msgstr "Create Inspection"
 
@@ -286,17 +298,47 @@ msgstr "Additional notes on resources"
 msgid "Total Students"
 msgstr "Total Students"
 
+msgid "Decrease total students"
+msgstr "Decrease total students"
+
+msgid "Increase total students"
+msgstr "Increase total students"
+
 msgid "Male Students"
 msgstr "Male Students"
+
+msgid "Decrease male students"
+msgstr "Decrease male students"
+
+msgid "Increase male students"
+msgstr "Increase male students"
 
 msgid "Female Students"
 msgstr "Female Students"
 
+msgid "Decrease female students"
+msgstr "Decrease female students"
+
+msgid "Increase female students"
+msgstr "Increase female students"
+
 msgid "Total Staff Count"
 msgstr "Total Staff Count"
 
+msgid "Decrease staff count"
+msgstr "Decrease staff count"
+
+msgid "Increase staff count"
+msgstr "Increase staff count"
+
 msgid "Number of Classrooms"
 msgstr "Number of Classrooms"
+
+msgid "Decrease classroom count"
+msgstr "Decrease classroom count"
+
+msgid "Increase classroom count"
+msgstr "Increase classroom count"
 
 msgid "Inspection not found"
 msgstr "Inspection not found"

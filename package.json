@@ -14,12 +14,13 @@
   "dependencies": {
     "@dhis2/app-runtime": "^3.14.6",
     "@dhis2/ui": "^10.9.1",
+    "lucide-react": "^0.400.0",
     "react": "^18",
     "react-dom": "^18",
     "react-router-dom": "^7.9.5"
   },
   "devDependencies": {
-    "@dhis2/cli-app-scripts": "^12.8.0",
+    "@dhis2/cli-app-scripts": "^12.9.2",
     "@types/jest": "^29.5.12",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
