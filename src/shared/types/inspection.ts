@@ -5,6 +5,11 @@
 export type InspectionStatus = 'scheduled' | 'in_progress' | 'completed'
 export type SyncStatus = 'synced' | 'not_synced' | 'sync_failed'
 
+export interface OrgUnitCategory {
+    id: string
+    name: string
+}
+
 /**
  * Form data matching InspectionOverview form structure
  * Based on data-mappings.json - only includes fields that sync to DHIS2
@@ -27,6 +32,12 @@ export interface InspectionFormData {
     classroomCount: string
 }
 
+export interface CategoryFormData {
+    formData: InspectionFormData
+    syncStatus?: SyncStatus
+    dhis2EventId?: string
+}
+
 /**
  * Complete inspection record stored in IndexedDB
  */
@@ -37,6 +48,7 @@ export interface Inspection {
     // School/org unit information
     orgUnit: string
     orgUnitName: string
+    orgUnitCategories?: OrgUnitCategory[] // Org unit groups (LBE/UBE/ECD/Tertiary)
 
     // Scheduling information
     eventDate: string // ISO 8601 format
@@ -47,8 +59,13 @@ export interface Inspection {
     status: InspectionStatus
     syncStatus: SyncStatus
 
-    // Form data - all inspection fields
+    // Form data - backward compatibility (single form)
     formData: InspectionFormData
+
+    // Per-category forms (keyed by org unit group ID)
+    formDataByCategory?: Record<string, CategoryFormData>
+    categorySyncStatus?: Record<string, SyncStatus>
+    categoryEventIds?: Record<string, string>
 
     // Metadata
     createdAt: string // ISO 8601 format
