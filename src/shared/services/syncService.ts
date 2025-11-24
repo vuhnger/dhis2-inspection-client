@@ -5,6 +5,7 @@
 import { updateInspection, getInspectionsBySyncStatus } from '../db/indexedDB'
 
 import type { Inspection } from '../types/inspection'
+
 import type { DataEngine } from '@dhis2/app-runtime'
 
 const PROGRAM_UID = 'UxK2o06ScIe' // School Inspection program UID

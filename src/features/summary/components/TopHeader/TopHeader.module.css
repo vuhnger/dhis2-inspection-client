@@ -1,0 +1,232 @@
+.header {
+  background: #e6f3ff;
+  padding: 28px 28px 22px;
+  border-radius: 0 0 24px 24px;
+}
+
+/* Top row */
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+/* Title + icon + edit */
+.leftGroup {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.titleBlock {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+/* Circle gradient icon */
+.logoWrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #2563eb, #06b6d4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 18px rgba(37, 99, 235, 0.35);
+  flex-shrink: 0;
+}
+
+.logoWrapper img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.textBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+
+.headerTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.2px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  color: #111827;
+}
+
+.schoolName {
+  font-weight: 500;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  letter-spacing: -0.2px;
+}
+
+/* Date on next line, slightly indented look */
+.dateRow {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: #6b7280;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+
+.editButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid #111827;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #111827;
+  transition: 0.15s ease;
+}
+
+.editButton:hover {
+  background: rgba(0, 0, 0, 0.07);
+}
+
+.rightBlock {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.syncedChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: #c4f4d8;
+  font-size: 12px;
+  font-weight: 500;
+  color: #15803d;
+}
+
+.syncedDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: #22c55e;
+}
+
+.userAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  border: none;
+  background: #e0f2fe;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.tabRow {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-start;
+  gap: 14px;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+/* Base pill style */
+.tab {
+  min-width: 170px;
+  padding: 9px 22px;
+  border-radius: 9999px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  box-shadow: 0 4px 8px rgba(15, 23, 42, 0.05);
+}
+
+/* Icon + label inside tab */
+.tabInner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.tabIcon {
+  flex-shrink: 0;
+}
+
+
+/* Active = dark pill (Current inspection) */
+.tabActive {
+  background: #101827;
+  border-color: #101827;
+  color: #ffffff;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.35);
+}
+
+
+.editTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.titleInput {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.2px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  color: #111827;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 4px 8px;
+  background: #ffffff;
+  outline: none;
+}
+
+.titleInput:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
+}
+
+.dateInput {
+  margin-top: 4px;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 3px 8px;
+  background: #ffffff;
+  outline: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+
+.dateInput:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
+}
+
+/* Optional: make edit button darker when in edit mode */
+.editButtonActive {
+  background: #111827;
+  color: #ffffff;
+}
+
