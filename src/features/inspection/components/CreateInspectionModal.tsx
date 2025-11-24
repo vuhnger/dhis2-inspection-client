@@ -49,20 +49,40 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
         setSchoolsLoading(true)
         setSchoolsError(null)
         try {
-            // Fetch org units that are actually assigned to the inspection program,
-            // then filter to school groups + level/root on the client. The server
-            // does not respect `program=` filtering on /organisationUnits.
+            // Fetch org units assigned to the program and intersect with the user's capture hierarchy
             const programUrl = `${apiBase}/programs/${DHIS2_PROGRAM_UID}?fields=organisationUnits[id,displayName,name,path,level,organisationUnitGroups[id]]`
-            const res = await fetch(programUrl, {
-                headers: {
-                    Authorization: getAuthHeader(),
-                },
-                cache: 'no-store',
-            })
+            const meUrl = `${apiBase}/me?fields=organisationUnits[id,path],dataViewOrganisationUnits[id,path]`
+
+            const [res, meRes] = await Promise.all([
+                fetch(programUrl, {
+                    headers: {
+                        Authorization: getAuthHeader(),
+                    },
+                    cache: 'no-store',
+                }),
+                fetch(meUrl, {
+                    headers: {
+                        Authorization: getAuthHeader(),
+                    },
+                    cache: 'no-store',
+                }),
+            ])
 
             if (!res.ok) {
                 throw new Error(`${res.status} ${res.statusText}`)
             }
+
+            if (!meRes.ok) {
+                throw new Error(`User access check failed: ${meRes.status} ${meRes.statusText}`)
+            }
+
+            const meData = await meRes.json()
+            const userOuPaths: string[] = [
+                ...(meData?.organisationUnits || []),
+                ...(meData?.dataViewOrganisationUnits || []),
+            ]
+                .map((ou: any) => ou.path)
+                .filter(Boolean)
 
             const data = await res.json()
             const orgUnits = (data?.organisationUnits || []) as Array<{
@@ -83,11 +103,14 @@ export const CreateInspectionModal: React.FC<CreateInspectionModalProps> = ({
                 )
                 const meetsLevel = typeof ou.level === 'number' ? ou.level >= 4 : true
                 const underRoot = rootPrefix ? ou.path?.startsWith(rootPrefix) : true
-                return inSchoolGroup && meetsLevel && underRoot
+                const withinUserHierarchy = userOuPaths.length
+                    ? userOuPaths.some((prefix) => ou.path?.startsWith(prefix))
+                    : true
+                return inSchoolGroup && meetsLevel && underRoot && withinUserHierarchy
             })
 
             if (!list.length) {
-                throw new Error('No schools assigned to the School Inspection program')
+                throw new Error('No accessible schools assigned to the School Inspection program for your account')
             }
 
             setSchoolOptions(
