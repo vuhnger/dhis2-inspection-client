@@ -143,6 +143,42 @@
   margin-left: 0;
 }
 
+/* Home button with blue tonal styling */
+.homeButton {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0px;
+  gap: 8px;
+  isolation: isolate;
+  
+  width: 101px;
+  height: 40px;
+  
+  background: #F1F9FF;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  
+  font-size: 13px;
+  font-weight: 500;
+  color: #0369a1;
+  
+  transition: all 0.15s ease-in-out;
+  box-shadow: 0 2px 4px rgba(3, 105, 161, 0.1);
+}
+
+.homeButton:hover {
+  background: #e0f2fe;
+  box-shadow: 0 4px 8px rgba(3, 105, 161, 0.15);
+}
+
+.homeButton:active {
+  background: #dbeafe;
+  transform: translateY(1px);
+}
+
 /* Base pill style */
 .tab {
   min-width: 170px;

@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { Edit3, Check, FileText, RotateCcw } from "lucide-react";
+import { Edit3, Check, FileText, RotateCcw, Home } from "lucide-react";
 import styles from "./TopHeader.module.css";
 
 interface HeaderProps {
@@ -139,6 +139,16 @@ const TopHeader: React.FC<HeaderProps> = ({
 
       {/* TABS */}
       <div className={styles.tabRow}>
+        <button
+          type="button"
+          className={styles.homeButton}
+          onClick={() => navigate("/")}
+          aria-label="Go to home page"
+        >
+          <Home size={16} className={styles.tabIcon} />
+          <span>Home</span>
+        </button>
+
         <button
           type="button"
           className={`${styles.tab} ${

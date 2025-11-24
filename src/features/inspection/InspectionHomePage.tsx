@@ -200,8 +200,13 @@ const InspectionHomePage: React.FC = () => {
     const handleSearchResultClick = (inspection: any) => {
         setSearchQuery(inspection.orgUnitName)
         setShowDropdown(false)
-        // Navigate to inspection or scroll to it
-        navigate('/inspection/overview', { state: { inspection } })
+        
+        // Route to summary page if completed, otherwise to inspection page
+        if (inspection.status === 'completed') {
+            navigate(`/summary/${inspection.id}`)
+        } else {
+            navigate(`/inspection/${inspection.id}`)
+        }
     }
 
     return (
@@ -313,7 +318,7 @@ const InspectionHomePage: React.FC = () => {
                                     <div
                                         key={inspection.id || index}
                                         className={classes.searchResultItem}
-                                        onClick={() => handleSearchResultClick(inspection.id)}
+                                        onClick={() => handleSearchResultClick(inspection)}
                                     >
                                         <div className={classes.searchResultSchool}>
                                             {inspection.orgUnitName || 'School name not available'}
@@ -436,11 +441,11 @@ const InspectionHomePage: React.FC = () => {
                                 <div
                                     key={inspection.id}
                                     className={classes.inspectionCard}
-                                    onClick={() => navigate(`/inspection/${inspection.id}`)}
+                                    onClick={() => navigate(`/summary/${inspection.id}`)}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' || e.key === ' ') {
                                             e.preventDefault()
-                                            navigate(`/inspection/${inspection.id}`)
+                                            navigate(`/summary/${inspection.id}`)
                                         }
                                     }}
                                     role="button"
