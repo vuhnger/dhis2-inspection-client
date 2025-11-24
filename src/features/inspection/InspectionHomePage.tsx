@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { useInspections } from '../../shared/hooks/useInspections'
 import { useSync } from '../../shared/hooks/useSync'
 
-import { CreateInspectionModal } from './components/CreateInspectionModal'
+import { CreateInspectionBottomSheet } from './components/CreateInspectionBottomSheet'
 import classes from './InspectionHomePage.module.css'
 
 /**
@@ -59,6 +59,10 @@ const InspectionHomePage: React.FC = () => {
     const [isOnline, setIsOnline] = React.useState(navigator.onLine)
     const [searchQuery, setSearchQuery] = React.useState('')
     const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false)
+    const [searchResults, setSearchResults] = React.useState<any[]>([])
+    const [showDropdown, setShowDropdown] = React.useState(false)
+    const [showAllUpcoming, setShowAllUpcoming] = React.useState(false)
+    const [showAllCompleted, setShowAllCompleted] = React.useState(false)
     const canTriggerSync = isOnline && hasUnsynced && !isSyncing
 
     const syncBadgeColors = React.useMemo(() => {
@@ -155,6 +159,51 @@ const InspectionHomePage: React.FC = () => {
         })
     }
 
+    // Search functionality
+    const handleSearch = (query: string) => {
+        setSearchQuery(query)
+        
+        if (!query.trim()) {
+            setSearchResults([])
+            setShowDropdown(false)
+            return
+        }
+
+        const filtered = localInspections.filter(inspection => {
+            const searchTerm = query.toLowerCase().trim()
+            
+            // Search by school name
+            if (inspection.orgUnitName?.toLowerCase().includes(searchTerm)) {
+                return true
+            }
+            
+            // Search by date (formatted)
+            const formattedDate = formatDate(inspection.eventDate).toLowerCase()
+            if (formattedDate.includes(searchTerm)) {
+                return true
+            }
+            
+            // Search by month/year in event date
+            const eventDate = new Date(inspection.eventDate)
+            const monthYear = eventDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }).toLowerCase()
+            if (monthYear.includes(searchTerm)) {
+                return true
+            }
+            
+            return false
+        }).slice(0, 5) // Limit to first 5 results
+        
+        setSearchResults(filtered)
+        setShowDropdown(filtered.length > 0)
+    }
+
+    const handleSearchResultClick = (inspection: any) => {
+        setSearchQuery(inspection.orgUnitName)
+        setShowDropdown(false)
+        // Navigate to inspection or scroll to it
+        navigate('/inspection/overview', { state: { inspection } })
+    }
+
     return (
         <div className={classes.container}>
             {/* Dark Header */}
@@ -244,16 +293,39 @@ const InspectionHomePage: React.FC = () => {
 
                 {/* Search Bar */}
                 <div className={classes.searchContainer}>
-                    <input
-                        type="text"
-                        placeholder="Looking for an inspection?"
-                        className={classes.searchInput}
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    <button className={classes.searchButton}>
-                        <span className={classes.searchIcon}>🔍</span>
-                    </button>
+                    <div className={classes.searchWrapper}>
+                        <input
+                            type="text"
+                            placeholder="Search for school or date..."
+                            className={classes.searchInput}
+                            value={searchQuery}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value)
+                                handleSearch(e.target.value)
+                            }}
+                        />
+                        <button className={classes.searchButton}>
+                            <span className={classes.searchIcon}>🔍</span>
+                        </button>
+                        {searchQuery && searchResults.length > 0 && (
+                            <div className={classes.searchDropdown}>
+                                {searchResults.map((inspection, index) => (
+                                    <div
+                                        key={inspection.id || index}
+                                        className={classes.searchResultItem}
+                                        onClick={() => handleSearchResultClick(inspection.id)}
+                                    >
+                                        <div className={classes.searchResultSchool}>
+                                            {inspection.orgUnitName || 'School name not available'}
+                                        </div>
+                                        <div className={classes.searchResultDate}>
+                                            {formatDate(inspection.eventDate)}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </header>
 
@@ -263,8 +335,11 @@ const InspectionHomePage: React.FC = () => {
                 <section className={classes.section}>
                     <div className={classes.sectionHeader}>
                         <h2 className={classes.sectionTitle}>Upcoming inspections</h2>
-                        <button className={classes.seeAllLink}>
-                            See all upcoming inspections ▾
+                        <button 
+                            className={classes.seeAllLink}
+                            onClick={() => setShowAllUpcoming(!showAllUpcoming)}
+                        >
+                            {showAllUpcoming ? 'Show less ▴' : 'See all upcoming inspections ▾'}
                         </button>
                     </div>
 
@@ -281,7 +356,7 @@ const InspectionHomePage: React.FC = () => {
                     )}
 
                     <div className={classes.inspectionCards}>
-                        {upcomingInspections.slice(0, 3).map((inspection) => {
+                        {(showAllUpcoming ? upcomingInspections : upcomingInspections.slice(0, 3)).map((inspection) => {
                             const { days } = getDaysRelative(inspection.eventDate)
                             const isSynced = inspection.syncStatus === 'synced'
 
@@ -338,8 +413,11 @@ const InspectionHomePage: React.FC = () => {
                 <section className={classes.section}>
                     <div className={classes.sectionHeader}>
                         <h2 className={classes.sectionTitle}>Completed inspections</h2>
-                        <button className={classes.seeAllLink}>
-                            See all previous inspections ▾
+                        <button 
+                            className={classes.seeAllLink}
+                            onClick={() => setShowAllCompleted(!showAllCompleted)}
+                        >
+                            {showAllCompleted ? 'Show less ▴' : 'See all previous inspections ▾'}
                         </button>
                     </div>
 
@@ -350,7 +428,7 @@ const InspectionHomePage: React.FC = () => {
                     )}
 
                     <div className={classes.inspectionCards}>
-                        {finishedInspections.slice(0, 3).map((inspection) => {
+                        {(showAllCompleted ? finishedInspections : finishedInspections.slice(0, 3)).map((inspection) => {
                             const { days } = getDaysRelative(inspection.eventDate)
                             const isSynced = inspection.syncStatus === 'synced'
 
@@ -409,8 +487,8 @@ const InspectionHomePage: React.FC = () => {
                 <span className={classes.fabIcon}>+</span>
             </button>
 
-            {/* Create Inspection Modal */}
-            <CreateInspectionModal
+            {/* Create Inspection Bottom Sheet */}
+            <CreateInspectionBottomSheet
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onSuccess={async () => {
