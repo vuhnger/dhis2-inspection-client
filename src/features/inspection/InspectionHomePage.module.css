@@ -76,6 +76,28 @@
     gap: 12px;
 }
 
+.pullInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-size: 11px;
+    color: #6B7280;
+}
+
+.pullButton {
+    padding: 6px 10px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    background: #FFFFFF;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.pullButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .userAvatar {
     display: flex;
     align-items: center;

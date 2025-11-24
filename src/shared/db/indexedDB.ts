@@ -7,7 +7,7 @@ import type { Inspection, CreateInspectionInput, UpdateInspectionInput } from '.
 
 const DB_NAME = 'InspectionDB'
 // Current schema version. Only bump this number forward; lowering it causes IndexedDB VersionError
-const DB_VERSION = 3
+const DB_VERSION = 4
 const STORE_NAME = 'inspections'
 export const INSPECTIONS_CHANGED_EVENT = 'inspections:changed'
 
@@ -156,6 +156,7 @@ export async function createInspection(input: CreateInspectionInput): Promise<In
         formDataByCategory: input.formDataByCategory,
         categorySyncStatus: input.categorySyncStatus,
         categoryEventIds: input.categoryEventIds,
+        source: input.source || 'local',
     }
 
     return new Promise((resolve, reject) => {
@@ -170,6 +171,33 @@ export async function createInspection(input: CreateInspectionInput): Promise<In
 
         request.onerror = () => {
             reject(new Error('Failed to create inspection'))
+        }
+    })
+}
+
+/**
+ * Save or update an inspection with a provided ID (used for importing server data)
+ */
+export async function saveInspection(inspection: Inspection): Promise<Inspection> {
+    const db = await openDB()
+    const record: Inspection = {
+        ...inspection,
+        createdAt: inspection.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    }
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readwrite')
+        const objectStore = transaction.objectStore(STORE_NAME)
+        const request = objectStore.put(record)
+
+        request.onsuccess = () => {
+            resolve(record)
+            emitInspectionsChanged()
+        }
+
+        request.onerror = () => {
+            reject(new Error('Failed to save inspection'))
         }
     })
 }

@@ -3,35 +3,13 @@ import { CircularLoader, Modal, ModalTitle, ModalContent, ModalActions, ButtonSt
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { DHIS2_PROGRAM_UID } from '../../shared/config/dhis2'
 import { clearAllInspections } from '../../shared/db/indexedDB'
 import { useInspections } from '../../shared/hooks/useInspections'
 import { useSync } from '../../shared/hooks/useSync'
-import { getApiBase, getAuthHeader } from '../../shared/utils/auth'
+import { pullRemoteInspections } from '../../shared/services/pullService'
 
 import { CreateInspectionBottomSheet } from './components/CreateInspectionBottomSheet'
 import classes from './InspectionHomePage.module.css'
-
-/**
- * Inspection event from DHIS2 tracker API
- */
-interface InspectionEvent {
-    event: string
-    orgUnit: string
-    orgUnitName: string
-    occurredAt: string
-    status: 'COMPLETED' | 'ACTIVE' | 'SCHEDULE'
-    dataValues: Array<{
-        dataElement: string
-        value: string | number
-    }>
-}
-
-interface EventsQueryResult {
-    events: {
-        instances: InspectionEvent[]
-    }
-}
 
 /**
  * Home page showing upcoming and completed school inspections
@@ -39,8 +17,6 @@ interface EventsQueryResult {
  */
 const InspectionHomePage: React.FC = () => {
     const navigate = useNavigate()
-    const apiBase = React.useMemo(() => getApiBase(), [])
-    const [remoteEvents, setRemoteEvents] = React.useState<InspectionEvent[]>([])
     const [remoteLoading, setRemoteLoading] = React.useState(false)
     const [remoteError, setRemoteError] = React.useState<string | null>(null)
     const { inspections: localInspections, loading: localLoading, refetch: refetchInspections } = useInspections()
@@ -50,6 +26,8 @@ const InspectionHomePage: React.FC = () => {
     const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false)
     const [isConfirmClearOpen, setIsConfirmClearOpen] = React.useState(false)
     const [isClearing, setIsClearing] = React.useState(false)
+    const [lastPullError, setLastPullError] = React.useState<string | null>(null)
+    const [lastPulledAt, setLastPulledAt] = React.useState<Date | null>(null)
     const [searchResults, setSearchResults] = React.useState<any[]>([])
     const [showDropdown, setShowDropdown] = React.useState(false)
     const [showAllUpcoming, setShowAllUpcoming] = React.useState(false)
@@ -107,50 +85,37 @@ const InspectionHomePage: React.FC = () => {
         })
     }, [localInspections, checkUnsyncedStatus])
 
-    // Load DHIS2 events once per mount (or when online changes to true)
+    // Pull DHIS2 events and store locally
+    const pullRemote = React.useCallback(async () => {
+        if (!isOnline) {
+            return
+        }
+        setRemoteLoading(true)
+        setRemoteError(null)
+        try {
+            const result = await pullRemoteInspections(200)
+            console.log('Pulled remote inspections:', result)
+            setLastPullError(null)
+            setLastPulledAt(new Date())
+            await refetchInspections()
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Unknown error'
+            console.error('Failed to pull remote inspections', err)
+            setRemoteError(message)
+            setLastPullError(message)
+        } finally {
+            setRemoteLoading(false)
+        }
+    }, [isOnline, refetchInspections])
+
     React.useEffect(() => {
-        let cancelled = false
-        const fetchEvents = async () => {
-            if (!isOnline) {
-                return
-            }
-            setRemoteLoading(true)
-            setRemoteError(null)
-            try {
-                const params = new URLSearchParams()
-                params.set('program', DHIS2_PROGRAM_UID)
-                params.set('fields', 'event,orgUnit,orgUnitName,occurredAt,status,dataValues[dataElement,value]')
-                params.set('order', 'occurredAt:desc')
-                params.set('pageSize', '50')
-                const url = `${apiBase}/tracker/events?${params.toString()}`
-                const res = await fetch(url, {
-                    headers: {
-                        Authorization: getAuthHeader(),
-                    },
-                })
-                if (!res.ok) {
-                    throw new Error(`${res.status} ${res.statusText}`)
-                }
-                const data = (await res.json()) as EventsQueryResult
-                if (!cancelled) {
-                    setRemoteEvents(data?.events?.instances || [])
-                }
-            } catch (err) {
-                if (!cancelled) {
-                    setRemoteError(err instanceof Error ? err.message : 'Unknown error')
-                    setRemoteEvents([])
-                }
-            } finally {
-                if (!cancelled) {
-                    setRemoteLoading(false)
-                }
-            }
-        }
-        fetchEvents()
-        return () => {
-            cancelled = true
-        }
-    }, [apiBase, isOnline])
+        pullRemote()
+    }, [pullRemote])
+
+    React.useEffect(() => {
+        if (!isOnline) return
+        pullRemote()
+    }, [isOnline, pullRemote])
 
     // Parse local inspections and DHIS2 events into upcoming vs finished
     const { upcomingInspections, finishedInspections } = React.useMemo(() => {
@@ -165,7 +130,7 @@ const InspectionHomePage: React.FC = () => {
             eventDate: inspection.eventDate,
             status: inspection.status,
             syncStatus: inspection.syncStatus,
-            isLocal: true,
+            source: inspection.source || 'local',
         }))
 
         // Separate upcoming and finished based on status and date
@@ -273,6 +238,13 @@ const InspectionHomePage: React.FC = () => {
         }
     }
 
+    const lastPulledLabel = React.useMemo(() => {
+        if (lastPulledAt) {
+            return `${lastPulledAt.toLocaleDateString()} ${lastPulledAt.toLocaleTimeString()}`
+        }
+        return i18n.t('Never pulled')
+    }, [lastPulledAt])
+
     return (
         <div className={classes.container}>
             {/* Dark Header */}
@@ -355,6 +327,20 @@ const InspectionHomePage: React.FC = () => {
                                     <span>{i18n.t('Synced')}</span>
                                 </>
                             )}
+                        </div>
+                        <div className={classes.pullInfo}>
+                            <button
+                                className={classes.pullButton}
+                                onClick={pullRemote}
+                                disabled={remoteLoading || !isOnline}
+                            >
+                                {remoteLoading ? i18n.t('Pulling...') : i18n.t('Refresh from server')}
+                            </button>
+                            <small>
+                                {remoteError
+                                    ? i18n.t('Pull failed: {{error}}', { error: remoteError })
+                                    : i18n.t('Last pull: {{time}}', { time: lastPulledLabel })}
+                            </small>
                         </div>
                         <button
                             className={classes.clearDataButton}
@@ -446,6 +432,7 @@ const InspectionHomePage: React.FC = () => {
                         {(showAllUpcoming ? upcomingInspections : upcomingInspections.slice(0, 3)).map((inspection) => {
                             const { days } = getDaysRelative(inspection.eventDate)
                             const isSynced = inspection.syncStatus === 'synced'
+                            const isServer = inspection.source === 'server'
 
                             return (
                                 <div
@@ -482,6 +469,11 @@ const InspectionHomePage: React.FC = () => {
                                                     {isSynced ? '✓' : '•'}
                                                 </span>
                                                 {isSynced ? i18n.t('Synced') : i18n.t('Not synced')}
+                                                {isServer ? (
+                                                    <span style={{ fontSize: '0.7rem', marginLeft: 6 }}>
+                                                        {i18n.t('From server')}
+                                                    </span>
+                                                ) : null}
                                             </div>
                                         </div>
                                     </div>
@@ -518,6 +510,7 @@ const InspectionHomePage: React.FC = () => {
                         {(showAllCompleted ? finishedInspections : finishedInspections.slice(0, 3)).map((inspection) => {
                             const { days } = getDaysRelative(inspection.eventDate)
                             const isSynced = inspection.syncStatus === 'synced'
+                            const isServer = inspection.source === 'server'
 
                             return (
                                 <div
@@ -554,6 +547,11 @@ const InspectionHomePage: React.FC = () => {
                                                     {isSynced ? '✓' : '•'}
                                                 </span>
                                                 {isSynced ? i18n.t('Synced') : i18n.t('Not synced')}
+                                                {isServer ? (
+                                                    <span style={{ fontSize: '0.7rem', marginLeft: 6 }}>
+                                                        {i18n.t('From server')}
+                                                    </span>
+                                                ) : null}
                                             </div>
                                         </div>
                                     </div>
