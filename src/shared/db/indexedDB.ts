@@ -7,7 +7,7 @@ import type { Inspection, CreateInspectionInput, UpdateInspectionInput } from '.
 
 const DB_NAME = 'InspectionDB'
 // Current schema version. Only bump this number forward; lowering it causes IndexedDB VersionError
-const DB_VERSION = 2
+const DB_VERSION = 3
 const STORE_NAME = 'inspections'
 export const INSPECTIONS_CHANGED_EVENT = 'inspections:changed'
 
@@ -152,6 +152,10 @@ export async function createInspection(input: CreateInspectionInput): Promise<In
         createdAt: now,
         updatedAt: now,
         syncStatus: 'not_synced',
+        // Ensure per-category maps exist when provided
+        formDataByCategory: input.formDataByCategory,
+        categorySyncStatus: input.categorySyncStatus,
+        categoryEventIds: input.categoryEventIds,
     }
 
     return new Promise((resolve, reject) => {

@@ -5,10 +5,19 @@ import { useParams, useNavigate } from 'react-router-dom'
 
 import { useInspection } from '../../../shared/hooks/useInspections'
 import { useSync } from '../../../shared/hooks/useSync'
+import { getApiBase, getAuthHeader } from '../../../shared/utils/auth'
+import type { SyncStatus } from '../../../shared/types/inspection'
 
 import classes from './InspectionOverview.module.css'
 
 type Category = 'resources' | 'staff' | 'students' | 'facilities'
+// Only treat these org unit group IDs as pedagogical categories
+const ALLOWED_CATEGORY_GROUP_IDS = new Set([
+    'ib40OsG9QAI', // LBE
+    'SPCm0Ts3SLR', // UBE
+    'sSgWDKuCrmi', // ECD
+    'UzSEGuwAfyX', // Tertiary
+])
 
 // Category metadata
 const CATEGORY_ORDER: Category[] = ['staff', 'resources', 'students', 'facilities']
@@ -59,6 +68,8 @@ const DEFAULT_FORM: FormState = {
     testFieldNotes: '',
 }
 
+type CategoryMeta = { id: string; name: string }
+
 const InspectionOverview: React.FC = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
@@ -66,19 +77,103 @@ const InspectionOverview: React.FC = () => {
     const { isSyncing, triggerSync, syncError } = useSync()
 
     const [selectedCategory, setSelectedCategory] = React.useState<Category>('staff')
-    const [selectedLevel, setSelectedLevel] = React.useState<'LBE' | 'SSE' | 'UBE'>('LBE')
-    const [form, setForm] = React.useState<FormState>(DEFAULT_FORM)
-    const [errors, setErrors] = React.useState<Partial<Record<keyof FormState, string>>>({})
+    const [schoolCategories, setSchoolCategories] = React.useState<CategoryMeta[]>([])
+    const [activeCategoryId, setActiveCategoryId] = React.useState<string>('default')
+    const [categoryForms, setCategoryForms] = React.useState<Record<string, FormState>>({
+        default: DEFAULT_FORM,
+    })
+    const [categoryErrors, setCategoryErrors] = React.useState<
+        Record<string, Partial<Record<keyof FormState, string>>>
+    >({})
     const [wasSubmitted, setWasSubmitted] = React.useState(false)
     const [showSummary, setShowSummary] = React.useState(false)
     const [isOnline, setIsOnline] = React.useState(navigator.onLine)
 
     // Load form data from inspection when available
+    // Hydrate category forms from inspection data + fetched categories
     React.useEffect(() => {
-        if (inspection?.formData) {
-            setForm(inspection.formData)
+        if (!inspection) {
+            return
         }
-    }, [inspection])
+
+        const fetchedCategories =
+            schoolCategories.length > 0
+                ? schoolCategories
+                : (inspection.orgUnitCategories || []).filter((c) =>
+                      ALLOWED_CATEGORY_GROUP_IDS.has(c.id)
+                  )
+
+        const categoryList =
+            fetchedCategories.length > 0
+                ? fetchedCategories
+                : [{ id: 'default', name: i18n.t('School type') }]
+
+        // Build form map with fallbacks
+        setCategoryForms((prev) => {
+            const next: Record<string, FormState> = {}
+            const sourceMap = inspection.formDataByCategory || {}
+            const fallbackForm = inspection.formData || DEFAULT_FORM
+
+            categoryList.forEach((cat) => {
+                next[cat.id] =
+                    prev[cat.id] ||
+                    sourceMap[cat.id]?.formData ||
+                    // If only a single category and we have legacy formData, reuse it
+                    (categoryList.length === 1 ? fallbackForm : DEFAULT_FORM)
+            })
+
+            return next
+        })
+
+        // Sync categories back to the inspection record for future loads
+        if (fetchedCategories.length && (!inspection.orgUnitCategories || inspection.orgUnitCategories.length === 0)) {
+            updateInspection({ orgUnitCategories: fetchedCategories }).catch((err) => {
+                console.warn('Unable to persist org unit categories on inspection', err)
+            })
+        }
+
+        // Ensure we have an active category
+        setActiveCategoryId((prev) => {
+            const exists = categoryList.some((c) => c.id === prev)
+            return exists ? prev : categoryList[0].id
+        })
+    }, [inspection, schoolCategories, updateInspection])
+
+    // Load school categories (org unit groups)
+    React.useEffect(() => {
+        const fetchCategories = async () => {
+            if (!inspection?.orgUnit) {
+                setSchoolCategories([])
+                return
+            }
+            try {
+                const apiBase = getApiBase()
+                const res = await fetch(
+                    `${apiBase}/organisationUnits/${inspection.orgUnit}?fields=organisationUnitGroups[id,name,displayName]`,
+                    {
+                        headers: {
+                            Authorization: getAuthHeader(),
+                        },
+                    }
+                )
+                if (!res.ok) {
+                    throw new Error(`${res.status} ${res.statusText}`)
+                }
+                const data = await res.json()
+                const categories = (data?.organisationUnitGroups || [])
+                    .filter((g: any) => ALLOWED_CATEGORY_GROUP_IDS.has(g.id))
+                    .map((g: any) => ({
+                        id: g.id,
+                        name: g.displayName || g.name,
+                    }))
+                setSchoolCategories(categories)
+            } catch (error) {
+                console.warn('Unable to fetch school categories', error)
+                setSchoolCategories([])
+            }
+        }
+        fetchCategories()
+    }, [inspection?.orgUnit])
 
     // Track online/offline status
     React.useEffect(() => {
@@ -111,6 +206,12 @@ const InspectionOverview: React.FC = () => {
         [inspectionDate]
     )
     const isSynced = inspection?.syncStatus === 'synced'
+
+    const categoryList =
+        (schoolCategories.length
+            ? schoolCategories
+            : (inspection?.orgUnitCategories || []).filter((c) => ALLOWED_CATEGORY_GROUP_IDS.has(c.id))) ||
+        [{ id: 'default', name: i18n.t('School type') }]
 
     const validateCategory = React.useCallback((category: Category, state: FormState) => {
         const nextErrors: Partial<Record<keyof FormState, string>> = {}
@@ -187,29 +288,72 @@ const InspectionOverview: React.FC = () => {
         return allErrors
     }, [validateCategory])
 
-    const updateForm = React.useCallback((updater: (prev: FormState) => FormState) => {
-        setForm(prev => {
-            const next = updater(prev)
-            setErrors(validateAll(next))
+    const computeSyncStatus = React.useCallback((statusMap: Record<string, string> | undefined): SyncStatus => {
+        if (!statusMap || Object.keys(statusMap).length === 0) {
+            return 'not_synced'
+        }
+        const statuses = Object.values(statusMap)
+        if (statuses.includes('sync_failed')) return 'sync_failed'
+        if (statuses.includes('not_synced')) return 'not_synced'
+        return 'synced'
+    }, [])
 
-            // Auto-save to database on form changes
-            if (inspection) {
-                updateInspection({
-                    formData: next,
-                    status: 'in_progress',
-                    syncStatus: 'not_synced',
-                }).catch(error => {
-                    console.error('Auto-save failed:', error)
-                })
-            }
+    const updateForm = React.useCallback(
+        (updater: (prev: FormState) => FormState) => {
+            const categoryId = activeCategoryId
+            setCategoryForms((prev) => {
+                const prevForm = prev[categoryId] || DEFAULT_FORM
+                const nextForm = updater(prevForm)
+                const nextForms = { ...prev, [categoryId]: nextForm }
 
-            return next
-        })
-    }, [validateAll, inspection, updateInspection])
+                // Update validation for the active category
+                setCategoryErrors((prevErrors) => ({
+                    ...prevErrors,
+                    [categoryId]: validateAll(nextForm),
+                }))
+
+                // Auto-save to database on form changes
+                if (inspection) {
+                    const formDataByCategory: Record<
+                        string,
+                        { formData: FormState; dhis2EventId?: string; syncStatus?: SyncStatus }
+                    > = {}
+                    const categorySyncStatus: Record<string, SyncStatus> = {
+                        ...(inspection.categorySyncStatus || {}),
+                    }
+
+                    Object.entries(nextForms).forEach(([catId, formState]) => {
+                        const existing = inspection.formDataByCategory?.[catId]
+                        formDataByCategory[catId] = {
+                            formData: formState,
+                            dhis2EventId:
+                                inspection.categoryEventIds?.[catId] || existing?.dhis2EventId,
+                            syncStatus: catId === categoryId ? 'not_synced' : existing?.syncStatus,
+                        }
+                        categorySyncStatus[catId] =
+                            catId === categoryId ? 'not_synced' : existing?.syncStatus || 'synced'
+                    })
+
+                    updateInspection({
+                        formData: nextForm,
+                        formDataByCategory,
+                        categorySyncStatus,
+                        status: 'in_progress',
+                        syncStatus: computeSyncStatus(categorySyncStatus),
+                    }).catch((error) => {
+                        console.error('Auto-save failed:', error)
+                    })
+                }
+
+                return nextForms
+            })
+        },
+        [activeCategoryId, computeSyncStatus, inspection, updateInspection, validateAll]
+    )
 
     const handleFieldChange = (field: keyof FormState) =>
         ({ value }: { value?: string }) => {
-            updateForm(prev => ({
+            updateForm((prev) => ({
                 ...prev,
                 [field]: value ?? '',
             }))
@@ -228,17 +372,22 @@ const InspectionOverview: React.FC = () => {
         return Object.keys(categoryErrors).length === 0
     }, [validateCategory])
 
-    const currentCategoryValid = React.useMemo(
-        () => isCategoryComplete(selectedCategory, form),
-        [form, selectedCategory, isCategoryComplete]
-    )
+    const currentCategoryValid = React.useMemo(() => {
+        const form = categoryForms[activeCategoryId] || DEFAULT_FORM
+        return isCategoryComplete(selectedCategory, form)
+    }, [activeCategoryId, categoryForms, isCategoryComplete, selectedCategory])
 
     // Check if all categories are complete
-    const allCategoriesComplete = React.useMemo(() => {
-        const categories: Category[] = ['resources', 'students', 'staff', 'facilities']
-        return categories.every(category => isCategoryComplete(category, form))
-    }, [form, isCategoryComplete])
-    const submitDisabled = !allCategoriesComplete
+    const allFormsComplete = React.useMemo(() => {
+        const categoriesList: Category[] = ['resources', 'students', 'staff', 'facilities']
+        return (
+            categoryList.every((cat) => {
+                const form = categoryForms[cat.id] || DEFAULT_FORM
+                return categoriesList.every((category) => isCategoryComplete(category, form))
+            }) && categoryList.length > 0
+        )
+    }, [categoryForms, categoryList, isCategoryComplete])
+    const submitDisabled = !allFormsComplete
     const currentCategoryIndex = CATEGORY_ORDER.indexOf(selectedCategory)
     const previousCategory = currentCategoryIndex > 0 ? CATEGORY_ORDER[currentCategoryIndex - 1] : null
     const nextCategory = currentCategoryIndex < CATEGORY_ORDER.length - 1 ? CATEGORY_ORDER[currentCategoryIndex + 1] : null
@@ -250,13 +399,14 @@ const InspectionOverview: React.FC = () => {
     }, [nextCategory])
 
     const ensureCurrentCategoryValid = React.useCallback(() => {
-        const categoryErrors = validateCategory(selectedCategory, form)
-        if (Object.keys(categoryErrors).length > 0) {
-            setErrors(prev => ({ ...prev, ...categoryErrors }))
+        const form = categoryForms[activeCategoryId] || DEFAULT_FORM
+        const nextErrors = validateCategory(selectedCategory, form)
+        if (Object.keys(nextErrors).length > 0) {
+            setCategoryErrors((prev) => ({ ...prev, [activeCategoryId]: nextErrors }))
             return false
         }
         return true
-    }, [form, selectedCategory, validateCategory])
+    }, [activeCategoryId, categoryForms, selectedCategory, validateCategory])
 
     const handleCategorySelect = React.useCallback((category: Category) => {
         if (category === selectedCategory) {
@@ -282,28 +432,70 @@ const InspectionOverview: React.FC = () => {
         setShowSummary(prev => !prev)
     }, [])
 
+    const form = categoryForms[activeCategoryId] || DEFAULT_FORM
+    const errors = categoryErrors[activeCategoryId] || {}
+    const submissionSucceeded =
+        wasSubmitted && Object.values(categoryErrors).every((e) => Object.keys(e || {}).length === 0)
+
     const handleSubmit = async () => {
-        const validationErrors = validateAll(form)
-        setErrors(validationErrors)
+        const nextErrors: Record<string, Partial<Record<keyof FormState, string>>> = {}
+        let hasErrors = false
+
+        categoryList.forEach((cat) => {
+            const form = categoryForms[cat.id] || DEFAULT_FORM
+            const errors = validateAll(form)
+            if (Object.keys(errors).length > 0) {
+                hasErrors = true
+            }
+            nextErrors[cat.id] = errors
+        })
+
+        setCategoryErrors(nextErrors)
         setWasSubmitted(true)
 
-        if (Object.keys(validationErrors).length === 0) {
-            try {
-                // Save form data to the inspection
-                await updateInspection({
-                    formData: form,
-                    status: 'completed',
-                    syncStatus: 'not_synced', // Mark as not synced until pushed to DHIS2
-                })
-                console.log('Form submitted successfully and saved to local database')
+        if (hasErrors) {
+            return
+        }
 
-                // Redirect to home page after successful submission
-                setTimeout(() => {
-                    navigate('/')
-                }, 1500) // Give user time to see success message
-            } catch (error) {
-                console.error('Failed to save inspection:', error)
-            }
+        try {
+            const formDataByCategory: Record<
+                string,
+                { formData: FormState; dhis2EventId?: string; syncStatus?: SyncStatus }
+            > = {}
+            const categorySyncStatus: Record<string, SyncStatus> = {}
+
+            categoryList.forEach((cat) => {
+                const form = categoryForms[cat.id] || DEFAULT_FORM
+                const existing = inspection?.formDataByCategory?.[cat.id]
+                const existingEvent = inspection?.categoryEventIds?.[cat.id] || existing?.dhis2EventId
+
+                formDataByCategory[cat.id] = {
+                    formData: form,
+                    dhis2EventId: existingEvent,
+                    syncStatus: 'not_synced',
+                }
+                categorySyncStatus[cat.id] = 'not_synced'
+
+            })
+
+            const firstForm = categoryForms[categoryList[0]?.id] || DEFAULT_FORM
+
+            await updateInspection({
+                formData: firstForm,
+                formDataByCategory,
+                categorySyncStatus,
+                orgUnitCategories: categoryList,
+                status: 'completed',
+                syncStatus: computeSyncStatus(categorySyncStatus), // Mark as not synced until pushed to DHIS2
+            })
+            console.log('Form submitted successfully and saved to local database')
+
+            // Redirect to home page after successful submission
+            setTimeout(() => {
+                navigate('/')
+            }, 1500) // Give user time to see success message
+        } catch (error) {
+            console.error('Failed to save inspection:', error)
         }
     }
 
@@ -354,7 +546,7 @@ const InspectionOverview: React.FC = () => {
                     <div className={classes.formFields}>
                         {/* Textbooks Counter */}
                         <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Textbooks')} {selectedLevel}</label>
+                            <label className={classes.counterLabel}>{i18n.t('Textbooks')}</label>
                             <div className={classes.counterControl}>
                                 <button
                                     type="button"
@@ -384,7 +576,7 @@ const InspectionOverview: React.FC = () => {
 
                         {/* Chairs Counter */}
                         <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Chairs')} {selectedLevel}</label>
+                            <label className={classes.counterLabel}>{i18n.t('Chairs')}</label>
                             <div className={classes.counterControl}>
                                 <button
                                     type="button"
@@ -435,7 +627,7 @@ const InspectionOverview: React.FC = () => {
                     <div className={classes.formFields}>
                         {/* Total Students Counter */}
                         <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Total Students')} {selectedLevel}</label>
+                            <label className={classes.counterLabel}>{i18n.t('Total Students')}</label>
                             <div className={classes.counterControl}>
                                 <button
                                     type="button"
@@ -468,7 +660,7 @@ const InspectionOverview: React.FC = () => {
 
                         {/* Male Students Counter */}
                         <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Male Students')} {selectedLevel}</label>
+                            <label className={classes.counterLabel}>{i18n.t('Male Students')}</label>
                             <div className={classes.counterControl}>
                                 <button
                                     type="button"
@@ -501,7 +693,7 @@ const InspectionOverview: React.FC = () => {
 
                         {/* Female Students Counter */}
                         <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Female Students')} {selectedLevel}</label>
+                            <label className={classes.counterLabel}>{i18n.t('Female Students')}</label>
                             <div className={classes.counterControl}>
                                 <button
                                     type="button"
@@ -539,7 +731,7 @@ const InspectionOverview: React.FC = () => {
                     <div className={classes.formFields}>
                         {/* Staff Count Counter */}
                         <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Total Staff Count')} {selectedLevel}</label>
+                            <label className={classes.counterLabel}>{i18n.t('Total Staff Count')}</label>
                             <div className={classes.counterControl}>
                                 <button
                                     type="button"
@@ -577,7 +769,7 @@ const InspectionOverview: React.FC = () => {
                     <div className={classes.formFields}>
                         {/* Classroom Count Counter */}
                         <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Number of Classrooms')} {selectedLevel}</label>
+                            <label className={classes.counterLabel}>{i18n.t('Number of Classrooms')}</label>
                             <div className={classes.counterControl}>
                                 <button
                                     type="button"
@@ -634,7 +826,6 @@ const InspectionOverview: React.FC = () => {
         )
     }
 
-    const submissionSucceeded = wasSubmitted && Object.keys(errors).length === 0
     const summaryButton = (
         <Button
             className={`${classes.previousButton} ${classes.summaryButton}`}
@@ -694,36 +885,19 @@ const InspectionOverview: React.FC = () => {
                 </div>
 
                 <div className={classes.schoolInfoDropdown}>
-                    <select className={classes.infoSelect}>
-                        <option>{i18n.t('Information about the school')}</option>
-                    </select>
-                </div>
-
-                {/* Level Selection */}
-                <div className={classes.levelSection}>
-                    <h3 className={classes.levelCaption}>Level</h3>
-                    <div className={classes.levelButtons}>
-                        <button
-                            type="button"
-                            className={`${classes.levelButton} ${selectedLevel === 'LBE' ? classes.levelButtonActive : ''}`}
-                            onClick={() => setSelectedLevel('LBE')}
-                        >
-                            LBE
-                        </button>
-                        <button
-                            type="button"
-                            className={`${classes.levelButton} ${selectedLevel === 'SSE' ? classes.levelButtonActive : ''}`}
-                            onClick={() => setSelectedLevel('SSE')}
-                        >
-                            SSE
-                        </button>
-                        <button
-                            type="button"
-                            className={`${classes.levelButton} ${selectedLevel === 'UBE' ? classes.levelButtonActive : ''}`}
-                            onClick={() => setSelectedLevel('UBE')}
-                        >
-                            UBE
-                        </button>
+                    <div className={classes.infoPillGroup} aria-label={i18n.t('School type')}>
+                        {categoryList.map((cat) => (
+                            <button
+                                key={cat.id}
+                                type="button"
+                                className={`${classes.infoPill} ${
+                                    cat.id === activeCategoryId ? classes.infoPillActive : ''
+                                }`}
+                                onClick={() => setActiveCategoryId(cat.id)}
+                            >
+                                {cat.name}
+                            </button>
+                        ))}
                     </div>
                 </div>
 

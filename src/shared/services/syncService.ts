@@ -6,7 +6,7 @@ import { updateInspection, getInspectionsBySyncStatus, getAllInspections } from 
 import { DHIS2_PROGRAM_STAGE_UID, DHIS2_PROGRAM_UID } from '../config/dhis2'
 import { getAuthHeader, getApiBase } from '../utils/auth'
 
-import type { Inspection } from '../types/inspection'
+import type { Inspection, InspectionFormData, SyncStatus } from '../types/inspection'
 
 // Define the engine type based on useDataEngine return type
 type DataEngine = {
@@ -38,11 +38,14 @@ const DATA_ELEMENT_MAP = {
 /**
  * Convert local inspection to DHIS2 event payload
  */
-function inspectionToDHIS2Event(inspection: Inspection) {
+function inspectionToDHIS2Event(
+    inspection: Inspection,
+    options?: { formDataOverride?: InspectionFormData; dhis2EventIdOverride?: string; categoryLabel?: string }
+) {
     const dataValues = []
 
     // Add data values from form data
-    const formData = inspection.formData
+    const formData = options?.formDataOverride || inspection.formData
 
     // Textbooks
     if (formData.textbooks !== 0 && DATA_ELEMENT_MAP.textbooks) {
@@ -104,10 +107,13 @@ function inspectionToDHIS2Event(inspection: Inspection) {
     }
 
     // Notes
-    if (formData.testFieldNotes && DATA_ELEMENT_MAP.testFieldNotes) {
+    const notesValue = options?.categoryLabel
+        ? `${options.categoryLabel}${formData.testFieldNotes ? ` - ${formData.testFieldNotes}` : ''}`
+        : formData.testFieldNotes
+    if (notesValue && DATA_ELEMENT_MAP.testFieldNotes) {
         dataValues.push({
             dataElement: DATA_ELEMENT_MAP.testFieldNotes,
-            value: formData.testFieldNotes,
+            value: notesValue,
         })
     }
 
@@ -129,8 +135,9 @@ function inspectionToDHIS2Event(inspection: Inspection) {
         dataValues,
     }
 
-    if (inspection.dhis2EventId) {
-        payload.event = inspection.dhis2EventId
+    const eventId = options?.dhis2EventIdOverride || inspection.dhis2EventId
+    if (eventId) {
+        payload.event = eventId
     }
 
     return payload
@@ -141,11 +148,17 @@ function inspectionToDHIS2Event(inspection: Inspection) {
  */
 export async function syncInspectionToDHIS2(
     inspection: Inspection,
-    engine: DataEngine
+    engine: DataEngine,
+    options?: {
+        formDataOverride?: InspectionFormData
+        dhis2EventIdOverride?: string
+        categoryLabel?: string
+        skipLocalUpdate?: boolean
+    }
 ): Promise<{ success: boolean; eventId?: string; error?: string }> {
     try {
-        const eventPayload = inspectionToDHIS2Event(inspection)
-        const isUpdate = Boolean(inspection.dhis2EventId)
+        const eventPayload = inspectionToDHIS2Event(inspection, options)
+        const isUpdate = Boolean(options?.dhis2EventIdOverride || inspection.dhis2EventId)
 
         console.log('Syncing inspection to DHIS2:', {
             inspectionId: inspection.id,
@@ -206,7 +219,7 @@ export async function syncInspectionToDHIS2(
 
         // Check if the response contains the event ID
         // New tracker API response structure
-        let eventId = inspection.dhis2EventId
+        let eventId = options?.dhis2EventIdOverride || inspection.dhis2EventId
 
         if (!isUpdate) {
             // Try multiple possible response paths for new tracker API
@@ -224,11 +237,12 @@ export async function syncInspectionToDHIS2(
             }
         }
 
-        // Update local inspection with DHIS2 event ID and mark as synced
-        await updateInspection(inspection.id, {
-            dhis2EventId: eventId,
-            syncStatus: 'synced',
-        })
+        if (!options?.skipLocalUpdate) {
+            await updateInspection(inspection.id, {
+                dhis2EventId: eventId,
+                syncStatus: 'synced',
+            })
+        }
 
         return { success: true, eventId }
     } catch (error) {
@@ -242,10 +256,11 @@ export async function syncInspectionToDHIS2(
             console.error('Sync error details:', error.message)
         }
 
-        // Update inspection sync status to failed
-        await updateInspection(inspection.id, {
-            syncStatus: 'sync_failed',
-        })
+        if (!options?.skipLocalUpdate) {
+            await updateInspection(inspection.id, {
+                syncStatus: 'sync_failed',
+            })
+        }
 
         return {
             success: false,
@@ -257,13 +272,29 @@ export async function syncInspectionToDHIS2(
 /**
  * Sync all unsynced inspections to DHIS2
  */
+const computeSyncStatus = (statusMap: Record<string, SyncStatus>): SyncStatus => {
+    const values = Object.values(statusMap)
+    if (values.includes('sync_failed')) return 'sync_failed'
+    if (values.includes('not_synced')) return 'not_synced'
+    return 'synced'
+}
+
+const getInspectionCategories = (inspection: Inspection): Array<{ id: string; name: string }> => {
+    if (inspection.orgUnitCategories && inspection.orgUnitCategories.length > 0) {
+        return inspection.orgUnitCategories
+    }
+    if (inspection.formDataByCategory) {
+        return Object.keys(inspection.formDataByCategory).map((id) => ({ id, name: id }))
+    }
+    return [{ id: 'default', name: 'General' }]
+}
+
 export async function syncAllInspections(engine: DataEngine): Promise<{
     synced: number
     failed: number
     total: number
 }> {
     try {
-        // Get all inspections that need syncing
         const unsyncedInspections = await getInspectionsBySyncStatus('not_synced')
         const failedInspections = await getInspectionsBySyncStatus('sync_failed')
 
@@ -279,15 +310,72 @@ export async function syncAllInspections(engine: DataEngine): Promise<{
         let synced = 0
         let failed = 0
 
-        // Sync each inspection
         for (const inspection of toSync) {
-            const result = await syncInspectionToDHIS2(inspection, engine)
-            if (result.success) {
+            const categories = getInspectionCategories(inspection)
+            const formDataByCategory = inspection.formDataByCategory || {}
+            const categorySyncStatus: Record<string, SyncStatus> = {
+                ...inspection.categorySyncStatus,
+            }
+            const categoryEventIds: Record<string, string> = {
+                ...inspection.categoryEventIds,
+            }
+
+            let categoryFailed = false
+
+            for (const category of categories) {
+                const formData =
+                    formDataByCategory[category.id]?.formData || inspection.formData
+
+                const status = categorySyncStatus[category.id] || inspection.syncStatus
+                if (status === 'synced') {
+                    continue
+                }
+
+                const dhis2EventId =
+                    formDataByCategory[category.id]?.dhis2EventId ||
+                    categoryEventIds[category.id] ||
+                    inspection.dhis2EventId
+
+                const result = await syncInspectionToDHIS2(inspection, engine, {
+                    formDataOverride: formData,
+                    dhis2EventIdOverride: dhis2EventId,
+                    categoryLabel: `Category: ${category.name}`,
+                    skipLocalUpdate: true,
+                })
+
+                if (result.success && result.eventId) {
+                    categorySyncStatus[category.id] = 'synced'
+                    categoryEventIds[category.id] = result.eventId
+                    formDataByCategory[category.id] = {
+                        ...(formDataByCategory[category.id] || { formData }),
+                        dhis2EventId: result.eventId,
+                        syncStatus: 'synced',
+                    }
+                } else {
+                    categorySyncStatus[category.id] = 'sync_failed'
+                    formDataByCategory[category.id] = {
+                        ...(formDataByCategory[category.id] || { formData }),
+                        syncStatus: 'sync_failed',
+                    }
+                    categoryFailed = true
+                }
+            }
+
+            const overallSyncStatus = computeSyncStatus(categorySyncStatus)
+
+            await updateInspection(inspection.id, {
+                formDataByCategory,
+                categorySyncStatus,
+                categoryEventIds,
+                syncStatus: overallSyncStatus,
+            })
+
+            if (categoryFailed) {
+                failed++
+                console.error(`✗ Failed to sync inspection ${inspection.id}: at least one category failed`)
+            } else {
                 synced++
                 console.log(`✓ Synced inspection ${inspection.id}`)
-            } else {
-                failed++
-                console.error(`✗ Failed to sync inspection ${inspection.id}:`, result.error)
             }
         }
 

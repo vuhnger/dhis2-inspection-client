@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-24T18:23:01.994Z\n"
-"PO-Revision-Date: 2025-11-24T18:23:01.995Z\n"
+"POT-Creation-Date: 2025-11-24T18:51:24.077Z\n"
+"PO-Revision-Date: 2025-11-24T18:51:24.077Z\n"
 
 msgid "Syncing..."
 msgstr "Syncing..."
@@ -250,6 +250,9 @@ msgstr "Additional notes (optional)"
 msgid "Create Inspection"
 msgstr "Create Inspection"
 
+msgid "School type"
+msgstr "School type"
+
 msgid "Total student count is required"
 msgstr "Total student count is required"
 
@@ -354,9 +357,6 @@ msgstr "See summary"
 
 msgid "Submit Report"
 msgstr "Submit Report"
-
-msgid "Information about the school"
-msgstr "Information about the school"
 
 msgid "Staff"
 msgstr "Staff"
