@@ -224,3 +224,26 @@ export async function getInspectionsBySyncStatus(syncStatus: string): Promise<In
         }
     })
 }
+
+/**
+ * Clear all inspections from the database
+ * Useful for removing test data or resetting the app
+ */
+export async function clearAllInspections(): Promise<void> {
+    const db = await openDB()
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], 'readwrite')
+        const objectStore = transaction.objectStore(STORE_NAME)
+        const request = objectStore.clear()
+
+        request.onsuccess = () => {
+            console.log('All inspections cleared from database')
+            resolve()
+        }
+
+        request.onerror = () => {
+            reject(new Error('Failed to clear inspections'))
+        }
+    })
+}

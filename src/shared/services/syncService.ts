@@ -4,7 +4,7 @@
 
 import { updateInspection, getInspectionsBySyncStatus } from '../db/indexedDB'
 import { DHIS2_PROGRAM_STAGE_UID, DHIS2_PROGRAM_UID } from '../config/dhis2'
-import { getAuthHeader } from '../utils/auth'
+import { getAuthHeader, getApiBase } from '../utils/auth'
 
 import type { Inspection } from '../types/inspection'
 
@@ -124,7 +124,7 @@ function inspectionToDHIS2Event(inspection: Inspection) {
         program: DHIS2_PROGRAM_UID,
         programStage: DHIS2_PROGRAM_STAGE_UID,
         orgUnit: inspection.orgUnit,
-        eventDate: inspection.eventDate.split('T')[0], // YYYY-MM-DD format
+        occurredAt: inspection.eventDate.split('T')[0], // YYYY-MM-DD format (Tracker API uses occurredAt)
         status: statusMap[inspection.status],
         dataValues,
     }
@@ -161,17 +161,26 @@ export async function syncInspectionToDHIS2(
             events: [eventPayload],
         }
 
-        const response = await engine.mutate({
-            resource: 'tracker',
-            type: 'create',
-            params: {
-                async: false, // Synchronous import
-            },
-            data: trackerPayload,
+        // Use direct fetch() instead of DataEngine to properly include Authorization header
+        // DataEngine's mutate() doesn't support custom headers
+        const url = `${getApiBase()}/tracker?async=false`
+        const fetchResponse = await fetch(url, {
+            method: 'POST',
             headers: {
+                'Content-Type': 'application/json',
                 Authorization: getAuthHeader(),
             },
+            body: JSON.stringify(trackerPayload),
         })
+
+        if (!fetchResponse.ok) {
+            const errorText = await fetchResponse.text()
+            throw new Error(
+                `${fetchResponse.status} ${fetchResponse.statusText}: ${errorText}`
+            )
+        }
+
+        const response = await fetchResponse.json()
 
         console.log('DHIS2 sync response:', response)
 

@@ -70,6 +70,25 @@
     font-family: 'Roboto Mono', monospace;
 }
 
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.userAvatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: #007DEB;
+    border-radius: 50%;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
 .syncBadge {
     display: flex;
     flex-direction: row;
@@ -83,6 +102,30 @@
     color: #059669;
     font-size: 0.9rem;
     font-weight: 500;
+}
+
+.clearDataButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #EF4444;
+    padding: 0;
+}
+
+.clearDataButton:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.clearDataButton:active {
+    transform: scale(0.95);
 }
 
 .statusBadge {

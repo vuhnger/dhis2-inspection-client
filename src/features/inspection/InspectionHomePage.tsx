@@ -1,9 +1,10 @@
 import i18n from '@dhis2/d2-i18n'
-import { CircularLoader } from '@dhis2/ui'
+import { CircularLoader, Modal, ModalTitle, ModalContent, ModalActions, ButtonStrip, Button } from '@dhis2/ui'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { DHIS2_PROGRAM_UID } from '../../shared/config/dhis2'
+import { clearAllInspections } from '../../shared/db/indexedDB'
 import { useInspections } from '../../shared/hooks/useInspections'
 import { useSync } from '../../shared/hooks/useSync'
 import { getApiBase, getAuthHeader } from '../../shared/utils/auth'
@@ -18,7 +19,7 @@ interface InspectionEvent {
     event: string
     orgUnit: string
     orgUnitName: string
-    eventDate: string
+    occurredAt: string
     status: 'COMPLETED' | 'ACTIVE' | 'SCHEDULE'
     dataValues: Array<{
         dataElement: string
@@ -47,6 +48,8 @@ const InspectionHomePage: React.FC = () => {
     const [isOnline, setIsOnline] = React.useState(navigator.onLine)
     const [searchQuery, setSearchQuery] = React.useState('')
     const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false)
+    const [isConfirmClearOpen, setIsConfirmClearOpen] = React.useState(false)
+    const [isClearing, setIsClearing] = React.useState(false)
     const loading = remoteLoading
     const canTriggerSync = isOnline && hasUnsynced && !isSyncing
 
@@ -100,8 +103,8 @@ const InspectionHomePage: React.FC = () => {
             try {
                 const params = new URLSearchParams()
                 params.set('program', DHIS2_PROGRAM_UID)
-                params.set('fields', 'event,orgUnit,orgUnitName,eventDate,status,dataValues[dataElement,value]')
-                params.set('order', 'eventDate:desc')
+                params.set('fields', 'event,orgUnit,orgUnitName,occurredAt,status,dataValues[dataElement,value]')
+                params.set('order', 'occurredAt:desc')
                 params.set('pageSize', '50')
                 const url = `${apiBase}/tracker/events?${params.toString()}`
                 const res = await fetch(url, {
@@ -183,10 +186,25 @@ const InspectionHomePage: React.FC = () => {
     // Format date for display
     const formatDate = (dateString: string): string => {
         const date = new Date(dateString)
-        return date.toLocaleDateString('en-GB', { 
-            day: 'numeric', 
-            month: 'short' 
+        return date.toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'short'
         })
+    }
+
+    // Handle clearing all data
+    const handleClearData = async () => {
+        setIsClearing(true)
+        try {
+            await clearAllInspections()
+            await refetchInspections()
+            setIsConfirmClearOpen(false)
+        } catch (error) {
+            console.error('Failed to clear data:', error)
+            alert('Failed to clear data. Please try again.')
+        } finally {
+            setIsClearing(false)
+        }
     }
 
     return (
@@ -272,6 +290,24 @@ const InspectionHomePage: React.FC = () => {
                                 </>
                             )}
                         </div>
+                        <button
+                            className={classes.clearDataButton}
+                            onClick={() => setIsConfirmClearOpen(true)}
+                            title={i18n.t('Reset all local data')}
+                        >
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+                                    fill="currentColor"
+                                />
+                            </svg>
+                        </button>
                         <div className={classes.userAvatar}>LH</div>
                     </div>
                 </div>
@@ -455,6 +491,32 @@ const InspectionHomePage: React.FC = () => {
                     }
                 }}
             />
+
+            {/* Confirm Clear Data Modal */}
+            <Modal hide={!isConfirmClearOpen} onClose={() => setIsConfirmClearOpen(false)} position="middle">
+                <ModalTitle>{i18n.t('Reset Local Data?')}</ModalTitle>
+                <ModalContent>
+                    <p style={{ marginBottom: '12px' }}>
+                        {i18n.t('This will permanently delete all inspections stored on this device.')}
+                    </p>
+                    <p style={{ marginBottom: '12px', fontWeight: 'bold' }}>
+                        {i18n.t('Warning: This action cannot be undone!')}
+                    </p>
+                    <p style={{ color: '#6B7280', fontSize: '14px' }}>
+                        {i18n.t('Note: Only data that has been synced to the server will be preserved. Any unsynced inspections will be lost.')}
+                    </p>
+                </ModalContent>
+                <ModalActions>
+                    <ButtonStrip end>
+                        <Button onClick={() => setIsConfirmClearOpen(false)} disabled={isClearing}>
+                            {i18n.t('Cancel')}
+                        </Button>
+                        <Button destructive onClick={handleClearData} loading={isClearing}>
+                            {i18n.t('Reset Data')}
+                        </Button>
+                    </ButtonStrip>
+                </ModalActions>
+            </Modal>
         </div>
     )
 }
