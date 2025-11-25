@@ -9,7 +9,7 @@ type ResourceMetricConfig =
       key: StandardKey;
       value: number;
       displayValue: number;
-      overrideLabel: string; 
+      overrideLabel: string;
     }
   | {
       key: null;
@@ -25,26 +25,17 @@ type ResourceMetricConfig =
 export function buildResourceMetrics(
   summary: ObtainedInspectionData
 ): MetricCardProps[] {
-  const { textbooks, desks, chairs, totalStudents } = summary;
+  const { textbooks, chairs, totalStudents } = summary;
 
   const textbookToLearner =
     totalStudents > 0 ? textbooks / totalStudents : 0;
-
-  const seatToLearner =
-    totalStudents > 0 ? desks / totalStudents : 0;
 
   const metrics: ResourceMetricConfig[] = [
     {
       key: "textbookToLearner",
       value: textbookToLearner,
       displayValue: textbooks,
-      overrideLabel: "Textbooks",  
-    },
-    {
-      key: "seatToLearner",
-      value: seatToLearner,
-      displayValue: desks,
-      overrideLabel: "Desks",    
+      overrideLabel: "Textbooks",
     },
     {
       key: null,
@@ -62,7 +53,7 @@ export function buildResourceMetrics(
     if (m.key !== null) {
       const evaluated = evaluateMetric(m.key, Number(m.value));
       return {
-        label: m.overrideLabel,     
+        label: m.overrideLabel,
         value: m.displayValue,
         status: evaluated.status,
         statusText: evaluated.statusText,
