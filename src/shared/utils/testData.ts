@@ -1,20 +1,6 @@
-/**
- * Test data utilities for creating sample inspections
- * Use this to quickly populate the app with test data during development
- */
-
 import { createInspection } from '../db/indexedDB'
 import type { CreateInspectionInput } from '../types/inspection'
 
-/**
- * Create a sample inspection for testing
- *
- * Usage in browser console:
- * ```
- * import { createSampleInspection } from './shared/utils/testData'
- * await createSampleInspection('School A', '2025-11-20T16:00:00', 'scheduled')
- * ```
- */
 export async function createSampleInspection(
     schoolName: string = 'Demo Primary School',
     eventDate: string = new Date().toISOString(),
@@ -45,9 +31,6 @@ export async function createSampleInspection(
     return inspection
 }
 
-/**
- * Create multiple sample inspections for testing
- */
 export async function createSampleInspections() {
     const today = new Date()
     const tomorrow = new Date(today)
@@ -71,7 +54,6 @@ export async function createSampleInspections() {
     return inspections
 }
 
-// Make functions available globally in development
 if (process.env.NODE_ENV === 'development') {
     ;(window as any).createSampleInspection = createSampleInspection
     ;(window as any).createSampleInspections = createSampleInspections

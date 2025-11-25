@@ -77,7 +77,6 @@ export async function pullRemoteInspections(limit = 100): Promise<{
     }
 
     const body = await res.json()
-    // Support both shapes: { events: [...] } and { events: { instances: [...] } }
     const events: TrackerEvent[] =
         (Array.isArray(body?.events) ? body.events : body?.events?.instances) ||
         body?.instances ||

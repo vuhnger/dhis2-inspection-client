@@ -1,6 +1,5 @@
 import React from 'react'
 
-// Feature components - using lazy loading for code splitting
 const InspectionHome = React.lazy(() => import('../features/inspection/InspectionHomePage'))
 const InspectionOverviewPage = React.lazy(() => import('../features/inspection/overview/InspectionOverview'))
 const SummaryPage = React.lazy(() => import('../features/summary/pages/Dashboard'))

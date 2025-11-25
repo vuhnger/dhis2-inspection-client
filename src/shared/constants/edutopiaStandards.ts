@@ -1,19 +1,12 @@
 export type RatioComparison = 'lt' | 'lte' | 'gt' | 'gte' | 'eq'
 
 export type RatioStandard = {
-    /** Human-readable identifier used in copy and logging. */
     id: 'seat-to-learner' | 'textbook-to-learner' | 'learner-to-classroom' | 'learner-to-teacher' | 'learner-to-toilet'
-    /** Friendly label to show in UIs. */
     label: string
-    /** Numerator entity in the ratio, e.g. learners. */
     numerator: string
-    /** Denominator entity in the ratio, e.g. toilets. */
     denominator: string
-    /** Comparison operator describing how to interpret the target. */
     comparison: RatioComparison
-    /** Target value that must satisfy the comparison. */
     target: number
-    /** Short description summarising the policy intent. */
     description: string
 }
 

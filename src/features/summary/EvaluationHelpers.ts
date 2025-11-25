@@ -5,7 +5,7 @@ import {
     type StandardKey 
 } from "./hooks/useInspection";
 import type { ProgressTag } from "./hooks/useInspection";
-import type { MetricCardProps } from "./components/MetricCard/MetricCard"; // adjust path
+import type { MetricCardProps } from "./components/MetricCard/MetricCard";
 
 export function evaluateMetric(
   key: StandardKey,
@@ -26,7 +26,6 @@ export function evaluateMetric(
 
   const { comparator, target, label } = config;
 
-  // 1) Check if it meets the requirement
   let meets = false;
 
   switch (comparator) {
@@ -38,21 +37,16 @@ export function evaluateMetric(
       break;
   }
 
-  // 2) Decide Above / Meets / Below
   let tag: ProgressTag;
 
   if (meets) {
     tag = PROGRESS_TAGS.MEETS_REQUIREMENT;
   } else if (comparator === "equal") {
-    // For "equal" metrics, higher than target = above, lower = below
     tag =
       actualValue > target
         ? PROGRESS_TAGS.ABOVE_REQUIREMENT
         : PROGRESS_TAGS.BELOW_REQUIREMENT;
   } else {
-    // comparator === "lessThan"
-    // For "lessThan" metrics, much smaller than target is "above" requirement (better),
-    // otherwise it's "below".
     tag =
       actualValue < target
         ? PROGRESS_TAGS.ABOVE_REQUIREMENT

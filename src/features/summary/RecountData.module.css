@@ -16,8 +16,6 @@
   max-width: 720px;
 }
 
-/* Header row above card */
-
 .recountHeaderRow {
   display: flex;
   align-items: center;
@@ -35,8 +33,6 @@
 .infoIcon {
   color: var(--colors-grey600, #9e9e9e);
 }
-
-/* Card & table */
 
 .resourceRecountCard {
   background: var(--colors-white, #ffffff);
@@ -88,8 +84,6 @@
   display: inline-block;
 }
 
-/* Recount input uses DHIS2-like form styles */
-
 .recountInput {
   background: var(--colors-white, #ffffff);
   border-radius: 10px;
@@ -115,8 +109,6 @@
   text-align: left;
 }
 
-/* Diff colours */
-
 .diffPositive {
   color: var(--colors-green700, #16a34a);
 }
@@ -128,8 +120,6 @@
 .diffNeutral {
   color: var(--colors-grey600, #6b7280);
 }
-
-/* Status icons */
 
 .statusCell {
   text-align: center;
@@ -191,8 +181,6 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
-/* Save button */
-
 .saveButtonWrapper {
   display: flex;
   justify-content: flex-end;
@@ -206,8 +194,6 @@
   font-weight: 600;
   margin-top: 0 !important; 
 }
-
-/* Level selector spacing */
 
 .levelRow {
   padding: 0 24px 8px;
@@ -228,8 +214,6 @@
 .saveSuccessIcon {
     flex-shrink: 0;
 }
-
-/* Category pills under "Resources" header */
 
 .categoryTabs {
   display: flex;
@@ -252,8 +236,6 @@
   background: var(--colors-blue050, #e5f0ff);
   color: var(--colors-blue700, #1d4ed8);
 }
-
-/* Sync info near header */
 
 .categoryStatusRow {
   padding: 0 24px 4px;
@@ -282,7 +264,6 @@
   opacity: 0.8;
 }
 
-/* Exit Confirmation Modal */
 .bottomSheetOverlay {
   position: fixed;
   top: 0;
@@ -294,7 +275,6 @@
 }
 
 .bottomSheetShell {
-  /* Auto layout */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -308,12 +288,10 @@
   background: #FFFFFF;
   border-radius: 28px 28px 0px 0px;
 
-  /* Inside auto layout */
   flex: none;
   order: 0;
   flex-grow: 0;
 
-  /* Positioning */
   position: fixed;
   bottom: 0;
   left: 0;

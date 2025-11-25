@@ -1,7 +1,3 @@
-/**
- * React hook for managing inspection synchronization with DHIS2
- */
-
 import { useDataEngine } from '@dhis2/app-runtime'
 import { useState, useEffect, useCallback } from 'react'
 
@@ -23,7 +19,6 @@ export function useSync() {
         syncError: null,
     })
 
-    // Check for unsynced inspections on mount and when coming online
     const checkUnsyncedStatus = useCallback(async () => {
         try {
             const hasUnsynced = await hasUnsyncedInspections()
@@ -33,7 +28,6 @@ export function useSync() {
         }
     }, [])
 
-    // Trigger sync
     const triggerSync = useCallback(async () => {
         if (syncState.isSyncing) {
             console.log('Sync already in progress')
@@ -70,13 +64,11 @@ export function useSync() {
         }
     }, [engine, syncState.isSyncing])
 
-    // Auto-sync when coming online
     useEffect(() => {
         const handleOnline = async () => {
             console.log('Network connection restored, checking for unsynced inspections...')
             await checkUnsyncedStatus()
 
-            // Auto-trigger sync if there are unsynced inspections
             const hasUnsynced = await hasUnsyncedInspections()
             if (hasUnsynced) {
                 console.log('Found unsynced inspections, triggering auto-sync...')
@@ -91,7 +83,6 @@ export function useSync() {
         }
     }, [checkUnsyncedStatus, triggerSync])
 
-    // Check for unsynced inspections on mount
     useEffect(() => {
         checkUnsyncedStatus()
     }, [checkUnsyncedStatus])

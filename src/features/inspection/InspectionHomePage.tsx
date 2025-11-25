@@ -11,10 +11,6 @@ import { pullRemoteInspections } from '../../shared/services/pullService'
 import { CreateInspectionBottomSheet } from './components/CreateInspectionBottomSheet'
 import classes from './InspectionHomePage.module.css'
 
-/**
- * Home page showing upcoming and completed school inspections
- * Designed for 768x1024 tablet viewport with offline-first workflow
- */
 const InspectionHomePage: React.FC = () => {
     const navigate = useNavigate()
     const location = useLocation()
@@ -67,7 +63,6 @@ const InspectionHomePage: React.FC = () => {
         }
     }, [effectiveHasUnsynced, isSyncing])
 
-    // Track online/offline status
     React.useEffect(() => {
         const handleOnline = () => setIsOnline(true)
         const handleOffline = () => setIsOnline(false)
@@ -81,26 +76,21 @@ const InspectionHomePage: React.FC = () => {
         }
     }, [])
 
-    // Re-check unsynced state whenever local inspections change
     React.useEffect(() => {
         checkUnsyncedStatus().catch(err => {
             console.error('Failed to refresh sync status:', err)
         })
     }, [localInspections, checkUnsyncedStatus])
 
-    // Handle discard toast notification
     React.useEffect(() => {
         const state = location.state as any
         if (state?.discardedInspection) {
             setDiscardedInspectionInfo(state.discardedInspection)
             setShowDiscardToast(true)
-            
-            // Clear navigation state
             navigate(location.pathname, { replace: true })
         }
     }, [location.state, location.pathname, navigate])
 
-    // Auto-hide toast after 4 seconds
     React.useEffect(() => {
         if (showDiscardToast) {
             const timer = setTimeout(() => {
@@ -112,7 +102,6 @@ const InspectionHomePage: React.FC = () => {
         }
     }, [showDiscardToast])
 
-    // Pull DHIS2 events and store locally
     const pullRemote = React.useCallback(async () => {
         if (!isOnline) {
             return
@@ -154,11 +143,9 @@ const InspectionHomePage: React.FC = () => {
         }
     }, [pullRemote, triggerSync])
 
-    // Parse local inspections and DHIS2 events into upcoming vs finished
     const { upcomingInspections, finishedInspections } = React.useMemo(() => {
         const now = new Date()
 
-        // Map local inspections to display format
         const localInspectionsList = localInspections.map(inspection => ({
             id: inspection.id,
             event: inspection.dhis2EventId || inspection.id,
@@ -170,7 +157,6 @@ const InspectionHomePage: React.FC = () => {
             source: inspection.source || 'local',
         }))
 
-        // Separate upcoming and finished based on status and date
         const upcoming = localInspectionsList.filter(inspection => {
             const eventDate = new Date(inspection.eventDate)
             return inspection.status === 'scheduled' ||
@@ -189,7 +175,6 @@ const InspectionHomePage: React.FC = () => {
         }
     }, [localInspections])
 
-    // Calculate days until/since inspection
     const getDaysRelative = (dateString: string): { days: number; isPast: boolean } => {
         const eventDate = new Date(dateString)
         const now = new Date()
@@ -201,7 +186,6 @@ const InspectionHomePage: React.FC = () => {
         }
     }
 
-    // Format date for display
     const formatDate = (dateString: string): string => {
         const date = new Date(dateString)
         return date.toLocaleDateString('en-GB', {
@@ -210,7 +194,6 @@ const InspectionHomePage: React.FC = () => {
         })
     }
 
-    // Handle undo discard
     const handleUndoDiscard = () => {
         if (discardedInspectionInfo) {
             setShowDiscardToast(false)
@@ -219,7 +202,6 @@ const InspectionHomePage: React.FC = () => {
         }
     }
 
-    // Handle clearing all data
     const handleClearData = async () => {
         setIsClearing(true)
         try {
@@ -234,7 +216,6 @@ const InspectionHomePage: React.FC = () => {
         }
     }
 
-    // Search functionality
     const handleSearch = (query: string) => {
         setSearchQuery(query)
         
@@ -247,18 +228,15 @@ const InspectionHomePage: React.FC = () => {
         const filtered = localInspections.filter(inspection => {
             const searchTerm = query.toLowerCase().trim()
             
-            // Search by school name
             if (inspection.orgUnitName?.toLowerCase().includes(searchTerm)) {
                 return true
             }
             
-            // Search by date (formatted)
             const formattedDate = formatDate(inspection.eventDate).toLowerCase()
             if (formattedDate.includes(searchTerm)) {
                 return true
             }
             
-            // Search by month/year in event date
             const eventDate = new Date(inspection.eventDate)
             const monthYear = eventDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }).toLowerCase()
             if (monthYear.includes(searchTerm)) {
@@ -266,7 +244,7 @@ const InspectionHomePage: React.FC = () => {
             }
             
             return false
-        }).slice(0, 5) // Limit to first 5 results
+        }).slice(0, 5)
         
         setSearchResults(filtered)
         setShowDropdown(filtered.length > 0)
@@ -276,7 +254,6 @@ const InspectionHomePage: React.FC = () => {
         setSearchQuery(inspection.orgUnitName)
         setShowDropdown(false)
         
-        // Route to summary page if completed, otherwise to inspection page
         if (inspection.status === 'completed') {
             navigate(`/summary/${inspection.id}`)
         } else {
@@ -293,7 +270,6 @@ const InspectionHomePage: React.FC = () => {
 
     return (
         <div className={classes.container}>
-            {/* Dark Header */}
             <header className={classes.header}>
                 <div className={classes.headerTop}>
                     <h1 className={classes.greeting}>Hi, inspector!</h1>
@@ -410,7 +386,7 @@ const InspectionHomePage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Search Bar */}
+                {}
                 <div className={classes.searchContainer}>
                     <div className={classes.searchWrapper}>
                         <input
@@ -448,9 +424,9 @@ const InspectionHomePage: React.FC = () => {
                 </div>
             </header>
 
-            {/* Main Content */}
+            {}
             <main className={classes.content}>
-                {/* Upcoming Inspections Section */}
+                {}
                 <section className={classes.section}>
                     <div className={classes.sectionHeader}>
                         <h2 className={classes.sectionTitle}>Upcoming inspections</h2>
@@ -534,7 +510,7 @@ const InspectionHomePage: React.FC = () => {
                     </div>
                 </section>
 
-                {/* Completed Inspections Section */}
+                {}
                 <section className={classes.section}>
                     <div className={classes.sectionHeader}>
                         <h2 className={classes.sectionTitle}>Completed inspections</h2>
@@ -613,25 +589,21 @@ const InspectionHomePage: React.FC = () => {
                 </section>
             </main>
 
-            {/* Floating Action Button */}
             <button className={classes.fab} onClick={() => setIsCreateModalOpen(true)}>
                 <span className={classes.fabIcon}>+</span>
             </button>
 
-            {/* Create Inspection Bottom Sheet */}
             <CreateInspectionBottomSheet
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onSuccess={async () => {
                     await refetchInspections()
-                    // Trigger sync if online
                     if (isOnline) {
                         await triggerSync()
                     }
                 }}
             />
 
-            {/* Confirm Clear Data Modal */}
             <Modal hide={!isConfirmClearOpen} onClose={() => setIsConfirmClearOpen(false)} position="middle">
                 <ModalTitle>{i18n.t('Reset Local Data?')}</ModalTitle>
                 <ModalContent>
@@ -657,7 +629,7 @@ const InspectionHomePage: React.FC = () => {
                 </ModalActions>
             </Modal>
 
-            {/* Discard Toast Notification */}
+            {}
             {showDiscardToast && discardedInspectionInfo && (
                 <div className={classes.discardToast}>
                     <span className={classes.toastMessage}>

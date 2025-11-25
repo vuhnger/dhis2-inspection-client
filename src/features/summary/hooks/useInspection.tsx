@@ -10,44 +10,42 @@ export const INSPECTION_STANDARDS = {
   seatToLearner: {
     label: "Seat-to-learner ratio",
     comparator: "equal" as const,
-    target: 1, // 1:1
+    target: 1,
   },
   textbookToLearner: {
     label: "Textbook-to-learner ratio",
     comparator: "equal" as const,
-    target: 1, // 1:1
+    target: 1,
   },
   learnerToClassroom: {
     label: "Learner-to-classroom ratio",
     comparator: "lessThan" as const,
-    target: 53, // <53:1
+    target: 53,
   },
   learnerToTeacher: {
     label: "Learner-to-teacher ratio",
     comparator: "lessThan" as const,
-    target: 45, // <45:1
+    target: 45,
   },
   learnerToToilet: {
     label: "Learner-to-toilet ratio",
     comparator: "lessThan" as const,
-    target: 25, // <25:1
+    target: 25,
   },
   gpiLearners: {
     label: "Gender Parity Index (learners)",
     comparator: "equal" as const,
-    target: 1, // female learners / male learners
+    target: 1,
   },
   gpiTeachers: {
     label: "Gender Parity Index (teachers)",
     comparator: "equal" as const,
-    target: 1, // female teachers / male teachers
+    target: 1,
   },
 }
 
-// Type: "seatToLearner" | "textbookToLearner" | ... etc.
 export type StandardKey = keyof typeof INSPECTION_STANDARDS;
 
-// Type of one standard object
 export type StandardConfig = (typeof INSPECTION_STANDARDS)[StandardKey];
 
 export const PROGRESS_TAGS = {
@@ -65,16 +63,11 @@ export const PROGRESS_TAGS = {
   },
 }
 
-// Type for a tag object
 export type ProgressTag =
   (typeof PROGRESS_TAGS)[keyof typeof PROGRESS_TAGS];
 
 export type MetricStatus = "success" | "warning" | "error" | "info";
 
-/**
- * Converts a ProgressTag into the status + statusText
- * used by MetricCard.
- */
 export function mapProgressTagToMetricStatus(
   tag: ProgressTag
 ): { status: MetricStatus; statusText: string } {
@@ -110,10 +103,6 @@ interface UseInspectionResult {
   error: string | null;
 }
 
-/**
- * Fetches an Inspection based on the `id` in the route params.
- * Returns the inspection (or null), plus status & error.
- */
 export const useInspectionFromRoute = (): UseInspectionResult => {
   const { id } = useParams<{ id: string }>();
 
@@ -178,7 +167,6 @@ export interface ObtainedInspectionData {
   classrooms: number;
 }
 
-// Small helper to format like "13.sep.2025" if you want to mimic the design
 function formatInspectionDate(isoDate: string): string {
   const date = new Date(isoDate);
   return date.toLocaleDateString("no-NO", {
@@ -188,10 +176,6 @@ function formatInspectionDate(isoDate: string): string {
   });
 }
 
-/**
- * Builds and returns data from the Inspection object.
- * Call only when inspection is not null.
- */
 export function buildObtainedInspectionData(
   inspection: Inspection,
   formDataOverride?: InspectionFormData
@@ -201,12 +185,10 @@ export function buildObtainedInspectionData(
   const schoolName = inspection.orgUnitName;
   const inspectionDate = formatInspectionDate(inspection.eventDate);
 
-  // Resources
   const textbooks = formData.textbooks;
   const desks = (formData as any).desks ?? 0;
   const chairs = formData.chairs;
 
-  // Students
   const totalStudents = Number(formData.totalStudents || 0);
   const maleStudents = Number(formData.maleStudents || 0);
   const femaleStudents = Number(formData.femaleStudents || 0);
@@ -214,10 +196,8 @@ export function buildObtainedInspectionData(
   const genderGpi =
     maleStudents > 0 ? Number((femaleStudents / maleStudents).toFixed(2)) : 0;
 
-  // Staff
   const staffCount = Number(formData.staffCount || 0);
 
-  // Facilities
   const classrooms = Number(formData.classroomCount || 0);
 
   return {
@@ -247,11 +227,6 @@ interface UseInspectionSummaryResult {
   error: string | null;
 }
 
-/**
- * Convenience hook for the Summary screen:
- * - Fetches inspection from the route
- * - Computes the derived/visible data
- */
 export const useInspectionSummary = (): UseInspectionSummaryResult => {
   const { inspection, status, error } = useInspectionFromRoute();
   const [isOnline, setIsOnline] = React.useState<boolean>(navigator.onLine);
@@ -274,7 +249,6 @@ export const useInspectionSummary = (): UseInspectionSummaryResult => {
     []
   );
 
-  // Fetch or derive categories
   React.useEffect(() => {
     const deriveFromLocal = () => {
       if (!inspection) return [];
@@ -297,7 +271,6 @@ export const useInspectionSummary = (): UseInspectionSummaryResult => {
       return;
     }
 
-    // Offline: use local data only
     if (!isOnline) {
       const localCats = deriveFromLocal();
       setCategoryList(
@@ -306,7 +279,6 @@ export const useInspectionSummary = (): UseInspectionSummaryResult => {
       return;
     }
 
-    // Online: try fetching org unit groups
     const fetchCategories = async () => {
       try {
         const apiBase = getApiBase();
