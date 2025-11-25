@@ -25,7 +25,7 @@ An offline-first DHIS2 application for school inspectors using tablets. The app 
    - **Username**: `in5320`
    - **Password**: `P1@tform`
 
-## What We Built
+## Functionality
 
 We chose to implement **Requirement 3** and **Requirement 5** from the project specification.
 
@@ -35,7 +35,16 @@ Schools need to count their actual resources each year and update DHIS2 records.
 ### Requirement 5: Offline Features  
 School inspectors work in areas with poor internet connection. Our app works completely offline - you can create and edit inspections without internet, then sync everything to DHIS2 when connectivity returns.
 
+## How this is implemented
 
+Our app uses a **feature-based architecture** with React TypeScript:
+
+- **`src/features/`** - Self-contained modules (`inspection/`, `summary/`) with their own components and logic
+- **`src/shared/`** - Concerns overlapping with more than one component. Including database layer, sync services, and React hooks
+- **IndexedDB wrapper** (`shared/db/indexedDB.ts`) - Handles offline data persistence with automatic schema versioning
+- **Sync service** (`shared/services/syncService.ts`) - Maps local data to DHIS2's Tracker API and handles push/pull operations
+
+The offline-first approach stores all inspections locally in IndexedDB, then syncs to DHIS2 when online using the new Tracker API with proper data element mapping.
 
 ### Quick Start for Developers
 
