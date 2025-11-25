@@ -465,9 +465,6 @@ const InspectionHomePage: React.FC = () => {
                                             <div className={classes.cardDate}>
                                                 {formatDate(inspection.eventDate)}
                                             </div>
-                                            <div className={classes.cardTime}>
-                                                16:00 - 17:30
-                                            </div>
                                             <div className={classes.cardSchool}>
                                                 {inspection.orgUnitName}
                                             </div>
@@ -542,9 +539,6 @@ const InspectionHomePage: React.FC = () => {
                                         <div className={classes.cardInfo}>
                                             <div className={classes.cardDate}>
                                                 {formatDate(inspection.eventDate)}
-                                            </div>
-                                            <div className={classes.cardTime}>
-                                                16:00 - 17:30
                                             </div>
                                             <div className={classes.cardSchool}>
                                                 {inspection.orgUnitName}
