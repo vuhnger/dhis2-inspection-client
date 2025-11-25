@@ -22,6 +22,7 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess, mode =
     const [notes, setNotes] = useState('');
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isCreating, setIsCreating] = useState(false);
+    const [showConfirmStart, setShowConfirmStart] = useState(false);
     
     const { createInspection } = useInspections();
     const { orgUnits, loading: orgUnitsLoading } = useAccessibleOrgUnits();
@@ -156,12 +157,6 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess, mode =
                 tabIndex={0}
                 aria-label="Close inspection sheet"
                 onClick={onClose}
-                onTouchStart={onClose}
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
-                        onClose();
-                    }
-                }}
             />
 
             <div className={`${styles.bottomSheet} ${isOpen ? styles.open : ''}`}>
@@ -251,7 +246,16 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess, mode =
                         Discard
                     </Button>
                     <Button
-                        onClick={handleSubmit}
+                        type="button"
+                        onClick={() => {
+                            if (mode === "schedule") {
+                                handleSubmit();
+                            } else {
+                                const isValid = validateForm();
+                                if (!isValid) return;
+                                setShowConfirmStart(true);
+                            }
+                        }}
                         loading={isCreating}
                         disabled={isCreating}
                         className={styles.startButton}
@@ -261,6 +265,35 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess, mode =
                     </Button>
                 </div>
             </div>
+
+            {showConfirmStart && mode === "start" && (
+                <div className={styles.confirmOverlay} role="dialog" aria-modal="true" aria-label="Start inspection?">
+                    <div className={styles.confirmModal}>
+                        <h3 className={styles.confirmTitle}>Start inspection?</h3>
+                        <div className={styles.confirmActions}>
+                            <button
+                                type="button"
+                                className={styles.confirmButtonNo}
+                                onClick={() => setShowConfirmStart(false)}
+                                disabled={isCreating}
+                            >
+                                No
+                            </button>
+                            <button
+                                type="button"
+                                className={styles.confirmButtonYes}
+                                onClick={() => {
+                                    setShowConfirmStart(false);
+                                    handleSubmit();
+                                }}
+                                disabled={isCreating}
+                            >
+                                Yes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 };
