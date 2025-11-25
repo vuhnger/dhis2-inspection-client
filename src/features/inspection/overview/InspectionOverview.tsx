@@ -71,6 +71,8 @@ const normalizeForm = (form: Partial<FormState> | undefined): FormState => {
     const male = toNumberOrZero(form?.maleStudents)
     const female = toNumberOrZero(form?.femaleStudents)
     const total = male + female
+    const rawNotes = typeof form?.testFieldNotes === 'string' ? form?.testFieldNotes : ''
+    const cleanedNotes = /^Category:\s*/i.test(rawNotes || '') ? '' : rawNotes
     return {
         textbooks: toNumberOrZero(form?.textbooks),
         chairs: toNumberOrZero(form?.chairs),
@@ -79,7 +81,7 @@ const normalizeForm = (form: Partial<FormState> | undefined): FormState => {
         femaleStudents: female,
         staffCount: toNumberOrZero(form?.staffCount),
         classroomCount: toNumberOrZero(form?.classroomCount),
-        testFieldNotes: form?.testFieldNotes ?? '',
+        testFieldNotes: cleanedNotes ?? '',
     }
 }
 
@@ -631,12 +633,9 @@ const InspectionOverview: React.FC = () => {
 
                         {}
                         <div className={classes.testFieldSection}>
-                            <div className={classes.testFieldHeader}>
-                                <span className={classes.testFieldLabel}>{i18n.t('Test field')}</span>
-                                <span className={classes.testFieldBadge}>{i18n.t('Optional')}</span>
-                            </div>
                             <TextAreaField
-                                label={i18n.t('Additional notes on resources')}
+                                label=""
+                                placeholder={i18n.t('Additional notes on resources')}
                                 value={form.testFieldNotes}
                                 onChange={({ value }: { value?: string }) =>
                                     updateForm(prev => ({ ...prev, testFieldNotes: value ?? '' }))
