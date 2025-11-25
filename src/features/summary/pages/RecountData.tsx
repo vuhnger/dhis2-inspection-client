@@ -381,8 +381,9 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
             setSaved(false);
             return;
         }
-
         setSaved(true);
+        onUnsavedChanges?.(false);
+        navigate("/");
     };
 
     const hasInvalidRows = rows.some((r) => r.error || r.inputValue.trim() === "");
