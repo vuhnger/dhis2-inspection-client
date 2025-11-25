@@ -119,6 +119,20 @@ const TopHeader: React.FC<HeaderProps> = ({
               {isEditing ? <Check size={18} /> : <Edit3 size={18} />}
             </button>
           )}
+
+          {isSynced && (
+            <div className={styles.syncedChip}>
+              <span className={styles.syncedDot} />
+              Synced
+            </div>
+          )}
+
+          <button
+            type="button"
+            className={styles.userAvatar}
+          >
+            {userInitials}
+          </button>
         </div>
       </div>
 
