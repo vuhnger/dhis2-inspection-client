@@ -634,7 +634,7 @@ const InspectionOverview: React.FC = () => {
                         {}
                         <div className={classes.testFieldSection}>
                             <TextAreaField
-                                label={i18n.t('Additional notes on resources')}
+                                label={i18n.t('Inspection note')}
                                 placeholder={i18n.t('Additional notes on resources')}
                                 value={form.testFieldNotes}
                                 onChange={({ value }: { value?: string }) =>
