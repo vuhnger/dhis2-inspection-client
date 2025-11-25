@@ -1,8 +1,10 @@
+import { Button, InputField, SingleSelectField, SingleSelectOption, TextAreaField } from '@dhis2/ui';
 import { useState, useEffect } from 'react';
-import { Button, InputField, SingleSelectField, SingleSelectOption } from '@dhis2/ui';
 import { useNavigate } from 'react-router-dom';
-import { useInspections } from '../../../shared/hooks/useInspections';
+
 import { useAccessibleOrgUnits } from '../../../shared/hooks/useAccessibleOrgUnits';
+import { useInspections } from '../../../shared/hooks/useInspections';
+
 import styles from './CreateInspectionBottomSheet.module.css';
 
 interface Props {
@@ -16,6 +18,7 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
     const [eventDate, setEventDate] = useState('');
     const [startTime, setStartTime] = useState('16:00');
     const [endTime, setEndTime] = useState('17:30');
+    const [notes, setNotes] = useState('');
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isCreating, setIsCreating] = useState(false);
     
@@ -102,7 +105,7 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
                     textbooks: 0,
                     desks: 0,
                     chairs: 0,
-                    testFieldNotes: '',
+                    testFieldNotes: notes,
                     totalStudents: '',
                     maleStudents: '',
                     femaleStudents: '',
@@ -140,6 +143,7 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
         setEventDate('');
         setStartTime('16:00');
         setEndTime('17:30');
+        setNotes('');
         setErrors({});
     };
 
@@ -150,9 +154,18 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
     return (
         <>
             {/* Overlay */}
-            <div 
+            <div
                 className={`${styles.overlay} ${isOpen ? styles.open : ''}`}
+                role="button"
+                tabIndex={0}
+                aria-label="Close inspection sheet"
                 onClick={onClose}
+                onTouchStart={onClose}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+                        onClose();
+                    }
+                }}
             />
 
             {/* Bottom Sheet */}
@@ -160,16 +173,20 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
                 {/* Drag Handle */}
                 <div className={styles.dragHandle} />
 
-                {/* Header */}
-                <div className={styles.header}>
-                    <h2 className={styles.title}>Create New Inspection</h2>
+                <div className={styles.headerBar}>
+                    <button className={styles.closeIconButton} onClick={onClose} aria-label="Close">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7.41 8.29492L12 12.8749L16.59 8.29492L18 9.70492L12 15.7049L6 9.70492L7.41 8.29492Z" fill="black"/>
+                        </svg>
+                    </button>
                 </div>
 
                 {/* Content */}
                 <div className={styles.content}>
                     <div className={styles.formGroup}>
                         <SingleSelectField
-                            label="Select School"
+                            className={styles.selectField}
+                            label="Select a school to inspect"
                             selected={selectedOrgUnit}
                             onChange={({ selected }) => {
                                 setSelectedOrgUnit(selected);
@@ -181,7 +198,7 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
                             validationText={errors.selectedOrgUnit}
                             required
                             disabled={isCreating || orgUnitsLoading}
-                            placeholder={orgUnitsLoading ? "Loading schools..." : "Choose a school"}
+                            placeholder={orgUnitsLoading ? "Loading schools..." : "Select school"}
                         >
                             {orgUnits.map((orgUnit) => (
                                 <SingleSelectOption
@@ -193,7 +210,7 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
                         </SingleSelectField>
 
                         <InputField
-                            label="Date"
+                            label="Date of inspection"
                             type="date"
                             value={eventDate}
                             onChange={({ value }) => {
@@ -209,37 +226,12 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
                             min={new Date().toISOString().split('T')[0]}
                         />
 
-                        <div className={styles.timeRow}>
-                            <InputField
-                                label="Start Time"
-                                type="time"
-                                value={startTime}
-                                onChange={({ value }) => {
-                                    setStartTime(value || '16:00');
-                                    if (errors.startTime) {
-                                        setErrors({ ...errors, startTime: '' });
-                                    }
-                                }}
-                                error={!!errors.startTime}
-                                validationText={errors.startTime}
-                                required
-                                disabled={isCreating}
-                            />
-
-                            <InputField
-                                label="End Time"
-                                type="time"
-                                value={endTime}
-                                onChange={({ value }) => {
-                                    setEndTime(value || '17:30');
-                                    if (errors.endTime) {
-                                        setErrors({ ...errors, endTime: '' });
-                                    }
-                                }}
-                                error={!!errors.endTime}
-                                validationText={errors.endTime}
-                                required
-                                disabled={isCreating}
+                        <div className={styles.notesRow}>
+                            <TextAreaField
+                                label="Additional notes"
+                                value={notes}
+                                rows={4}
+                                onChange={({ value }) => setNotes(value ?? '')}
                             />
                         </div>
 
@@ -256,14 +248,22 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
                     <Button 
                         onClick={handleDiscard} 
                         disabled={isCreating}
+                        className={styles.discardButton}
+                        style={{ backgroundColor: '#F8B3B4', color: '#1260BA', border: 'none' }}
                     >
+                        <span className={styles.buttonIcon}>
+                            <svg width="15" height="15" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path d="M6 12H10M10 12H42M10 12V40C10 41.0609 10.4214 42.0783 11.1716 42.8284C11.9217 43.5786 12.9391 44 14 44H34C35.0609 44 36.0783 43.5786 36.8284 42.8284C37.5786 42.0783 38 41.0609 38 40V12M16 12V8C16 6.93913 16.4214 5.92172 17.1716 5.17157C17.9217 4.42143 18.9391 4 20 4H28C29.0609 4 30.0783 4.42143 30.8284 5.17157C31.5786 5.92172 32 6.93913 32 8V12" stroke="#1260BA" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                        </span>
                         Discard
                     </Button>
-                    <Button 
-                        primary 
-                        onClick={handleStartInspection} 
+                    <Button
+                        onClick={handleStartInspection}
                         loading={isCreating}
                         disabled={isCreating}
+                        className={styles.startButton}
+                        style={{ backgroundColor: '#1D2B36', color: '#F1F5F9', border: 'none' }}
                     >
                         Start Inspection
                     </Button>

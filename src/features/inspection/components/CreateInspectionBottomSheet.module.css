@@ -53,13 +53,6 @@
     flex-shrink: 0;
 }
 
-/* Header */
-.header {
-    padding: 0 24px 16px;
-    border-bottom: 1px solid #e5e7eb;
-    flex-shrink: 0;
-}
-
 .title {
     font-family: 'Roboto Mono', 'Courier New', monospace;
     font-size: 1.5rem;
@@ -68,23 +61,80 @@
     color: #1e293b;
 }
 
+.headerBar {
+    display: flex;
+    align-items: center;
+    padding: 0 16px 8px;
+}
+
+.closeIconButton {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+}
+
 /* Content */
 .content {
     flex: 1;
     overflow-y: auto;
     padding: 24px;
+    display: flex;
+    flex-direction: column;
 }
 
 .formGroup {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    flex: 1;
 }
 
-.timeRow {
+.notesRow {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 16px;
+    flex: 1;
+}
+
+/* Soft background for inputs */
+.content :global(input),
+.content :global(textarea),
+.content :global(.dhis2-ui-input),
+.content :global(.dhis2-ui-select),
+.content :global(.dhis2-ui-select__input),
+.content :global(.select),
+.content :global(.select button),
+.content :global(.select input),
+.content :global(.select .input) {
+    background: #E2F2FF !important;
+    border: none !important;
+    border-radius: 10px !important;
+}
+
+.content :global(.select .input),
+.content :global(.select button) {
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.selectField :global(.select),
+.selectField :global(.select input),
+.selectField :global(.select button),
+.selectField :global(.select .input) {
+    background: #E2F2FF !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 10px !important;
+}
+
+.content :global(label) {
+    font-size: 1.2em !important;
+}
+
+.content :global(textarea) {
+    min-height: 180px;
+    height: 100%;
 }
 
 .infoBox {
@@ -102,7 +152,7 @@
     border-top: 1px solid #e5e7eb;
     display: flex;
     gap: 12px;
-    justify-content: flex-end;
+    justify-content: space-between;
     background: white;
     flex-shrink: 0;
 }
@@ -122,21 +172,34 @@
     font-size: 1rem;
     font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     
-    background: #F1F9FF;
     border-radius: 100px;
     border: none;
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
 
-.footer button:hover {
-    background: #E2F2FF;
+.discardButton {
+    background: #F8B3B4;
+    color: #1260BA;
 }
 
-.footer button:disabled {
-    background: #F5F5F5;
-    cursor: not-allowed;
-    opacity: 0.6;
+.discardButton:hover {
+    background: #f8c3c4;
+}
+
+.startButton {
+    background: #1D2B36;
+    color: #F1F5F9;
+}
+
+.startButton:hover {
+    background: #111827;
+}
+
+.buttonIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Responsive */
