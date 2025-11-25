@@ -1,18 +1,41 @@
-This project was bootstrapped with [DHIS2 Application Platform](https://github.com/dhis2/app-platform).
+# School Inspection App
 
-## Project Focus
+An offline-first DHIS2 application for school inspectors using tablets. The app works completely offline and syncs data when internet is available.
 
-We are building an **offline-first** DHIS2 web application aimed at tablet usage by school inspectors. All inspection workflows must function without connectivity; when online, the app will synchronise cached inspections and pull the latest DHIS2 events so multiple inspectors see each other’s work.
+## How to Run the App
 
-## 📚 Documentation
+1. Install dependencies:
+   ```
+   yarn install
+   ```
 
-All technical documentation is in the [`docs/`](./docs/) folder:
+2. Build the app:
+   ```
+   yarn build
+   ```
 
-- **[DHIS2 Sync Guide](./docs/dhis2-sync-guide.md)** - Complete guide for implementing DHIS2 sync
-- **[Sync Implementation Example](./docs/sync-implementation-example.md)** - Working code examples
-- **[Data Mappings](./docs/data-mappings.json)** - JSON configuration for local↔DHIS2 mapping
-- **[Architecture](./docs/architecture.md)** - App architecture overview
-- **[All Docs](./docs/README.md)** - Full documentation index
+3. Start the development server:
+   ```
+   yarn start
+   ```
+
+4. Open your browser and go to the link provided (usually [http://localhost:3000](http://localhost:3000))
+
+5. Login with these credentials:
+   - **Username**: `in5320`
+   - **Password**: `P1@tform`
+
+## What We Built
+
+We chose to implement **Requirement 3** and **Requirement 5** from the project specification.
+
+### Requirement 3: School Resource Count
+Schools need to count their actual resources each year and update DHIS2 records. Our app lets inspectors quickly capture resource counts (books, chairs, teachers) and compare them with previous data to spot significant changes.
+
+### Requirement 5: Offline Features  
+School inspectors work in areas with poor internet connection. Our app works completely offline - you can create and edit inspections without internet, then sync everything to DHIS2 when connectivity returns.
+
+
 
 ### Quick Start for Developers
 
@@ -20,69 +43,6 @@ All technical documentation is in the [`docs/`](./docs/) folder:
 - Hit the sync badge to push unsynced locals to DHIS2; the app then automatically pulls remote events and stores them locally (`source: server`), so the home lists show both your and others’ synced inspections. You can also tap “Refresh from server” to pull without pushing.
 - See [docs/sync-implementation-example.md](./docs/sync-implementation-example.md) for code details, and `scripts/sync-check.js` for a console helper to compare local vs remote.
 
-## DHIS2 Instance Credentials
+## Technical Details
 
-**Development/Testing Instance**: `https://research.im.dhis2.org/in5320g16/`
-
-**API Credentials:**
-- **Username**: `in5320`
-- **Password**: `P1@tform`
-
-These credentials are used for:
-- Logging into the DHIS2 instance during development
-- API requests to create/update inspection events
-- Fetching organization units (schools) for the inspection form
-
-**Note**: The DHIS2 App Platform automatically handles authentication when you run `yarn start` and log in. All API calls made through `useDataEngine()` will use your logged-in session.
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `yarn start`
-
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-**Login with these credentials:**
-- **Username**: `in5320`
-- **Password**: `P1@tform`
-
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
-
-### `yarn test`
-
-Launches the test runner and runs all available tests found in `/src`.<br />
-
-See the section about [running tests](https://platform.dhis2.nu/#/scripts/test) for more information.
-
-### `yarn build`
-
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br />
-A deployable `.zip` file can be found in `build/bundle`!
-
-See the section about [building](https://platform.dhis2.nu/#/scripts/build) for more information.
-
-### `yarn deploy`
-
-Deploys the built app in the `build` folder to a running DHIS2 instance.<br />
-This command will prompt you to enter a server URL as well as the username and password of a DHIS2 user with the App Management authority.<br/>
-You must run `yarn build` before running `yarn deploy`.<br />
-
-See the section about [deploying](https://platform.dhis2.nu/#/scripts/deploy) for more information.
-
-## Learn More
-
-You can learn more about the platform in the [DHIS2 Application Platform Documentation](https://platform.dhis2.nu/).
-
-You can learn more about the runtime in the [DHIS2 Application Runtime Documentation](https://runtime.dhis2.nu/).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-## Selected requirements 
-
-We selected requirement 3 (school resource count) and requirement 5 (offline features). All design and development decisions must support inspectors who operate with no connectivity during school visits.
+More detailed documentation is available in the [`docs/`](./docs/) folder for developers who want to understand the technical implementation.
