@@ -188,10 +188,12 @@ const InspectionHomePage: React.FC = () => {
 
     const formatDate = (dateString: string): string => {
         const date = new Date(dateString)
-        return date.toLocaleDateString('en-GB', {
+        const base = date.toLocaleDateString('en-GB', {
+            weekday: 'long',
             day: 'numeric',
-            month: 'short'
-        })
+            month: 'short',
+        }).replace(',', '')
+        return base.replace(/(\d{1,2}) /, '$1. ')
     }
 
     const handleUndoDiscard = () => {
