@@ -1,5 +1,5 @@
 import i18n from '@dhis2/d2-i18n'
-import { Button, InputField, NoticeBox, TextAreaField, Tooltip, CircularLoader } from '@dhis2/ui'
+import { Button, InputField, NoticeBox, TextAreaField, Tooltip, CircularLoader, Modal, ModalTitle, ModalContent, ModalActions, ButtonStrip } from '@dhis2/ui'
 import React from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 
@@ -88,6 +88,7 @@ const InspectionOverview: React.FC = () => {
     const [wasSubmitted, setWasSubmitted] = React.useState(false)
     const [showSummary, setShowSummary] = React.useState(false)
     const [isOnline, setIsOnline] = React.useState(navigator.onLine)
+    const [showCompleteModal, setShowCompleteModal] = React.useState(false)
 
     // Load form data from inspection when available
     // Hydrate category forms from inspection data + fetched categories
@@ -454,7 +455,11 @@ const InspectionOverview: React.FC = () => {
     const activeCategoryEventId =
         inspection?.categoryEventIds?.[activeCategoryId] || inspection?.dhis2EventId
 
-    const handleSubmit = async () => {
+    const handleCompleteInspection = () => {
+        setShowCompleteModal(true)
+    }
+
+    const handleSeeSubmittedInspection = async () => {
         const nextErrors: Record<string, Partial<Record<keyof FormState, string>>> = {}
         let hasErrors = false
 
@@ -471,6 +476,7 @@ const InspectionOverview: React.FC = () => {
         setWasSubmitted(true)
 
         if (hasErrors) {
+            setShowCompleteModal(false)
             return
         }
 
@@ -492,7 +498,6 @@ const InspectionOverview: React.FC = () => {
                     syncStatus: 'not_synced',
                 }
                 categorySyncStatus[cat.id] = 'not_synced'
-
             })
 
             const firstForm = categoryForms[categoryList[0]?.id] || DEFAULT_FORM
@@ -506,13 +511,44 @@ const InspectionOverview: React.FC = () => {
                 syncStatus: computeSyncStatus(categorySyncStatus), // Mark as not synced until pushed to DHIS2
             })
             console.log('Form submitted successfully and saved to local database')
-
-            // Redirect to home page after successful submission
-            setTimeout(() => {
-                navigate('/')
-            }, 1500) // Give user time to see success message
+            
+            setShowCompleteModal(false)
+            // Navigate to summary page
+            navigate(`/summary/${inspection?.id}`)
         } catch (error) {
             console.error('Failed to save inspection:', error)
+            setShowCompleteModal(false)
+        }
+    }
+
+    const handleDiscardInspection = async () => {
+        try {
+            const inspectionName = inspection?.orgUnitName || 'Inspection'
+            const inspectionId = inspection?.id
+            
+            // Reset inspection back to scheduled status and clear all form data
+            await updateInspection({
+                status: 'scheduled',
+                syncStatus: 'not_synced',
+                formData: DEFAULT_FORM,
+                formDataByCategory: {},
+                categorySyncStatus: {},
+            })
+            console.log('Inspection discarded and reset to scheduled')
+            
+            setShowCompleteModal(false)
+            // Navigate back to home page with discard info for toast
+            navigate('/', { 
+                state: { 
+                    discardedInspection: { 
+                        id: inspectionId, 
+                        name: inspectionName 
+                    } 
+                } 
+            })
+        } catch (error) {
+            console.error('Failed to discard inspection:', error)
+            setShowCompleteModal(false)
         }
     }
 
@@ -855,10 +891,11 @@ const InspectionOverview: React.FC = () => {
     const submitButton = (
         <Button
             className={classes.nextButton}
-            onClick={handleSubmit}
+            onClick={handleCompleteInspection}
             disabled={submitDisabled}
+            style={{ backgroundColor: '#F1F9FF' }}
         >
-            {i18n.t('Submit Report')}
+            {i18n.t('Complete inspection')}
         </Button>
     )
 
@@ -1131,6 +1168,40 @@ const InspectionOverview: React.FC = () => {
                     </>
                 )}
             </div>
+
+            {/* Complete Inspection Bottom Sheet */}
+            {showCompleteModal && (
+                <>
+                    <div 
+                        className={classes.bottomSheetOverlay}
+                        onClick={() => setShowCompleteModal(false)}
+                    />
+                    <div className={classes.bottomSheetShell}>
+                        <div className={classes.bottomSheetContent}>
+                            <h2 className={classes.bottomSheetTitle}>
+                                {i18n.t('Complete inspection')}
+                            </h2>
+                            <p className={classes.bottomSheetText}>
+                                {i18n.t('What would you like to do with this inspection?')}
+                            </p>
+                            <div className={classes.bottomSheetButtons}>
+                                <Button 
+                                    onClick={handleSeeSubmittedInspection}
+                                    className={classes.summaryButton}
+                                >
+                                    {i18n.t('See summary')}
+                                </Button>
+                                <Button 
+                                    onClick={handleDiscardInspection}
+                                    className={classes.discardButton}
+                                >
+                                    {i18n.t('Discard')}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
         </section>
     )
 }

@@ -164,8 +164,8 @@ msgstr "Hide summary"
 msgid "See summary"
 msgstr "See summary"
 
-msgid "Submit Report"
-msgstr "Submit Report"
+msgid "Complete inspection"
+msgstr "Complete inspection"
 
 msgid "Status"
 msgstr "Status"
@@ -217,3 +217,9 @@ msgstr "Offline - Cannot Sync"
 
 msgid "Sync Error"
 msgstr "Sync Error"
+
+msgid "What would you like to do with this inspection?"
+msgstr "What would you like to do with this inspection?"
+
+msgid "Discard"
+msgstr "Discard"

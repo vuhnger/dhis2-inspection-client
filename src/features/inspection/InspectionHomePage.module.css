@@ -775,6 +775,56 @@
     line-height: 1;
 }
 
+/* Discard Toast Notification */
+.discardToast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #FEF2F2;
+    color: #991B1B;
+    border: 1px solid #FECACA;
+    border-radius: 24px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    width: 360px;
+    box-sizing: border-box;
+}
+
+.toastMessage {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.2;
+    color: #991B1B;
+    white-space: nowrap;
+}
+
+.undoButton {
+    background: #3B82F6;
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    white-space: nowrap;
+}
+
+.undoButton:hover {
+    background: #2563EB;
+}
+
+.undoButton:active {
+    background: #1D4ED8;
+}
+
 @media (max-width: 768px) {
     .fab {
         bottom: 24px;
@@ -785,6 +835,24 @@
 
     .fabIcon {
         font-size: 2rem;
+    }
+
+    .discardToast {
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 360px;
+        border-radius: 20px;
+        padding: 10px 14px;
+    }
+
+    .toastMessage {
+        font-size: 13px;
+    }
+
+    .undoButton {
+        font-size: 13px;
+        padding: 5px 10px;
     }
 }
 
