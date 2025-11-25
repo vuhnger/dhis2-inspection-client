@@ -176,7 +176,7 @@ const TopHeader: React.FC<HeaderProps> = ({
           onClick={() => goToTab("recount")}
         >
           <span className={styles.tabInner}>
-            <RotateCcw size={16} className={styles.tabIcon} />
+            <Edit3 size={16} className={styles.tabIcon} />
             <span>Recount data</span>
           </span>
         </button>
