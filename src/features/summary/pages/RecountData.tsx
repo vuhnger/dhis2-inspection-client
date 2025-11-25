@@ -695,21 +695,25 @@ const RecountDataScreen: React.FC = () => {
 
             <div className={styles.categoryStatusRow}>
                 {activeCategory && (
-                    <div className={styles.categoryStatusChip}>
-                        <span className={styles.categoryStatusCategory}>
-                            {activeCategory.displayName}
-                        </span>
-                        {syncLabel && (
-                            <span className={styles.categoryStatusLabel}>
-                                {syncLabel}
+                    <>
+                        <div className={styles.levelLabel}>Level</div>
+
+                        <div className={styles.categoryStatusChip}>
+                            <span className={styles.categoryStatusCategory}>
+                                {activeCategory.displayName}
                             </span>
-                        )}
-                        {activeCategory.eventId && (
-                            <span className={styles.categoryStatusEvent}>
-                                • {activeCategory.eventId}
-                            </span>
-                        )}
-                    </div>
+                            {syncLabel && (
+                                <span className={styles.categoryStatusLabel}>
+                                    {syncLabel}
+                                </span>
+                            )}
+                            {activeCategory.eventId && (
+                                <span className={styles.categoryStatusEvent}>
+                                    • {activeCategory.eventId}
+                                </span>
+                            )}
+                        </div>
+                    </>
                 )}
             </div>
 
