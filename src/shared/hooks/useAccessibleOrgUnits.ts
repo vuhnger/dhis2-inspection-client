@@ -80,8 +80,6 @@ export const useAccessibleOrgUnits = () => {
         setLoading(true)
         setError(null)
         try {
-            // Fetch org units actually assigned to the inspection program. The
-            // /organisationUnits?program=... endpoint does not consistently filter.
             const programUrl = `${apiBase}/programs/${DHIS2_PROGRAM_UID}?fields=organisationUnits[id,name,displayName,path,level]`
             const meUrl = `${apiBase}/me?fields=organisationUnits[id,path],dataViewOrganisationUnits[id,path]`
 

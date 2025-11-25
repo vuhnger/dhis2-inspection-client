@@ -5,7 +5,6 @@ import styles from "./LevelSelector.module.css";
 export type LevelType = "LBE" | "SSE" | "UBE";
 
 interface LevelSelectorProps {
-  /** Optional: which level should look selected initially */
   initialLevel?: LevelType;
 }
 

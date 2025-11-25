@@ -11,19 +11,12 @@ interface HeaderProps {
   isSynced?: boolean;
   userInitials?: string;
 
-  /** Optional override for active tab; otherwise inferred from URL */
   activeTab?: "current" | "recount";
 
-  /** Optional side-effect callback when tab changes (navigation is internal) */
   onTabChange?: (tab: "current" | "recount") => void;
 
-  /**
-   * Optional callback when the user finishes editing the header.
-   * You can use this later to persist changes to DB.
-   */
   onHeaderChange?: (schoolName: string, inspectionDate: string) => void;
 
-  /** Optional callback for home button click (overrides default navigation) */
   onHomeClick?: () => void;
 }
 
@@ -42,7 +35,6 @@ const TopHeader: React.FC<HeaderProps> = ({
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
 
-  // ----- Tab handling -----
   const inferredActiveTab: "current" | "recount" =
     location.pathname.includes("/RecountData") ? "recount" : "current";
 
@@ -60,12 +52,10 @@ const TopHeader: React.FC<HeaderProps> = ({
     onTabChange?.(tab);
   };
 
-  // ----- Inline editing state -----
   const [isEditing, setIsEditing] = React.useState(false);
   const [draftSchoolName, setDraftSchoolName] = React.useState(schoolName);
   const [draftDate, setDraftDate] = React.useState(inspectionDate);
 
-  // If props change from outside while not editing, sync the drafts
   React.useEffect(() => {
     if (!isEditing) {
       setDraftSchoolName(schoolName);
@@ -75,7 +65,6 @@ const TopHeader: React.FC<HeaderProps> = ({
 
   const handleEditClick = () => {
     if (isEditing) {
-      // Save edits
       onHeaderChange?.(draftSchoolName, draftDate);
     }
     setIsEditing((prev) => !prev);
@@ -84,7 +73,6 @@ const TopHeader: React.FC<HeaderProps> = ({
   return (
     <header className={styles.header}>
       <div className={styles.topRow}>
-        {/* LEFT SIDE — title + date (editable) */}
         <div className={styles.textBlock}>
           {isEditing ? (
             <>
@@ -108,7 +96,6 @@ const TopHeader: React.FC<HeaderProps> = ({
               <span className={styles.schoolName}>
                 {schoolName}
 
-                {/* Info icon ONLY on RecountData screen */}
                 {currentActiveTab === "recount" && (
                   <Info size={18} className={styles.inlineInfoIcon} />
                 )}
@@ -119,7 +106,6 @@ const TopHeader: React.FC<HeaderProps> = ({
           )}
         </div>
 
-        {/* RIGHT SIDE — EDIT + SYNC + AVATAR */}
         <div className={styles.rightBlock}>
           {currentActiveTab !== "recount" && (
             <button
@@ -136,7 +122,6 @@ const TopHeader: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* TABS */}
       <div className={styles.tabRow}>
         <button
           type="button"

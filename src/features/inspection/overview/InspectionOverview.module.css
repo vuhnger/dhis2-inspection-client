@@ -1,10 +1,8 @@
-/* Remove borders from all input fields */
 .form :global(input),
 .form :global(textarea) {
   border: none !important;
 }
 
-/* DHIS2 Mobile Design System Colors */
 :root {
   --dhis2-blue-900: #093371;
   --dhis2-blue-700: #1565c0;
@@ -32,7 +30,6 @@
 
   --dhis2-white: #ffffff;
 
-  /* DHIS2 Spacers (8-point grid) */
   --dhis2-space-4: 4px;
   --dhis2-space-8: 8px;
   --dhis2-space-12: 12px;
@@ -48,8 +45,7 @@
   max-width: 100%;
   background: #E2F2FF;
   min-height: 100vh;
-  padding-bottom: 88px; /* Space for fixed navigation buttons */
-}
+  padding-bottom: 88px; }
 
 .header {
   background: #E2F2FF;
@@ -195,7 +191,6 @@
   position: relative;
 }
 
-/* Staff icon - Outlined style */
 .staffLogo {
   position: absolute;
   left: 12.5%;
@@ -214,7 +209,6 @@
   fill: #F1F9FF;
 }
 
-/* Resources icon - Outlined style */
 .resourcesLogo {
   position: absolute;
   left: 20.83%;
@@ -233,7 +227,6 @@
   fill: #F1F9FF;
 }
 
-/* Students icon - Outlined style */
 .studentsLogo {
   position: absolute;
   left: 20.83%;
@@ -252,7 +245,6 @@
   fill: #F1F9FF;
 }
 
-/* Facilities icon - Outlined style */
 .facilitiesLogo {
   position: absolute;
   left: 20.83%;
@@ -425,7 +417,6 @@
   opacity: 0.95;
 }
 
-/* Counter controls */
 .counterField {
   display: flex;
   flex-direction: column;
@@ -492,7 +483,6 @@
   background: #FFFFFF;
 }
 
-/* Remove spinner from number input */
 .counterInput::-webkit-outer-spin-button,
 .counterInput::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -503,7 +493,6 @@
   -moz-appearance: textfield;
 }
 
-/* Test field section */
 .testFieldSection {
   margin-top: var(--dhis2-space-16);
   padding-top: var(--dhis2-space-16);
@@ -655,7 +644,6 @@
   cursor: not-allowed;
 }
 
-/* Bottom Sheet Styles */
 .bottomSheetOverlay {
   position: fixed;
   top: 0;
@@ -667,7 +655,6 @@
 }
 
 .bottomSheetShell {
-  /* Auto layout */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -681,12 +668,10 @@
   background: #FFFFFF;
   border-radius: 28px 28px 0px 0px;
 
-  /* Inside auto layout */
   flex: none;
   order: 0;
   flex-grow: 0;
 
-  /* Positioning */
   position: fixed;
   bottom: 0;
   left: 0;

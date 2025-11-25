@@ -12,10 +12,6 @@ import styles from "../RecountData.module.css";
 
 import type { Inspection, InspectionFormData } from "../../../shared/types/inspection";
 
-/* ------------------------------------------------------------------ */
-/* Types                                                              */
-/* ------------------------------------------------------------------ */
-
 type RowStatus = "up" | "down" | "neutral";
 
 interface ResourceRowProps {
@@ -49,7 +45,7 @@ interface ResourceRecountTableProps {
 type CategoryCode = "LBE" | "UBE" | "ECD" | "TERTIARY" | "GENERAL";
 
 interface CategoryMeta {
-    id: string;              // may be code or some other key
+    id: string;
     code: CategoryCode;
     displayName: string;
     source: "per-category" | "legacy";
@@ -58,14 +54,11 @@ interface CategoryMeta {
     fromServer?: boolean;
 }
 
-/* ------------------------------------------------------------------ */
-/* Category helpers                                                   */
-/* ------------------------------------------------------------------ */
 const ALLOWED_CATEGORY_GROUP_IDS = new Set([
-    "ib40OsG9QAI", // LBE
-    "SPCm0Ts3SLR", // UBE
-    "sSgWDKuCrmi", // ECD
-    "UzSEGuwAfyX", // Tertiary
+    "ib40OsG9QAI",
+    "SPCm0Ts3SLR",
+    "sSgWDKuCrmi",
+    "UzSEGuwAfyX",
 ]);
 
 const DEFAULT_FORM: InspectionFormData = {
@@ -115,16 +108,6 @@ const CATEGORY_ORDER: CategoryCode[] = [
     "GENERAL",
 ];
 
-/**
- * Build the list of categories for an inspection.
- * - If `formDataByCategory` exists, we use those keys.
- * - Otherwise, we fall back to a single GENERAL category using legacy formData.
- * - Sync info is sourced from `categorySyncStatus` / `categoryEventIds`.
- *
- * NOTE: The inspection form should already have resolved categories from
- * org unit groups, so we simply reuse that information here instead of
- * doing new network calls.
- */
 function buildCategoriesFromInspection(inspection: Inspection): CategoryMeta[] {
     const {
         formDataByCategory,
@@ -136,7 +119,6 @@ function buildCategoriesFromInspection(inspection: Inspection): CategoryMeta[] {
     const allowedCategories =
         orgUnitCategories?.filter((c: any) => ALLOWED_CATEGORY_GROUP_IDS.has(c.id)) || [];
 
-    // No per-category data => single GENERAL bucket
     if (!formDataByCategory || Object.keys(formDataByCategory).length === 0) {
         return [
             {
@@ -153,7 +135,6 @@ function buildCategoriesFromInspection(inspection: Inspection): CategoryMeta[] {
 
     const cats: CategoryMeta[] = Object.keys(formDataByCategory).map(
         (key) => {
-            // Treat key as a category code when possible, otherwise fall back
             const upperKey = key.toUpperCase();
             const code: CategoryCode =
                 upperKey === "LBE" ||
@@ -182,7 +163,6 @@ function buildCategoriesFromInspection(inspection: Inspection): CategoryMeta[] {
         }
     );
 
-    // Sort into a stable UX order
     cats.sort((a, b) => {
         const aIdx = CATEGORY_ORDER.indexOf(a.code);
         const bIdx = CATEGORY_ORDER.indexOf(b.code);
@@ -191,10 +171,6 @@ function buildCategoriesFromInspection(inspection: Inspection): CategoryMeta[] {
 
     return cats;
 }
-
-/* ------------------------------------------------------------------ */
-/* Status helpers                                                     */
-/* ------------------------------------------------------------------ */
 
 function getStatusFromPercentDiff(percentDiff: number): RowStatus {
     if (percentDiff > 0) return "up";
@@ -227,10 +203,6 @@ const getStatusIcon = (status: RowStatus) => {
     }
 };
 
-/* ------------------------------------------------------------------ */
-/* Category tabs component                                            */
-/* ------------------------------------------------------------------ */
-
 interface CategoryTabsProps {
     categories: CategoryMeta[];
     activeId: string;
@@ -242,7 +214,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({
     activeId,
     onChange,
 }) => {
-    if (categories.length <= 1) return null; // no tabs for single category
+    if (categories.length <= 1) return null;
 
     return (
         <div className={styles.categoryTabs}>
@@ -264,10 +236,6 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({
     );
 };
 
-/* ------------------------------------------------------------------ */
-/* Single table row                                                   */
-/* ------------------------------------------------------------------ */
-
 const ResourceRow: React.FC<ResourceRowProps> = ({
     item,
     previous,
@@ -279,7 +247,7 @@ const ResourceRow: React.FC<ResourceRowProps> = ({
     onRecountBlur,
 }) => {
     const rawDiff =
-        previous > 0 ? ((recount - previous) / previous) * 100 : 0; // %
+        previous > 0 ? ((recount - previous) / previous) * 100 : 0;
     const roundedDiff = Math.round(rawDiff);
     const formattedDiff =
         roundedDiff > 0 ? `+${roundedDiff}%` : `${roundedDiff}%`;
@@ -318,10 +286,6 @@ const ResourceRow: React.FC<ResourceRowProps> = ({
     );
 };
 
-/* ------------------------------------------------------------------ */
-/* Table + note + save                                                */
-/* ------------------------------------------------------------------ */
-
 const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
     data,
     schoolName,
@@ -336,13 +300,11 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
     const { id } = useParams<{ id: string }>();
 
     useEffect(() => {
-        // when category changes, reset table rows + note + saved state
         setRows(data);
         setSaved(false);
         onUnsavedChanges?.(false);
     }, [data, onUnsavedChanges]);
 
-    // Check for unsaved changes
     useEffect(() => {
         const hasChanges = !saved && (
             rows.some((row, index) => row.recount !== data[index]?.recount) ||
@@ -352,12 +314,10 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
     }, [rows, notes, saved, data, onUnsavedChanges]);
 
     const validateInput = (raw: string, row: ResourceItem) => {
-        // Allow empty while typing; treat as invalid for save
         if (raw.trim() === "") {
             return { inputValue: "", recount: row.recount, error: "Enter a non-negative whole number" };
         }
 
-        // Reject decimals or non-numeric characters
         if (!/^-?\d+$/.test(raw.trim())) {
             return { inputValue: raw, recount: row.recount, error: "Enter a non-negative whole number" };
         }
@@ -367,7 +327,6 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
             return { inputValue: raw, recount: row.recount, error: "Enter a non-negative whole number" };
         }
 
-        // Clamp negatives to 0 on blur; while typing we flag error but keep last valid value
         if (parsed < 0) {
             return { inputValue: raw, recount: row.recount, error: "Enter a non-negative whole number" };
         }
@@ -396,7 +355,6 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
             prev.map((row, i) => {
                 if (i !== index) return row;
 
-                // On blur, if invalid or empty/negative, clamp to 0
                 if (row.error) {
                     const percentDiff =
                         row.previous > 0 ? ((0 - row.previous) / row.previous) * 100 : 0;
@@ -431,7 +389,6 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
 
     return (
         <>
-            {/* Resources card – ONLY the table */}
             <div className={styles.resourceRecountCard}>
                 <table className={styles.table}>
                     <thead>
@@ -457,7 +414,6 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
                 </table>
             </div>
 
-            {/* Notes & button BELOW the card */}
             <div className={styles.notesSection}>
                 <div className={styles.notesLabelRow}>
                     <span className={styles.notesLabelMain}>Recount note</span>
@@ -500,10 +456,6 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
     );
 };
 
-/* ------------------------------------------------------------------ */
-/* Fetch inspection + per-category data                               */
-/* ------------------------------------------------------------------ */
-
 const findPreviousInspection = async (
     current: Inspection
 ): Promise<Inspection | null> => {
@@ -519,7 +471,6 @@ const findPreviousInspection = async (
 
     if (candidates.length === 0) return null;
 
-    // Prefer inspections before the current one; otherwise pick the most recent overall
     const earlier = candidates.filter(
         (ins) => new Date(ins.eventDate).getTime() < currentDate
     );
@@ -554,7 +505,6 @@ const RecountDataScreen: React.FC = () => {
 
     const navigate = useNavigate();
 
-    // Override home navigation to show confirmation if there are unsaved changes
     const handleHomeNavigation = () => {
         if (hasUnsavedChanges) {
             setShowExitModal(true);
@@ -601,7 +551,6 @@ const RecountDataScreen: React.FC = () => {
                         setActiveCategoryId(cats[0].id);
                     }
 
-                    // Resolve previous inspection for comparison
                     findPreviousInspection(result)
                         .then(setPreviousInspection)
                         .catch((err) => {
@@ -624,7 +573,6 @@ const RecountDataScreen: React.FC = () => {
     };
 }, [id]);
 
-    // Determine the active category and its form data
     const activeCategory =
         categories.find((c) => c.id === activeCategoryId) ?? categories[0];
 
@@ -745,7 +693,6 @@ const RecountDataScreen: React.FC = () => {
                 onHomeClick={handleHomeNavigation}
             />
 
-            {/* Category sync info row, near header */}
             <div className={styles.categoryStatusRow}>
                 {activeCategory && (
                     <div className={styles.categoryStatusChip}>
@@ -773,7 +720,6 @@ const RecountDataScreen: React.FC = () => {
                         <Info size={16} className={styles.infoIcon} />
                     </div>
 
-                    {/* Category pills below section header */}
                     <CategoryTabs
                         categories={categories}
                         activeId={activeCategoryId}
@@ -796,7 +742,6 @@ const RecountDataScreen: React.FC = () => {
                 </div>
             </div>
 
-            {/* Exit Confirmation Modal */}
             {showExitModal && (
                 <>
                     <div 

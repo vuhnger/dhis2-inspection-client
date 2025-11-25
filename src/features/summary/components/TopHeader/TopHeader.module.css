@@ -4,14 +4,12 @@
   border-radius: 0 0 24px 24px;
 }
 
-/* Top row */
 .topRow {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
 }
 
-/* Title + icon + edit */
 .leftGroup {
   display: flex;
   align-items: flex-start;
@@ -24,7 +22,6 @@
   align-items: flex-start;
 }
 
-/* Circle gradient icon */
 .logoWrapper {
   width: 48px;
   height: 48px;
@@ -68,7 +65,6 @@
   letter-spacing: -0.2px;
 }
 
-/* Date on next line, slightly indented look */
 .dateRow {
   margin: 2px 0 0;
   font-size: 13px;
@@ -143,7 +139,6 @@
   margin-left: 0;
 }
 
-/* Home button with blue tonal styling */
 .homeButton {
   display: flex;
   flex-direction: row;
@@ -179,7 +174,6 @@
   transform: translateY(1px);
 }
 
-/* Base pill style */
 .tab {
   min-width: 170px;
   padding: 9px 22px;
@@ -194,7 +188,6 @@
   box-shadow: 0 4px 8px rgba(15, 23, 42, 0.05);
 }
 
-/* Icon + label inside tab */
 .tabInner {
   display: flex;
   align-items: center;
@@ -207,7 +200,6 @@
 }
 
 
-/* Active = dark pill (Current inspection) */
 .tabActive {
   background: #101827;
   border-color: #101827;
@@ -260,7 +252,6 @@
   box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
 }
 
-/* Optional: make edit button darker when in edit mode */
 .editButtonActive {
   background: #111827;
   color: #ffffff;

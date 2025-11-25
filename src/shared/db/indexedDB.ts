@@ -1,12 +1,6 @@
-/**
- * IndexedDB wrapper for local inspection storage
- * Provides offline-first data persistence for the inspection app
- */
-
 import type { Inspection, CreateInspectionInput, UpdateInspectionInput } from '../types/inspection'
 
 const DB_NAME = 'InspectionDB'
-// Current schema version. Only bump this number forward; lowering it causes IndexedDB VersionError
 const DB_VERSION = 4
 const STORE_NAME = 'inspections'
 export const INSPECTIONS_CHANGED_EVENT = 'inspections:changed'
@@ -18,12 +12,8 @@ function emitInspectionsChanged() {
     window.dispatchEvent(new Event(INSPECTIONS_CHANGED_EVENT))
 }
 
-/**
- * Initialize IndexedDB database and create object stores
- */
 function openDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
-        // Check if IndexedDB is available
         if (!window.indexedDB) {
             reject(new Error('IndexedDB is not supported in this browser'))
             return
@@ -51,7 +41,6 @@ function openDB(): Promise<IDBDatabase> {
             request.onsuccess = () => {
                 const db = request.result
 
-                // Add error handler for the database connection
                 db.onerror = (event) => {
                     console.error('Database error:', event)
                 }
@@ -67,11 +56,9 @@ function openDB(): Promise<IDBDatabase> {
             request.onupgradeneeded = (event) => {
                 const db = (event.target as IDBOpenDBRequest).result
 
-                // Create inspections store if it doesn't exist
                 if (!db.objectStoreNames.contains(STORE_NAME)) {
                     const objectStore = db.createObjectStore(STORE_NAME, { keyPath: 'id' })
 
-                    // Create indexes for efficient querying
                     objectStore.createIndex('orgUnit', 'orgUnit', { unique: false })
                     objectStore.createIndex('eventDate', 'eventDate', { unique: false })
                     objectStore.createIndex('status', 'status', { unique: false })
@@ -86,9 +73,6 @@ function openDB(): Promise<IDBDatabase> {
     })
 }
 
-/**
- * Generate a UUID v4
- */
 function generateUUID(): string {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
         const r = (Math.random() * 16) | 0
@@ -97,9 +81,6 @@ function generateUUID(): string {
     })
 }
 
-/**
- * Get all inspections from the database
- */
 export async function getAllInspections(): Promise<Inspection[]> {
     const db = await openDB()
 
@@ -118,9 +99,6 @@ export async function getAllInspections(): Promise<Inspection[]> {
     })
 }
 
-/**
- * Get a single inspection by ID
- */
 export async function getInspectionById(id: string): Promise<Inspection | null> {
     const db = await openDB()
 
@@ -139,9 +117,6 @@ export async function getInspectionById(id: string): Promise<Inspection | null> 
     })
 }
 
-/**
- * Create a new inspection
- */
 export async function createInspection(input: CreateInspectionInput): Promise<Inspection> {
     const db = await openDB()
 
@@ -152,7 +127,6 @@ export async function createInspection(input: CreateInspectionInput): Promise<In
         createdAt: now,
         updatedAt: now,
         syncStatus: 'not_synced',
-        // Ensure per-category maps exist when provided
         formDataByCategory: input.formDataByCategory,
         categorySyncStatus: input.categorySyncStatus,
         categoryEventIds: input.categoryEventIds,
@@ -175,9 +149,6 @@ export async function createInspection(input: CreateInspectionInput): Promise<In
     })
 }
 
-/**
- * Save or update an inspection with a provided ID (used for importing server data)
- */
 export async function saveInspection(inspection: Inspection): Promise<Inspection> {
     const db = await openDB()
     const record: Inspection = {
@@ -202,13 +173,9 @@ export async function saveInspection(inspection: Inspection): Promise<Inspection
     })
 }
 
-/**
- * Update an existing inspection
- */
 export async function updateInspection(id: string, updates: UpdateInspectionInput): Promise<Inspection> {
     const db = await openDB()
 
-    // First, get the existing inspection
     const existing = await getInspectionById(id)
     if (!existing) {
         throw new Error(`Inspection with id ${id} not found`)
@@ -217,8 +184,8 @@ export async function updateInspection(id: string, updates: UpdateInspectionInpu
     const updated: Inspection = {
         ...existing,
         ...updates,
-        id, // Ensure ID doesn't change
-        createdAt: existing.createdAt, // Preserve creation time
+        id,
+        createdAt: existing.createdAt,
         updatedAt: new Date().toISOString(),
     }
 
@@ -238,9 +205,6 @@ export async function updateInspection(id: string, updates: UpdateInspectionInpu
     })
 }
 
-/**
- * Delete an inspection
- */
 export async function deleteInspection(id: string): Promise<void> {
     const db = await openDB()
 
@@ -260,9 +224,6 @@ export async function deleteInspection(id: string): Promise<void> {
     })
 }
 
-/**
- * Get inspections by status
- */
 export async function getInspectionsByStatus(status: string): Promise<Inspection[]> {
     const db = await openDB()
 
@@ -282,9 +243,6 @@ export async function getInspectionsByStatus(status: string): Promise<Inspection
     })
 }
 
-/**
- * Get inspections by sync status
- */
 export async function getInspectionsBySyncStatus(syncStatus: string): Promise<Inspection[]> {
     const db = await openDB()
 
@@ -304,10 +262,6 @@ export async function getInspectionsBySyncStatus(syncStatus: string): Promise<In
     })
 }
 
-/**
- * Clear all inspections from the database
- * Useful for removing test data or resetting the app
- */
 export async function clearAllInspections(): Promise<void> {
     const db = await openDB()
 
@@ -330,10 +284,6 @@ export async function clearAllInspections(): Promise<void> {
     })
 }
 
-/**
- * Delete the entire IndexedDB database
- * Use this to recover from a corrupted database state
- */
 export async function deleteDatabase(): Promise<void> {
     return new Promise((resolve, reject) => {
         console.log('Attempting to delete IndexedDB database...')
@@ -358,9 +308,6 @@ export async function deleteDatabase(): Promise<void> {
     })
 }
 
-/**
- * Check if IndexedDB is available and working
- */
 export async function checkIndexedDBHealth(): Promise<{
     available: boolean
     error?: string
@@ -375,7 +322,6 @@ export async function checkIndexedDBHealth(): Promise<{
             }
         }
 
-        // Try to open the database
         const db = await openDB()
         db.close()
 
@@ -385,7 +331,6 @@ export async function checkIndexedDBHealth(): Promise<{
 
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
-        // Provide helpful suggestions based on the error
         let details = 'Possible causes:\n'
         if (errorMessage.includes('blocked')) {
             details += '- Close other tabs with this app open\n'

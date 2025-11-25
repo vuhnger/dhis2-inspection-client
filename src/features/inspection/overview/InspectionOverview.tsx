@@ -13,15 +13,13 @@ import type { SyncStatus } from '../../../shared/types/inspection'
 
 
 type Category = 'resources' | 'staff' | 'students' | 'facilities'
-// Only treat these org unit group IDs as pedagogical categories
 const ALLOWED_CATEGORY_GROUP_IDS = new Set([
-    'ib40OsG9QAI', // LBE
-    'SPCm0Ts3SLR', // UBE
-    'sSgWDKuCrmi', // ECD
-    'UzSEGuwAfyX', // Tertiary
+    'ib40OsG9QAI',
+    'SPCm0Ts3SLR',
+    'sSgWDKuCrmi',
+    'UzSEGuwAfyX',
 ])
 
-// Category metadata
 const CATEGORY_ORDER: Category[] = ['staff', 'resources', 'students', 'facilities']
 
 const CATEGORY_LABELS: Record<Category, string> = {
@@ -32,26 +30,20 @@ const CATEGORY_LABELS: Record<Category, string> = {
 }
 
 type FormState = {
-    // Resources form fields (using numbers or empty string for editing)
     textbooks: number | string
     chairs: number | string
 
-    // Students form fields
     totalStudents: string | number
     maleStudents: string | number
     femaleStudents: string | number
 
-    // Staff form fields
     staffCount: string | number
 
-    // Facilities form fields
     classroomCount: string | number
 
-    // Notes
     testFieldNotes: string
 }
 
-// Map each category to its fields
 const CATEGORY_FIELDS: Record<Category, Array<keyof FormState>> = {
     resources: ['textbooks', 'chairs'],
     students: ['totalStudents', 'maleStudents', 'femaleStudents'],
@@ -109,8 +101,6 @@ const InspectionOverview: React.FC = () => {
     const [isOnline, setIsOnline] = React.useState(navigator.onLine)
     const [showCompleteModal, setShowCompleteModal] = React.useState(false)
 
-    // Load form data from inspection when available
-    // Hydrate category forms from inspection data + fetched categories
     React.useEffect(() => {
         if (!inspection) {
             return
@@ -128,7 +118,6 @@ const InspectionOverview: React.FC = () => {
                 ? fetchedCategories
                 : [{ id: 'default', name: i18n.t('School type') }]
 
-        // Build form map with fallbacks
         setCategoryForms((prev) => {
             const next: Record<string, FormState> = {}
             const sourceMap = inspection.formDataByCategory || {}
@@ -138,7 +127,6 @@ const InspectionOverview: React.FC = () => {
                 next[cat.id] = normalizeForm(
                     prev[cat.id] ||
                     sourceMap[cat.id]?.formData ||
-                    // If only a single category and we have legacy formData, reuse it
                     (categoryList.length === 1 ? fallbackForm : DEFAULT_FORM)
                 )
             })
@@ -146,21 +134,18 @@ const InspectionOverview: React.FC = () => {
             return next
         })
 
-        // Sync categories back to the inspection record for future loads
         if (fetchedCategories.length && (!inspection.orgUnitCategories || inspection.orgUnitCategories.length === 0)) {
             updateInspection({ orgUnitCategories: fetchedCategories }).catch((err) => {
                 console.warn('Unable to persist org unit categories on inspection', err)
             })
         }
 
-        // Ensure we have an active category
         setActiveCategoryId((prev) => {
             const exists = categoryList.some((c) => c.id === prev)
             return exists ? prev : categoryList[0].id
         })
     }, [inspection, schoolCategories, updateInspection])
 
-    // Load school categories (org unit groups)
     React.useEffect(() => {
         const fetchCategories = async () => {
             if (!inspection?.orgUnit) {
@@ -168,7 +153,6 @@ const InspectionOverview: React.FC = () => {
                 return
             }
 
-            // If offline, fall back to whatever we already have stored
             if (!isOnline) {
                 if (inspection.orgUnitCategories?.length) {
                     setSchoolCategories(inspection.orgUnitCategories)
@@ -209,7 +193,6 @@ const InspectionOverview: React.FC = () => {
         fetchCategories()
     }, [inspection?.orgUnit, inspection?.orgUnitCategories, isOnline])
 
-    // Track online/offline status
     React.useEffect(() => {
         const handleOnline = () => setIsOnline(true)
         const handleOffline = () => setIsOnline(false)
@@ -309,7 +292,6 @@ const InspectionOverview: React.FC = () => {
         return nextErrors
     }, [])
 
-    // Validate all categories
     const validateAll = React.useCallback((state: FormState) => {
         const allErrors: Partial<Record<keyof FormState, string>> = {}
 
@@ -340,13 +322,11 @@ const InspectionOverview: React.FC = () => {
                 const nextForm = updater(prevForm)
                 const nextForms = { ...prev, [categoryId]: nextForm }
 
-                // Update validation for the active category
                 setCategoryErrors((prevErrors) => ({
                     ...prevErrors,
                     [categoryId]: validateAll(nextForm),
                 }))
 
-                // Auto-save to database on form changes
                 if (inspection) {
                     const formDataByCategory: Record<
                         string,
@@ -393,15 +373,12 @@ const InspectionOverview: React.FC = () => {
             }))
         }
 
-    // Check if a category is complete (all fields filled and valid)
     const isCategoryComplete = React.useCallback((category: Category, state: FormState): boolean => {
         const fields = CATEGORY_FIELDS[category]
 
-        // Check if all fields have values
         const allFieldsFilled = fields.every(field => state[field] !== '')
         if (!allFieldsFilled) return false
 
-        // Validate the fields
         const categoryErrors = validateCategory(category, state)
         return Object.keys(categoryErrors).length === 0
     }, [validateCategory])
@@ -411,7 +388,6 @@ const InspectionOverview: React.FC = () => {
         return isCategoryComplete(selectedCategory, form)
     }, [activeCategoryId, categoryForms, isCategoryComplete, selectedCategory])
 
-    // Submit is enabled when the active category is valid
     const submitDisabled = !currentCategoryValid
     const currentCategoryIndex = CATEGORY_ORDER.indexOf(selectedCategory)
     const previousCategory = currentCategoryIndex > 0 ? CATEGORY_ORDER[currentCategoryIndex - 1] : null
@@ -520,12 +496,11 @@ const InspectionOverview: React.FC = () => {
                 categorySyncStatus,
                 orgUnitCategories: categoryList,
                 status: 'completed',
-                syncStatus: computeSyncStatus(categorySyncStatus), // Mark as not synced until pushed to DHIS2
+                syncStatus: computeSyncStatus(categorySyncStatus),
             })
             console.log('Form submitted successfully and saved to local database')
             
             setShowCompleteModal(false)
-            // Navigate to summary page
             navigate(`/summary/${inspection?.id}`)
         } catch (error) {
             console.error('Failed to save inspection:', error)
@@ -538,7 +513,6 @@ const InspectionOverview: React.FC = () => {
             const inspectionName = inspection?.orgUnitName || 'Inspection'
             const inspectionId = inspection?.id
             
-            // Reset inspection back to scheduled status and clear all form data
             await updateInspection({
                 status: 'scheduled',
                 syncStatus: 'not_synced',
@@ -549,7 +523,6 @@ const InspectionOverview: React.FC = () => {
             console.log('Inspection discarded and reset to scheduled')
             
             setShowCompleteModal(false)
-            // Navigate back to home page with discard info for toast
             navigate('/', { 
                 state: { 
                     discardedInspection: { 
@@ -587,7 +560,6 @@ const InspectionOverview: React.FC = () => {
     const handleCounterChange = (field: keyof FormState) =>
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const value = e.target.value
-            // Allow empty string for easier editing
             if (value === '') {
                 updateForm(prev => ({
                     ...prev,
@@ -609,7 +581,7 @@ const InspectionOverview: React.FC = () => {
             case 'resources':
                 return (
                     <div className={classes.formFields}>
-                        {/* Textbooks Counter */}
+                        {}
                         <div className={classes.counterField}>
                             <label className={classes.counterLabel}>{i18n.t('Textbooks')}</label>
                             <div className={classes.counterControl}>
@@ -639,7 +611,7 @@ const InspectionOverview: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Chairs Counter */}
+                        {}
                         <div className={classes.counterField}>
                             <label className={classes.counterLabel}>{i18n.t('Chairs')}</label>
                             <div className={classes.counterControl}>
@@ -669,7 +641,7 @@ const InspectionOverview: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Test field section */}
+                        {}
                         <div className={classes.testFieldSection}>
                             <div className={classes.testFieldHeader}>
                                 <span className={classes.testFieldLabel}>{i18n.t('Test field')}</span>
@@ -690,7 +662,7 @@ const InspectionOverview: React.FC = () => {
             case 'students':
                 return (
                     <div className={classes.formFields}>
-                        {/* Total Students Counter */}
+                        {}
                         <div className={classes.counterField}>
                             <label className={classes.counterLabel}>{i18n.t('Total Students')}</label>
                             <div className={classes.counterControl}>
@@ -723,7 +695,7 @@ const InspectionOverview: React.FC = () => {
                             )}
                         </div>
 
-                        {/* Male Students Counter */}
+                        {}
                         <div className={classes.counterField}>
                             <label className={classes.counterLabel}>{i18n.t('Male Students')}</label>
                             <div className={classes.counterControl}>
@@ -756,7 +728,7 @@ const InspectionOverview: React.FC = () => {
                             )}
                         </div>
 
-                        {/* Female Students Counter */}
+                        {}
                         <div className={classes.counterField}>
                             <label className={classes.counterLabel}>{i18n.t('Female Students')}</label>
                             <div className={classes.counterControl}>
@@ -794,7 +766,7 @@ const InspectionOverview: React.FC = () => {
             case 'staff':
                 return (
                     <div className={classes.formFields}>
-                        {/* Staff Count Counter */}
+                        {}
                         <div className={classes.counterField}>
                             <label className={classes.counterLabel}>{i18n.t('Total Staff Count')}</label>
                             <div className={classes.counterControl}>
@@ -832,7 +804,7 @@ const InspectionOverview: React.FC = () => {
             case 'facilities':
                 return (
                     <div className={classes.formFields}>
-                        {/* Classroom Count Counter */}
+                        {}
                         <div className={classes.counterField}>
                             <label className={classes.counterLabel}>{i18n.t('Number of Classrooms')}</label>
                             <div className={classes.counterControl}>
@@ -869,7 +841,6 @@ const InspectionOverview: React.FC = () => {
         }
     }
 
-    // Show loading state while inspection is loading
     if (inspectionLoading) {
         return (
             <div className={classes.page}>
@@ -880,7 +851,6 @@ const InspectionOverview: React.FC = () => {
         )
     }
 
-    // Show error if no inspection found
     if (!inspection && id) {
         return (
             <div className={classes.page}>
@@ -1198,7 +1168,7 @@ const InspectionOverview: React.FC = () => {
                 )}
             </div>
 
-            {/* Complete Inspection Bottom Sheet */}
+            {}
             {showCompleteModal && (
                 <>
                     <div 

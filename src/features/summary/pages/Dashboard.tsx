@@ -22,7 +22,6 @@ const SummaryScreen: React.FC = () => {
     inspection,
   } = useInspectionSummary();
 
-  // Local editable header state
   const [displaySchoolName, setDisplaySchoolName] = React.useState("");
   const [displayDate, setDisplayDate] = React.useState("");
 
@@ -43,7 +42,6 @@ const SummaryScreen: React.FC = () => {
 
   const resourceMetrics = buildResourceMetrics(summary);
   const studentMetrics = buildStudentMetrics(summary);
-  // const studentMetrics = buildStudentMetrics(summary, previousSummary); // need to fecth previous (as of now, this parameter is optional as displays 0% change as default)
   const staffMetrics = buildStaffMetrics(summary);
 
   return (
@@ -54,7 +52,6 @@ const SummaryScreen: React.FC = () => {
         onHeaderChange={(name, date) => {
           setDisplaySchoolName(name);
           setDisplayDate(date);
-          // TODO: later – persist to DB / DHIS2 here
         }}
       />
 

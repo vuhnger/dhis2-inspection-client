@@ -1,8 +1,3 @@
-/**
- * React hook for managing inspections in IndexedDB
- * Provides a convenient API for CRUD operations with automatic state management
- */
-
 import { useState, useEffect, useCallback } from 'react'
 
 import * as db from '../db/indexedDB'
@@ -15,7 +10,6 @@ export function useInspections() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<Error | null>(null)
 
-    // Load all inspections on mount
     const loadInspections = useCallback(async () => {
         try {
             setLoading(true)
@@ -33,7 +27,6 @@ export function useInspections() {
         loadInspections()
     }, [loadInspections])
 
-    // Listen for external DB changes (e.g., sync updates) to refresh state
     useEffect(() => {
         if (typeof window === 'undefined') {
             return
@@ -47,7 +40,6 @@ export function useInspections() {
         }
     }, [loadInspections])
 
-    // Create a new inspection
     const createInspection = useCallback(async (input: CreateInspectionInput): Promise<Inspection> => {
         try {
             setError(null)
@@ -61,7 +53,6 @@ export function useInspections() {
         }
     }, [])
 
-    // Update an existing inspection
     const updateInspection = useCallback(async (id: string, updates: UpdateInspectionInput): Promise<Inspection> => {
         try {
             setError(null)
@@ -77,7 +68,6 @@ export function useInspections() {
         }
     }, [])
 
-    // Delete an inspection
     const deleteInspection = useCallback(async (id: string): Promise<void> => {
         try {
             setError(null)
@@ -90,7 +80,6 @@ export function useInspections() {
         }
     }, [])
 
-    // Get a single inspection by ID
     const getInspection = useCallback(async (id: string): Promise<Inspection | null> => {
         try {
             setError(null)
@@ -114,9 +103,6 @@ export function useInspections() {
     }
 }
 
-/**
- * Hook for managing a single inspection by ID
- */
 export function useInspection(id: string | null) {
     const [inspection, setInspection] = useState<Inspection | null>(null)
     const [loading, setLoading] = useState(true)

@@ -11,10 +11,10 @@ function getPercentDiff(current: number, previous?: number): number {
 
 
 function getStatusForStudentChange(percent: number): MetricCardProps["status"] {
-  if (percent <= -20) return "error";     // big drop
-  if (percent < 0) return "warning";      // small drop
-  if (percent === 0) return "info";       // unchanged
-  return "success";                       // increase
+  if (percent <= -20) return "error";
+  if (percent < 0) return "warning";
+  if (percent === 0) return "info";
+  return "success";
 }
 
 
@@ -28,16 +28,13 @@ export function buildStudentMetrics(
   const prevMale = previous?.maleStudents ?? maleStudents;
   const prevGpi = previous?.genderGpi ?? genderGpi;
 
-  // 1. Percent diffs
   const femaleDiff = getPercentDiff(femaleStudents, prevFemale);
   const maleDiff = getPercentDiff(maleStudents, prevMale);
   const gpiDiff = getPercentDiff(genderGpi, prevGpi);
 
-  // 2. Status colors
   const femaleStatus = getStatusForStudentChange(femaleDiff);
   const maleStatus = getStatusForStudentChange(maleDiff);
 
-  // 3. Evaluate GPI by your DHIS2 standard logic
   const gpiEval = evaluateMetric("gpiLearners", Number(genderGpi));
 
   return [
@@ -59,7 +56,7 @@ export function buildStudentMetrics(
       label: "Gender GPI",
       value: genderGpi.toFixed(2),
       status: gpiEval.status,
-      statusText: gpiEval.statusText, // keep standard system for GPI
+      statusText: gpiEval.statusText,
     },
   ];
 }
