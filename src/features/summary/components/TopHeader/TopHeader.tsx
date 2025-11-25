@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { Edit3, Check, FileText, RotateCcw, Home } from "lucide-react";
+import { Edit3, Check, FileText, RotateCcw, Home, Info} from "lucide-react";
 import styles from "./TopHeader.module.css";
 
 interface HeaderProps {
@@ -98,10 +98,17 @@ const TopHeader: React.FC<HeaderProps> = ({
             </>
           ) : (
             <>
-              <h1 className={styles.headerTitle}>
-                {pageTitle}:{" "}
-                <span className={styles.schoolName}>{schoolName}</span>
-              </h1>
+            <h1 className={styles.headerTitle}>
+              {pageTitle}:{" "}
+              <span className={styles.schoolName}>
+                {schoolName}
+
+                {/* Info icon ONLY on RecountData screen */}
+                {currentActiveTab === "recount" && (
+                  <Info size={18} className={styles.inlineInfoIcon} />
+                )}
+              </span>
+            </h1>
               <p className={styles.dateRow}>Date: {inspectionDate}</p>
             </>
           )}
@@ -109,31 +116,18 @@ const TopHeader: React.FC<HeaderProps> = ({
 
         {/* RIGHT SIDE — EDIT + SYNC + AVATAR */}
         <div className={styles.rightBlock}>
-          <button
-            type="button"
-            className={`${styles.editButton} ${
-              isEditing ? styles.editButtonActive : ""
-            }`}
-            onClick={handleEditClick}
-            aria-label={isEditing ? "Save header" : "Edit header"}
-          >
-            {isEditing ? <Check size={18} /> : <Edit3 size={18} />}
-          </button>
-
-          {isSynced && (
-            <div className={styles.syncedChip}>
-              <span className={styles.syncedDot} />
-              Synced
-            </div>
+          {currentActiveTab !== "recount" && (
+            <button
+              type="button"
+              className={`${styles.editButton} ${
+                isEditing ? styles.editButtonActive : ""
+              }`}
+              onClick={handleEditClick}
+              aria-label={isEditing ? "Save header" : "Edit header"}
+            >
+              {isEditing ? <Check size={18} /> : <Edit3 size={18} />}
+            </button>
           )}
-
-          <button
-            type="button"
-            className={styles.userAvatar}
-            onClick={() => navigate("/profile")}
-          >
-            {userInitials}
-          </button>
         </div>
       </div>
 

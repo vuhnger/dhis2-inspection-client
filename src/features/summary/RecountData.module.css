@@ -1,7 +1,8 @@
 .dashboardContainer {
   min-height: 100vh;
-  background-color: #e6f3ff;
+  background-color: var(--colors-blue050, #e6f3ff);
   padding-bottom: 2rem;
+  font-family: inherit;
 }
 
 .content {
@@ -15,65 +16,7 @@
   max-width: 720px;
 }
 
-
-.header {
-  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-  color: white;
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.headerContent {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  max-width: 100%;
-}
-
-.headerIcon {
-  flex-shrink: 0;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 0.5rem;
-  background-color: rgba(255, 255, 255, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.headerIcon img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  border-radius: 0.5rem;
-}
-
-.headerText {
-  flex: 1;
-  min-width: 0;
-}
-
-.headerTitle {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0 0 0.5rem 0;
-  letter-spacing: 0.01em;
-}
-
-.schoolName {
-  font-size: 1rem;
-  font-weight: 500;
-  margin: 0.25rem 0;
-  opacity: 0.95;
-}
-
-.inspectionDate {
-  font-size: 0.875rem;
-  margin: 0.25rem 0 0 0;
-  opacity: 0.75;
-}
+/* Header row above card */
 
 .recountHeaderRow {
   display: flex;
@@ -86,20 +29,22 @@
   margin: 0;
   font-size: 18px;
   font-weight: 600;
+  color: var(--colors-grey900, #111827);
 }
 
 .infoIcon {
-  color: #9e9e9e;
+  color: var(--colors-grey600, #9e9e9e);
 }
 
+/* Card & table */
 
 .resourceRecountCard {
-  background: #ffffff;
+  background: var(--colors-white, #ffffff);
   border-radius: 16px;
-  padding: 16px;
+  padding: 16px 20px;
   width: 100%;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  margin-bottom: 32px;
+  margin-bottom: 16px;     
 }
 
 .table {
@@ -111,18 +56,20 @@
 .table th {
   font-size: 12px;
   font-weight: 600;
-  color: #999;
+  color: var(--colors-grey600, #6b7280);
   padding-bottom: 8px;
   text-align: center;
 }
 
 .itemHead {
   text-align: left;
+  width: 30%;
 }
 
 .row td {
-  padding: 6px 4px;
+  padding: 8px 4px;
   font-size: 14px;
+  color: var(--colors-grey900, #111827);
 }
 
 .itemCell {
@@ -134,43 +81,48 @@
 }
 
 .valueChip {
-  background: #f5f6fa;
+  background: var(--colors-grey050, #f5f6fa);
   border-radius: 10px;
   padding: 6px 12px;
   min-width: 64px;
   display: inline-block;
 }
 
+/* Recount input uses DHIS2-like form styles */
+
 .recountInput {
-  background: #ffffff;             
+  background: var(--colors-white, #ffffff);
   border-radius: 10px;
-  border: 1px solid #e5e7eb;     
+  border: 1px solid var(--colors-grey400, #e5e7eb);
   padding: 6px 12px;
   min-width: 64px;
   text-align: center;
   font-size: 14px;
   outline: none;
-  color: #111827;
+  color: var(--colors-grey900, #111827);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .recountInput:focus {
-  border-color: #3b82f6;              
-  background: #ffffff;
-  box-shadow: 0 0 0 2px rgba(59,130,246,0.25);
+  border-color: var(--colors-blue600, #2563eb);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
 }
 
+/* Diff colours */
+
 .diffPositive {
-  color: #16a34a;
+  color: var(--colors-green700, #16a34a);
 }
 
 .diffNegative {
-  color: #dc2626;
+  color: var(--colors-red700, #dc2626);
 }
 
 .diffNeutral {
-  color: #6b7280;
+  color: var(--colors-grey600, #6b7280);
 }
+
+/* Status icons */
 
 .statusCell {
   text-align: center;
@@ -186,30 +138,23 @@
 }
 
 .statusOk {
-  background: #e5f4ec;
-  color: #0f9d58;
+  background: var(--colors-green050, #e5f4ec);
+  color: var(--colors-green700, #0f9d58);
 }
 
 .statusWarning {
-  background: #fff7e0;
-  color: #fbbc05;
+  background: var(--colors-yellow050, #fff7e0);
+  color: var(--colors-yellow700, #f59e0b);
 }
 
 .statusError {
-  background: #fde7e9;
-  color: #ea4335;
+  background: var(--colors-red050, #fde7e9);
+  color: var(--colors-red700, #ea4335);
 }
 
 
 .notesSection {
-  margin-top: 8px;
-}
-
-.notesLabel {
-  font-size: 12px;
-  color: #777;
-  margin-bottom: 4px;
-  display: block;
+    margin-top: 16px;
 }
 
 .notesLabelRow {
@@ -222,53 +167,111 @@
 .notesLabelMain {
   font-size: 13px;
   font-weight: 600;
-  color: #111827;
+  color: var(--colors-grey900, #111827);
 }
 
 .notesLabelOptional {
   font-size: 11px;
   padding: 2px 8px;
   border-radius: 9999px;
-  background: #e5f0ff;
-  color: #2563eb;
+  background: var(--colors-blue050, #e5f0ff);
+  color: var(--colors-blue600, #2563eb);
 }
 
 .notesTextArea textarea {
-  background: #f5f6fa;
+  background: #ffffff !important; 
+  border-radius: 16px; 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
+
+/* Save button */
 
 .saveButtonWrapper {
   display: flex;
-  justify-content: center; 
-  margin-top: 16px;
+  justify-content: flex-end;
+  margin-top: 24px;
 }
 
 .roundSaveButton {
   width: 180px;
-  background: #0a66ff;
-  color: white;
-  padding: 10px 0;
-  border: none;
-  border-radius: 9999px;
-  font-size: 0.95rem;
+  border-radius: 9999px !important;
+  justify-content: center;
   font-weight: 600;
-  cursor: pointer;
-  margin: 16px auto 0 auto;
-  display: block;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-  transition: background 0.2s ease, transform 0.1s ease;
+  margin-top: 0 !important; 
 }
 
-.roundSaveButton:hover {
-  background: #0058e6;
-}
-
-.roundSaveButton:active {
-  background: #004ecc;
-  transform: scale(0.98);
-}
-
+/* Level selector spacing */
 
 .levelRow {
   padding: 0 24px 8px;
 }
+
+.saveSuccessPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 9999px;
+    background: var(--colors-green050, #e6f9f0); 
+    color: var(--colors-green700, #059669);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.saveSuccessIcon {
+    flex-shrink: 0;
+}
+
+/* Category pills under "Resources" header */
+
+.categoryTabs {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0 16px;
+}
+
+.categoryPill {
+  border-radius: 9999px;
+  padding: 4px 12px;
+  border: 1px solid var(--colors-grey300, #d1d5db);
+  background: #ffffff;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--colors-grey700, #374151);
+}
+
+.categoryPillActive {
+  border-color: var(--colors-blue600, #2563eb);
+  background: var(--colors-blue050, #e5f0ff);
+  color: var(--colors-blue700, #1d4ed8);
+}
+
+/* Sync info near header */
+
+.categoryStatusRow {
+  padding: 0 24px 4px;
+}
+
+.categoryStatusChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: var(--colors-grey050, #f9fafb);
+  font-size: 12px;
+  color: var(--colors-grey700, #374151);
+}
+
+.categoryStatusCategory {
+  font-weight: 600;
+}
+
+.categoryStatusLabel {
+  font-weight: 500;
+}
+
+.categoryStatusEvent {
+  opacity: 0.8;
+}
+

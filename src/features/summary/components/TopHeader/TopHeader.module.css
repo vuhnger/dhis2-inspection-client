@@ -266,3 +266,24 @@
   color: #ffffff;
 }
 
+.infoIconWrapper {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+}
+
+.infoIcon {
+    color: #111;
+    opacity: 0.6;
+}
+
+.inlineInfoIcon {
+    margin-left: 6px;
+    vertical-align: middle;
+    opacity: 0.75;
+}
