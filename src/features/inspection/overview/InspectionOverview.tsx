@@ -33,7 +33,6 @@ type FormState = {
     textbooks: number | string
     chairs: number | string
 
-    totalStudents: string | number
     maleStudents: string | number
     femaleStudents: string | number
 
@@ -46,7 +45,7 @@ type FormState = {
 
 const CATEGORY_FIELDS: Record<Category, Array<keyof FormState>> = {
     resources: ['textbooks', 'chairs'],
-    students: ['totalStudents', 'maleStudents', 'femaleStudents'],
+    students: ['maleStudents', 'femaleStudents'],
     staff: ['staffCount'],
     facilities: ['classroomCount'],
 }
@@ -69,12 +68,15 @@ const normalizeForm = (form: Partial<FormState> | undefined): FormState => {
         const num = Number(value)
         return Number.isFinite(num) ? num : 0
     }
+    const male = toNumberOrZero(form?.maleStudents)
+    const female = toNumberOrZero(form?.femaleStudents)
+    const total = male + female
     return {
         textbooks: toNumberOrZero(form?.textbooks),
         chairs: toNumberOrZero(form?.chairs),
-        totalStudents: toNumberOrZero(form?.totalStudents),
-        maleStudents: toNumberOrZero(form?.maleStudents),
-        femaleStudents: toNumberOrZero(form?.femaleStudents),
+        totalStudents: total,
+        maleStudents: male,
+        femaleStudents: female,
         staffCount: toNumberOrZero(form?.staffCount),
         classroomCount: toNumberOrZero(form?.classroomCount),
         testFieldNotes: form?.testFieldNotes ?? '',
@@ -244,12 +246,6 @@ const InspectionOverview: React.FC = () => {
         }
 
         if (category === 'students') {
-            if (state.totalStudents === '' || state.totalStudents === null || state.totalStudents === undefined) {
-                nextErrors.totalStudents = i18n.t('Total student count is required')
-            } else if (Number(state.totalStudents) < 0) {
-                nextErrors.totalStudents = i18n.t('Enter a non-negative number')
-            }
-
             if (state.maleStudents === '' || state.maleStudents === null || state.maleStudents === undefined) {
                 nextErrors.maleStudents = i18n.t('Male student count is required')
             } else if (Number(state.maleStudents) < 0) {
@@ -260,16 +256,6 @@ const InspectionOverview: React.FC = () => {
                 nextErrors.femaleStudents = i18n.t('Female student count is required')
             } else if (Number(state.femaleStudents) < 0) {
                 nextErrors.femaleStudents = i18n.t('Enter a non-negative number')
-            }
-
-            const total = Number(state.totalStudents)
-            const male = Number(state.maleStudents)
-            const female = Number(state.femaleStudents)
-
-            if (total > 0 && male + female > total) {
-                nextErrors.totalStudents = i18n.t(
-                    'Total students cannot be less than male + female students'
-                )
             }
         }
 
@@ -320,11 +306,13 @@ const InspectionOverview: React.FC = () => {
             setCategoryForms((prev) => {
                 const prevForm = prev[categoryId] || DEFAULT_FORM
                 const nextForm = updater(prevForm)
-                const nextForms = { ...prev, [categoryId]: nextForm }
+                const computedTotal = Number(nextForm.maleStudents || 0) + Number(nextForm.femaleStudents || 0)
+                const normalizedNextForm = { ...nextForm, totalStudents: computedTotal }
+                const nextForms = { ...prev, [categoryId]: normalizedNextForm }
 
                 setCategoryErrors((prevErrors) => ({
                     ...prevErrors,
-                    [categoryId]: validateAll(nextForm),
+                    [categoryId]: validateAll(normalizedNextForm),
                 }))
 
                 if (inspection) {
@@ -349,7 +337,7 @@ const InspectionOverview: React.FC = () => {
                     })
 
                     updateInspection({
-                        formData: nextForm,
+                        formData: normalizedNextForm,
                         formDataByCategory,
                         categorySyncStatus,
                         status: 'in_progress',
@@ -662,39 +650,6 @@ const InspectionOverview: React.FC = () => {
             case 'students':
                 return (
                     <div className={classes.formFields}>
-                        {}
-                        <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Total Students')}</label>
-                            <div className={classes.counterControl}>
-                                <button
-                                    type="button"
-                                    className={classes.counterButton}
-                                    onClick={() => handleDecrement('totalStudents')}
-                                    aria-label={i18n.t('Decrease total students')}
-                                >
-                                    −
-                                </button>
-                                <input
-                                    type="number"
-                                    className={classes.counterInput}
-                                    value={form.totalStudents}
-                                    onChange={handleCounterChange('totalStudents')}
-                                    min="0"
-                                />
-                                <button
-                                    type="button"
-                                    className={classes.counterButton}
-                                    onClick={() => handleIncrement('totalStudents')}
-                                    aria-label={i18n.t('Increase total students')}
-                                >
-                                    +
-                                </button>
-                            </div>
-                            {errors.totalStudents && (
-                                <span className={classes.errorText}>{errors.totalStudents}</span>
-                            )}
-                        </div>
-
                         {}
                         <div className={classes.counterField}>
                             <label className={classes.counterLabel}>{i18n.t('Male Students')}</label>
