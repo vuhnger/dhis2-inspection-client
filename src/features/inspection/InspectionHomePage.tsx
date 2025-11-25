@@ -537,7 +537,7 @@ const InspectionHomePage: React.FC = () => {
                             return (
                                 <div
                                     key={inspection.id}
-                                    className={classes.inspectionCard}
+                                    className={classes.inspectionCardCompleted}
                                     onClick={() => navigate(`/summary/${inspection.id}`)}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' || e.key === ' ') {
