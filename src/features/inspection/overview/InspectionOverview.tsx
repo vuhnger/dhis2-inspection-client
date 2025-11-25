@@ -840,8 +840,9 @@ const InspectionOverview: React.FC = () => {
             className={classes.nextButton}
             onClick={handleSubmit}
             disabled={submitDisabled}
+            style={{ backgroundColor: '#F1F9FF' }}
         >
-            {i18n.t('Submit Report')}
+            {i18n.t('Complete inspection')}
         </Button>
     )
 
