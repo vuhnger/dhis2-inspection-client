@@ -1,7 +1,7 @@
 import i18n from '@dhis2/d2-i18n'
 import { CircularLoader, Modal, ModalTitle, ModalContent, ModalActions, ButtonStrip, Button } from '@dhis2/ui'
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 import { clearAllInspections } from '../../shared/db/indexedDB'
 import { useInspections } from '../../shared/hooks/useInspections'
@@ -17,6 +17,7 @@ import classes from './InspectionHomePage.module.css'
  */
 const InspectionHomePage: React.FC = () => {
     const navigate = useNavigate()
+    const location = useLocation()
     const [remoteLoading, setRemoteLoading] = React.useState(false)
     const [remoteError, setRemoteError] = React.useState<string | null>(null)
     const { inspections: localInspections, loading: localLoading, refetch: refetchInspections } = useInspections()
@@ -32,6 +33,8 @@ const InspectionHomePage: React.FC = () => {
     const [showDropdown, setShowDropdown] = React.useState(false)
     const [showAllUpcoming, setShowAllUpcoming] = React.useState(false)
     const [showAllCompleted, setShowAllCompleted] = React.useState(false)
+    const [showDiscardToast, setShowDiscardToast] = React.useState(false)
+    const [discardedInspectionInfo, setDiscardedInspectionInfo] = React.useState<{id: string, name: string} | null>(null)
     const loading = remoteLoading
     const localHasUnsynced = React.useMemo(
         () => localInspections.some((inspection) => inspection.syncStatus !== 'synced'),
@@ -84,6 +87,26 @@ const InspectionHomePage: React.FC = () => {
             console.error('Failed to refresh sync status:', err)
         })
     }, [localInspections, checkUnsyncedStatus])
+
+    // Handle discard toast notification
+    React.useEffect(() => {
+        const state = location.state as any
+        if (state?.discardedInspection) {
+            setDiscardedInspectionInfo(state.discardedInspection)
+            setShowDiscardToast(true)
+            
+            // Clear navigation state
+            navigate(location.pathname, { replace: true })
+            
+            // Auto-hide toast after 4 seconds
+            const timer = setTimeout(() => {
+                setShowDiscardToast(false)
+                setDiscardedInspectionInfo(null)
+            }, 4000)
+            
+            return () => clearTimeout(timer)
+        }
+    }, [location.state, location.pathname, navigate])
 
     // Pull DHIS2 events and store locally
     const pullRemote = React.useCallback(async () => {
@@ -181,6 +204,15 @@ const InspectionHomePage: React.FC = () => {
             day: 'numeric',
             month: 'short'
         })
+    }
+
+    // Handle undo discard
+    const handleUndoDiscard = () => {
+        if (discardedInspectionInfo) {
+            setShowDiscardToast(false)
+            setDiscardedInspectionInfo(null)
+            navigate(`/inspection/${discardedInspectionInfo.id}`)
+        }
     }
 
     // Handle clearing all data
@@ -620,6 +652,32 @@ const InspectionHomePage: React.FC = () => {
                     </ButtonStrip>
                 </ModalActions>
             </Modal>
+
+            {/* Discard Toast Notification */}
+            {showDiscardToast && discardedInspectionInfo && (
+                <div className={classes.discardToast}>
+                    <div className={classes.toastContent}>
+                        <span className={classes.toastMessage}>
+                            {i18n.t('Inspection discarded')}
+                        </span>
+                        <button 
+                            className={classes.undoButton}
+                            onClick={handleUndoDiscard}
+                        >
+                            {i18n.t('Undo')}
+                        </button>
+                    </div>
+                    <button 
+                        className={classes.closeToastButton}
+                        onClick={() => {
+                            setShowDiscardToast(false)
+                            setDiscardedInspectionInfo(null)
+                        }}
+                    >
+                        ×
+                    </button>
+                </div>
+            )}
         </div>
     )
 }

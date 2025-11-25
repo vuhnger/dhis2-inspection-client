@@ -506,6 +506,9 @@ const InspectionOverview: React.FC = () => {
 
     const handleDiscardInspection = async () => {
         try {
+            const inspectionName = inspection?.orgUnitName || 'Inspection'
+            const inspectionId = inspection?.id
+            
             // Reset inspection back to scheduled status and clear all form data
             await updateInspection({
                 status: 'scheduled',
@@ -517,8 +520,15 @@ const InspectionOverview: React.FC = () => {
             console.log('Inspection discarded and reset to scheduled')
             
             setShowCompleteModal(false)
-            // Navigate back to home page
-            navigate('/')
+            // Navigate back to home page with discard info for toast
+            navigate('/', { 
+                state: { 
+                    discardedInspection: { 
+                        id: inspectionId, 
+                        name: inspectionName 
+                    } 
+                } 
+            })
         } catch (error) {
             console.error('Failed to discard inspection:', error)
             setShowCompleteModal(false)
