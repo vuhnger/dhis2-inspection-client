@@ -530,8 +530,8 @@
 
 .testFieldSection {
   margin-top: var(--dhis2-space-16);
-  padding-top: var(--dhis2-space-16);
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: 0;
+  border-top: none;
   display: flex;
   flex-direction: column;
   gap: var(--dhis2-space-12);
