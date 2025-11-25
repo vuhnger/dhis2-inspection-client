@@ -187,125 +187,32 @@ function transformFormData(formData: InspectionFormData) {
 
 ---
 
-## Sync Workflow
+## Sync Workflow (push + pull)
 
-### 1. Creating an Inspection Event
+### Push (local → DHIS2)
+- Unsynced/failed inspections are stored in IndexedDB with `syncStatus`.
+- On sync (via the badge), the app posts to `POST /api/38/tracker?async=false` with `events: [...]`. On success, it stores the returned event UID in `dhis2EventId` and marks `syncStatus: 'synced'`.
+- Schools with multiple categories (LBE/UBE/ECD/Tertiary) are synced as separate events with category-labelled notes.
 
-```typescript
-import { useDataMutation } from '@dhis2/app-runtime';
-import dataMappings from '../docs/data-mappings.json';
+### Pull (DHIS2 → local)
+- After a push—or when tapping “Refresh from server”—the app calls `GET /api/38/tracker/events?program=UxK2o06ScIe&fields=…` and resolves org unit names via `/organisationUnits?id:in:[...]`.
+- Returned events are saved into IndexedDB with `source: 'server'` and `syncStatus: 'synced'`. Existing records with the same `dhis2EventId` are updated; otherwise new records are inserted. Local drafts are never overwritten.
+- Home/overview render from IndexedDB, so pulled events appear immediately with a “From server” hint.
 
-function useSyncInspection() {
-  const [mutate] = useDataMutation({
-    resource: 'events',
-    type: 'create'
-  });
+### Offline behaviour
+- Offline: all CRUD hits IndexedDB only; push/pull are skipped until online.
+- Coming online: the app can auto-sync unsynced items; manual refresh is also available.
 
-  const syncInspection = async (inspection: Inspection) => {
-    // Transform form data
-    const transformed = transformFormData(inspection.formData);
-
-    // Build data values array
-    const dataValues = buildDataValues(transformed);
-
-    // Create DHIS2 event
-    const payload = {
-      program: dataMappings.programs.schoolInspection.programId,
-      programStage: dataMappings.programs.schoolInspection.programStageId,
-      orgUnit: inspection.orgUnit,
-      eventDate: inspection.eventDate,
-      status: 'COMPLETED',
-      dataValues
-    };
-
-    try {
-      const response = await mutate(payload);
-      return response.response.importSummaries[0].reference;
-    } catch (error) {
-      console.error('Sync failed:', error);
-      throw error;
-    }
-  };
-
-  return { syncInspection };
-}
-```
-
-### 2. Building Data Values
-
-```typescript
-function buildDataValues(formData: InspectionFormData) {
-  const mappings = dataMappings.dataElements;
-  const dataValues = [];
-
-  // Resources
-  if (formData.textbooks) {
-    dataValues.push({
-      dataElement: mappings.resources.textbooks.dhis2Id,
-      value: formData.textbooks
-    });
-  }
-
-  if (formData.chairs) {
-    dataValues.push({
-      dataElement: mappings.resources.chairs.dhis2Id,
-      value: formData.chairs
-    });
-  }
-
-  if (formData.testFieldNotes) {
-    dataValues.push({
-      dataElement: mappings.resources.testFieldNotes.dhis2Id,
-      value: formData.testFieldNotes
-    });
-  }
-
-  // Students
-  dataValues.push({
-    dataElement: mappings.students.totalStudents.dhis2Id,
-    value: formData.totalStudents
-  });
-
-  dataValues.push({
-    dataElement: mappings.students.maleStudents.dhis2Id,
-    value: formData.maleStudents
-  });
-
-  dataValues.push({
-    dataElement: mappings.students.femaleStudents.dhis2Id,
-    value: formData.femaleStudents
-  });
-
-  // Staff
-  dataValues.push({
-    dataElement: mappings.staff.staffCount.dhis2Id,
-    value: formData.staffCount
-  });
-
-  // Facilities
-  dataValues.push({
-    dataElement: mappings.facilities.classroomCount.dhis2Id,
-    value: formData.classroomCount
-  });
-
-  // Note: desks are skipped as they don't exist in DHIS2
-
-  return dataValues;
-}
-```
-
-### 3. Updating Sync Status
-
-After successful sync:
-
-```typescript
-// Update local inspection record
-await updateInspection(inspection.id, {
-  dhis2EventId: eventId,
-  syncStatus: 'synced',
-  updatedAt: new Date().toISOString()
-});
-```
+### Data mappings (unchanged)
+- `textbooks` → `xiaOnejpgdY`
+- `chairs` → `mAtab30vU5g`
+- `totalStudents` → `EaWxWo27lm3`
+- `maleStudents` → `h4XENZX2UMf`
+- `femaleStudents` → `DM707Od7el4`
+- `staffCount` → `ooYtEgJUuRM`
+- `classroomCount` → `ya5SyA5hej4`
+- `testFieldNotes` → `KrijJzaqMAU`
+- `desks` is not synced (no DHIS2 element).
 
 ---
 

@@ -36,7 +36,11 @@ interface Inspection {
     scheduledEndTime?: string     // e.g., "17:30"
     status: InspectionStatus      // scheduled | in_progress | completed
     syncStatus: SyncStatus        // synced | not_synced | sync_failed
-    formData: InspectionFormData  // Form field values
+    source?: 'local' | 'server'   // where it came from
+    formData: InspectionFormData  // Legacy single-form data
+    formDataByCategory?: Record<string, { formData: InspectionFormData; syncStatus?: SyncStatus; dhis2EventId?: string }>
+    categorySyncStatus?: Record<string, SyncStatus>
+    categoryEventIds?: Record<string, string>
     createdAt: string             // ISO 8601 timestamp
     updatedAt: string             // ISO 8601 timestamp
     dhis2EventId?: string         // DHIS2 event ID after sync
@@ -48,7 +52,6 @@ interface Inspection {
 interface InspectionFormData {
     // Resources
     textbooks: number
-    desks: number
     chairs: number
     testFieldNotes: string
 
@@ -64,6 +67,7 @@ interface InspectionFormData {
     classroomCount: string
 }
 ```
+> Note: `desks` is no longer stored; it had no DHIS2 element.
 
 ## API Functions
 

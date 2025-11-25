@@ -2,7 +2,7 @@ This project was bootstrapped with [DHIS2 Application Platform](https://github.c
 
 ## Project Focus
 
-We are building an **offline-first** DHIS2 web application aimed at tablet usage by school inspectors. All inspection workflows must function without connectivity; when online, the app will synchronise cached inspections and enrich comparisons with the latest DHIS2 data.
+We are building an **offline-first** DHIS2 web application aimed at tablet usage by school inspectors. All inspection workflows must function without connectivity; when online, the app will synchronise cached inspections and pull the latest DHIS2 events so multiple inspectors see each other’s work.
 
 ## 📚 Documentation
 
@@ -16,15 +16,9 @@ All technical documentation is in the [`docs/`](./docs/) folder:
 
 ### Quick Start for Developers
 
-```typescript
-// Sync inspection to DHIS2
-import { useSyncInspection } from './services/sync/useSyncInspection';
-
-const { syncInspection } = useSyncInspection();
-const eventId = await syncInspection(inspection);
-```
-
-See [docs/sync-implementation-example.md](./docs/sync-implementation-example.md) for complete implementation.
+- Run `yarn start`, log in (`in5320 / P1@tform`), and create inspections offline; they are stored in IndexedDB.
+- Hit the sync badge to push unsynced locals to DHIS2; the app then automatically pulls remote events and stores them locally (`source: server`), so the home lists show both your and others’ synced inspections. You can also tap “Refresh from server” to pull without pushing.
+- See [docs/sync-implementation-example.md](./docs/sync-implementation-example.md) for code details, and `scripts/sync-check.js` for a console helper to compare local vs remote.
 
 ## DHIS2 Instance Credentials
 
