@@ -21,6 +21,9 @@ interface HeaderProps {
    * You can use this later to persist changes to DB.
    */
   onHeaderChange?: (schoolName: string, inspectionDate: string) => void;
+
+  /** Optional callback for home button click (overrides default navigation) */
+  onHomeClick?: () => void;
 }
 
 const TopHeader: React.FC<HeaderProps> = ({
@@ -32,6 +35,7 @@ const TopHeader: React.FC<HeaderProps> = ({
   activeTab,
   onTabChange,
   onHeaderChange,
+  onHomeClick,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -136,7 +140,7 @@ const TopHeader: React.FC<HeaderProps> = ({
         <button
           type="button"
           className={styles.homeButton}
-          onClick={() => navigate("/")}
+          onClick={onHomeClick || (() => navigate("/"))}
           aria-label="Go to home page"
         >
           <Home size={16} className={styles.tabIcon} />

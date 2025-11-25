@@ -3,6 +3,7 @@ import { Info, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import styles from "../RecountData.module.css";
 import { Button, TextArea } from "@dhis2/ui";
+import i18n from '@dhis2/d2-i18n'
 
 import TopHeader from "../components/TopHeader/TopHeader";
 
@@ -40,6 +41,7 @@ interface ResourceRecountTableProps {
     schoolName: string;
     inspectionDate: string;
     activeCategoryId: string;
+    onUnsavedChanges?: (hasChanges: boolean) => void;
 }
 
 type CategoryCode = "LBE" | "UBE" | "ECD" | "TERTIARY" | "GENERAL";
@@ -323,6 +325,7 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
     schoolName,
     inspectionDate,
     activeCategoryId,
+    onUnsavedChanges,
 }) => {
     const [notes, setNotes] = useState("");
     const [rows, setRows] = useState<ResourceItem[]>(data);
@@ -334,7 +337,17 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
         // when category changes, reset table rows + note + saved state
         setRows(data);
         setSaved(false);
-    }, [data]);
+        onUnsavedChanges?.(false);
+    }, [data, onUnsavedChanges]);
+
+    // Check for unsaved changes
+    useEffect(() => {
+        const hasChanges = !saved && (
+            rows.some((row, index) => row.recount !== data[index]?.recount) ||
+            notes !== ""
+        );
+        onUnsavedChanges?.(hasChanges);
+    }, [rows, notes, saved, data, onUnsavedChanges]);
 
     const validateInput = (raw: string, row: ResourceItem) => {
         // Allow empty while typing; treat as invalid for save
@@ -534,6 +547,28 @@ const RecountDataScreen: React.FC = () => {
 
     const [categories, setCategories] = useState<CategoryMeta[]>([]);
     const [activeCategoryId, setActiveCategoryId] = useState<string>("GENERAL");
+    const [showExitModal, setShowExitModal] = useState(false);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+    const navigate = useNavigate();
+
+    // Override home navigation to show confirmation if there are unsaved changes
+    const handleHomeNavigation = () => {
+        if (hasUnsavedChanges) {
+            setShowExitModal(true);
+        } else {
+            navigate("/");
+        }
+    };
+
+    const handleConfirmExit = () => {
+        setShowExitModal(false);
+        navigate("/");
+    };
+
+    const handleCancelExit = () => {
+        setShowExitModal(false);
+    };
 
     useEffect(() => {
         if (!id) {
@@ -705,6 +740,7 @@ const RecountDataScreen: React.FC = () => {
                     setDisplaySchoolName(name);
                     setDisplayDate(date);
                 }}
+                onHomeClick={handleHomeNavigation}
             />
 
             {/* Category sync info row, near header */}
@@ -747,6 +783,7 @@ const RecountDataScreen: React.FC = () => {
                         schoolName={displaySchoolName}
                         inspectionDate={displayDate}
                         activeCategoryId={activeCategoryId}
+                        onUnsavedChanges={setHasUnsavedChanges}
                     />
 
                     {!previousInspection && (
@@ -756,6 +793,40 @@ const RecountDataScreen: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {/* Exit Confirmation Modal */}
+            {showExitModal && (
+                <>
+                    <div 
+                        className={styles.bottomSheetOverlay}
+                        onClick={handleCancelExit}
+                    />
+                    <div className={styles.bottomSheetShell}>
+                        <div className={styles.bottomSheetContent}>
+                            <h2 className={styles.bottomSheetTitle}>
+                                {i18n.t('Are you sure you want to exit?')}
+                            </h2>
+                            <p className={styles.bottomSheetText}>
+                                {i18n.t('Any unsaved data will be lost.')}
+                            </p>
+                            <div className={styles.bottomSheetButtons}>
+                                <Button 
+                                    onClick={handleConfirmExit}
+                                    className={styles.summaryButton}
+                                >
+                                    {i18n.t('Yes')}
+                                </Button>
+                                <Button 
+                                    onClick={handleCancelExit}
+                                    className={styles.discardButton}
+                                >
+                                    {i18n.t('No')}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 };
