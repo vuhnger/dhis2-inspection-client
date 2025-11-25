@@ -97,8 +97,12 @@ const InspectionHomePage: React.FC = () => {
             
             // Clear navigation state
             navigate(location.pathname, { replace: true })
-            
-            // Auto-hide toast after 4 seconds
+        }
+    }, [location.state, location.pathname, navigate])
+
+    // Auto-hide toast after 4 seconds
+    React.useEffect(() => {
+        if (showDiscardToast) {
             const timer = setTimeout(() => {
                 setShowDiscardToast(false)
                 setDiscardedInspectionInfo(null)
@@ -106,7 +110,7 @@ const InspectionHomePage: React.FC = () => {
             
             return () => clearTimeout(timer)
         }
-    }, [location.state, location.pathname, navigate])
+    }, [showDiscardToast])
 
     // Pull DHIS2 events and store locally
     const pullRemote = React.useCallback(async () => {
@@ -656,25 +660,14 @@ const InspectionHomePage: React.FC = () => {
             {/* Discard Toast Notification */}
             {showDiscardToast && discardedInspectionInfo && (
                 <div className={classes.discardToast}>
-                    <div className={classes.toastContent}>
-                        <span className={classes.toastMessage}>
-                            {i18n.t('Inspection discarded')}
-                        </span>
-                        <button 
-                            className={classes.undoButton}
-                            onClick={handleUndoDiscard}
-                        >
-                            {i18n.t('Undo')}
-                        </button>
-                    </div>
+                    <span className={classes.toastMessage}>
+                        {i18n.t('Inspection discarded')}
+                    </span>
                     <button 
-                        className={classes.closeToastButton}
-                        onClick={() => {
-                            setShowDiscardToast(false)
-                            setDiscardedInspectionInfo(null)
-                        }}
+                        className={classes.undoButton}
+                        onClick={handleUndoDiscard}
                     >
-                        ×
+                        {i18n.t('Undo')}
                     </button>
                 </div>
             )}

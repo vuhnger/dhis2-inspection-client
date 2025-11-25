@@ -839,10 +839,9 @@
 
     .discardToast {
         bottom: 16px;
-        left: 16px;
-        right: 16px;
-        transform: none;
-        max-width: none;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 360px;
         border-radius: 20px;
         padding: 10px 14px;
     }
