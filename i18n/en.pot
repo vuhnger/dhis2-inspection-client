@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-24T19:38:17.604Z\n"
-"PO-Revision-Date: 2025-11-24T19:38:17.604Z\n"
+"POT-Creation-Date: 2025-11-25T11:46:52.319Z\n"
+"PO-Revision-Date: 2025-11-25T11:46:52.319Z\n"
 
 msgid "Never pulled"
 msgstr "Never pulled"
@@ -56,214 +56,11 @@ msgstr "Cancel"
 msgid "Reset Data"
 msgstr "Reset Data"
 
-msgid ""
-"We could not save the draft on this device. Copy your notes before "
-"refreshing."
-msgstr ""
-"We could not save the draft on this device. Copy your notes before "
-"refreshing."
-
-msgid "{{name}} (not in current list)"
-msgstr "{{name}} (not in current list)"
-
-msgid "Previously selected school ({{id}})"
-msgstr "Previously selected school ({{id}})"
-
-msgid "Select a school from the list"
-msgstr "Select a school from the list"
-
-msgid "Select the inspection date"
-msgstr "Select the inspection date"
+msgid "School type"
+msgstr "School type"
 
 msgid "Enter a non-negative number"
 msgstr "Enter a non-negative number"
-
-msgid "Working toilets cannot exceed total toilets"
-msgstr "Working toilets cannot exceed total toilets"
-
-msgid "Female-friendly toilets cannot exceed total toilets"
-msgstr "Female-friendly toilets cannot exceed total toilets"
-
-msgid "Accessible toilets cannot exceed total toilets"
-msgstr "Accessible toilets cannot exceed total toilets"
-
-msgid "Add learner and working toilet counts to see the ratio"
-msgstr "Add learner and working toilet counts to see the ratio"
-
-msgid "Learner-to-toilet ratio {{ratio}} meets the under {{limit}} target."
-msgstr "Learner-to-toilet ratio {{ratio}} meets the under {{limit}} target."
-
-msgid ""
-"Learner-to-toilet ratio {{ratio}} is above the under {{limit}} target. Flag "
-"for follow-up."
-msgstr ""
-"Learner-to-toilet ratio {{ratio}} is above the under {{limit}} target. Flag "
-"for follow-up."
-
-msgid "Toilet capture"
-msgstr "Toilet capture"
-
-msgid ""
-"Log today’s toilet status for {{name}}. We will sync with DHIS2 when "
-"connectivity is available."
-msgstr ""
-"Log today’s toilet status for {{name}}. We will sync with DHIS2 when "
-"connectivity is available."
-
-msgid ""
-"Log today’s toilet status. Data stays on this device until a sync feature "
-"is added."
-msgstr ""
-"Log today’s toilet status. Data stays on this device until a sync feature "
-"is added."
-
-msgid "Learner-to-toilet ratio"
-msgstr "Learner-to-toilet ratio"
-
-msgid "School details and context"
-msgstr "School details and context"
-
-msgid "School"
-msgstr "School"
-
-msgid "Search school name"
-msgstr "Search school name"
-
-msgid "No schools match your search"
-msgstr "No schools match your search"
-
-msgid "No schools found"
-msgstr "No schools found"
-
-msgid "Inspection date"
-msgstr "Inspection date"
-
-msgid "Learners present today"
-msgstr "Learners present today"
-
-msgid "Toilet breakdown"
-msgstr "Toilet breakdown"
-
-msgid "Total toilets on site"
-msgstr "Total toilets on site"
-
-msgid "Working toilets"
-msgstr "Working toilets"
-
-msgid "Female-friendly toilets"
-msgstr "Female-friendly toilets"
-
-msgid "Accessible toilets"
-msgstr "Accessible toilets"
-
-msgid "Notes"
-msgstr "Notes"
-
-msgid "Observations and maintenance needs"
-msgstr "Observations and maintenance needs"
-
-msgid "Describe cleanliness, stock levels (soap, water), or any urgent repairs."
-msgstr "Describe cleanliness, stock levels (soap, water), or any urgent repairs."
-
-msgid "Mark draft as ready"
-msgstr "Mark draft as ready"
-
-msgid "Clear draft"
-msgstr "Clear draft"
-
-msgid "Draft saved locally"
-msgstr "Draft saved locally"
-
-msgid "Saved at {{timestamp}}. Ready to sync later."
-msgstr "Saved at {{timestamp}}. Ready to sync later."
-
-msgid "Ready to sync later."
-msgstr "Ready to sync later."
-
-msgid "Please fix the highlighted fields before finishing the draft."
-msgstr "Please fix the highlighted fields before finishing the draft."
-
-msgid "Draft not saved"
-msgstr "Draft not saved"
-
-msgid "Draft auto-saved at {{timestamp}}"
-msgstr "Draft auto-saved at {{timestamp}}"
-
-msgid "Why we capture toilets"
-msgstr "Why we capture toilets"
-
-msgid ""
-"Edutopia expects fewer than {{limit}} learners per working toilet. These "
-"notes will help plan maintenance visits and resource transfers once syncing "
-"is available."
-msgstr ""
-"Edutopia expects fewer than {{limit}} learners per working toilet. These "
-"notes will help plan maintenance visits and resource transfers once syncing "
-"is available."
-
-msgid ""
-"When online, the app will compare against DHIS2 baselines so you can "
-"explain changes to the head teacher in the field."
-msgstr ""
-"When online, the app will compare against DHIS2 baselines so you can "
-"explain changes to the head teacher in the field."
-
-msgid "Please select a school"
-msgstr "Please select a school"
-
-msgid "Inspection date is required"
-msgstr "Inspection date is required"
-
-msgid "Inspection date cannot be in the past"
-msgstr "Inspection date cannot be in the past"
-
-msgid "Start time is required"
-msgstr "Start time is required"
-
-msgid "End time is required"
-msgstr "End time is required"
-
-msgid "End time must be after start time"
-msgstr "End time must be after start time"
-
-msgid "Failed to create inspection. Please try again."
-msgstr "Failed to create inspection. Please try again."
-
-msgid "Schedule New Inspection"
-msgstr "Schedule New Inspection"
-
-msgid "Error"
-msgstr "Error"
-
-msgid "Select School"
-msgstr "Select School"
-
-msgid "Loading schools..."
-msgstr "Loading schools..."
-
-msgid "Search schools"
-msgstr "Search schools"
-
-msgid "Failed to load schools. Please try again."
-msgstr "Failed to load schools. Please try again."
-
-msgid "Inspection Date"
-msgstr "Inspection Date"
-
-msgid "Start Time"
-msgstr "Start Time"
-
-msgid "End Time"
-msgstr "End Time"
-
-msgid "Additional notes (optional)"
-msgstr "Additional notes (optional)"
-
-msgid "Create Inspection"
-msgstr "Create Inspection"
-
-msgid "School type"
-msgstr "School type"
 
 msgid "Total student count is required"
 msgstr "Total student count is required"
@@ -369,6 +166,15 @@ msgstr "See summary"
 
 msgid "Submit Report"
 msgstr "Submit Report"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Unknown"
+msgstr "Unknown"
+
+msgid "Event ID"
+msgstr "Event ID"
 
 msgid "Staff"
 msgstr "Staff"
