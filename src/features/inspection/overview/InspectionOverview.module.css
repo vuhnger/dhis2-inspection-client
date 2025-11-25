@@ -218,7 +218,7 @@
 }
 
 .categoryIcon svg {
-  transform: scale(1.25);
+  transform: scale(1);
   transform-origin: center;
 }
 
@@ -306,6 +306,10 @@
   background: var(--dhis2-grey-900);
   color: var(--dhis2-white);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: scale(1.25);
+}
+
+.categoryButton.active .categoryIcon svg {
   transform: scale(1.25);
 }
 
