@@ -5,8 +5,11 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-25T15:38:13.833Z\n"
-"PO-Revision-Date: 2025-11-25T15:38:13.833Z\n"
+"POT-Creation-Date: 2025-11-25T18:03:37.662Z\n"
+"PO-Revision-Date: 2025-11-25T18:03:37.662Z\n"
+
+msgid "Today"
+msgstr "Today"
 
 msgid "Never pulled"
 msgstr "Never pulled"
@@ -43,6 +46,15 @@ msgstr "From server"
 
 msgid "No completed inspections yet"
 msgstr "No completed inspections yet"
+
+msgid "Inspection actions"
+msgstr "Inspection actions"
+
+msgid "New inspection"
+msgstr "New inspection"
+
+msgid "Schedule inspection"
+msgstr "Schedule inspection"
 
 msgid "Reset Local Data?"
 msgstr "Reset Local Data?"
