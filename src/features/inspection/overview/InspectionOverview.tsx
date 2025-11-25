@@ -147,6 +147,15 @@ const InspectionOverview: React.FC = () => {
                 setSchoolCategories([])
                 return
             }
+
+            // If offline, fall back to whatever we already have stored
+            if (!isOnline) {
+                if (inspection.orgUnitCategories?.length) {
+                    setSchoolCategories(inspection.orgUnitCategories)
+                }
+                return
+            }
+
             try {
                 const apiBase = getApiBase()
                 const res = await fetch(
@@ -170,11 +179,15 @@ const InspectionOverview: React.FC = () => {
                 setSchoolCategories(categories)
             } catch (error) {
                 console.warn('Unable to fetch school categories', error)
-                setSchoolCategories([])
+                if (inspection.orgUnitCategories?.length) {
+                    setSchoolCategories(inspection.orgUnitCategories)
+                } else {
+                    setSchoolCategories([])
+                }
             }
         }
         fetchCategories()
-    }, [inspection?.orgUnit])
+    }, [inspection?.orgUnit, inspection?.orgUnitCategories, isOnline])
 
     // Track online/offline status
     React.useEffect(() => {
@@ -437,6 +450,10 @@ const InspectionOverview: React.FC = () => {
     const errors = categoryErrors[activeCategoryId] || {}
     const submissionSucceeded =
         wasSubmitted && Object.values(categoryErrors).every((e) => Object.keys(e || {}).length === 0)
+    const activeCategorySyncStatus =
+        inspection?.categorySyncStatus?.[activeCategoryId] || inspection?.syncStatus
+    const activeCategoryEventId =
+        inspection?.categoryEventIds?.[activeCategoryId] || inspection?.dhis2EventId
 
     const handleCompleteInspection = () => {
         setShowCompleteModal(true)
@@ -935,6 +952,19 @@ const InspectionOverview: React.FC = () => {
                                 {cat.name}
                             </button>
                         ))}
+                    </div>
+                    <div className={classes.syncMeta}>
+                        <span className={classes.syncMetaStatus}>
+                            {i18n.t('Status')}: {activeCategorySyncStatus || i18n.t('Unknown')}
+                        </span>
+                        {activeCategoryEventId ? (
+                            <span className={classes.syncMetaEvent}>
+                                {i18n.t('Event ID')}: {activeCategoryEventId}
+                            </span>
+                        ) : null}
+                        {inspection?.source === 'server' ? (
+                            <span className={classes.syncMetaSource}>{i18n.t('From server')}</span>
+                        ) : null}
                     </div>
                 </div>
 

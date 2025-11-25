@@ -1,7 +1,8 @@
 import * as React from "react";
 import { useParams } from "react-router-dom";
 import { getInspectionById } from "../../../shared/db";
-import type { Inspection } from "../../../shared/types/inspection";
+import { getApiBase, getAuthHeader } from "../../../shared/utils/auth";
+import type { Inspection, InspectionFormData, SyncStatus } from "../../../shared/types/inspection";
 
 export type InspectionFetchStatus = "loading" | "success" | "error";
 
@@ -192,16 +193,17 @@ function formatInspectionDate(isoDate: string): string {
  * Call only when inspection is not null.
  */
 export function buildObtainedInspectionData(
-  inspection: Inspection
+  inspection: Inspection,
+  formDataOverride?: InspectionFormData
 ): ObtainedInspectionData {
-  const { formData } = inspection;
+  const formData = formDataOverride ?? inspection.formData;
 
   const schoolName = inspection.orgUnitName;
   const inspectionDate = formatInspectionDate(inspection.eventDate);
 
   // Resources
   const textbooks = formData.textbooks;
-  const desks = formData.desks;
+  const desks = (formData as any).desks ?? 0;
   const chairs = formData.chairs;
 
   // Students
@@ -236,6 +238,11 @@ export function buildObtainedInspectionData(
 interface UseInspectionSummaryResult {
   inspection: Inspection | null;
   summary: ObtainedInspectionData | null;
+  categoryList: Array<{ id: string; name: string }>;
+  activeCategoryId: string;
+  setActiveCategoryId: (id: string) => void;
+  activeCategorySyncStatus?: SyncStatus;
+  activeCategoryEventId?: string;
   status: InspectionFetchStatus;
   error: string | null;
 }
@@ -247,12 +254,132 @@ interface UseInspectionSummaryResult {
  */
 export const useInspectionSummary = (): UseInspectionSummaryResult => {
   const { inspection, status, error } = useInspectionFromRoute();
+  const [isOnline, setIsOnline] = React.useState<boolean>(navigator.onLine);
+  const [categoryList, setCategoryList] = React.useState<Array<{ id: string; name: string }>>([]);
+  const [activeCategoryId, setActiveCategoryId] = React.useState<string>("default");
 
-  const summary = React.useMemo(
-    () => (inspection ? buildObtainedInspectionData(inspection) : null),
-    [inspection]
+  React.useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  const ALLOWED_CATEGORY_GROUP_IDS = React.useMemo(
+    () => new Set(["ib40OsG9QAI", "SPCm0Ts3SLR", "sSgWDKuCrmi", "UzSEGuwAfyX"]),
+    []
   );
 
-  return { inspection, summary, status, error };
-};
+  // Fetch or derive categories
+  React.useEffect(() => {
+    const deriveFromLocal = () => {
+      if (!inspection) return [];
+      const categories =
+        (inspection.orgUnitCategories || [])
+          .filter((c) => ALLOWED_CATEGORY_GROUP_IDS.has(c.id)) || [];
+      if (categories.length) return categories;
 
+      if (inspection.formDataByCategory) {
+        return Object.keys(inspection.formDataByCategory).map((id) => ({
+          id,
+          name: id,
+        }));
+      }
+      return [];
+    };
+
+    if (!inspection) {
+      setCategoryList([]);
+      return;
+    }
+
+    // Offline: use local data only
+    if (!isOnline) {
+      const localCats = deriveFromLocal();
+      setCategoryList(
+        localCats.length ? localCats : [{ id: "default", name: "General" }]
+      );
+      return;
+    }
+
+    // Online: try fetching org unit groups
+    const fetchCategories = async () => {
+      try {
+        const apiBase = getApiBase();
+        const res = await fetch(
+          `${apiBase}/organisationUnits/${inspection.orgUnit}?fields=organisationUnitGroups[id,name,displayName]`,
+          { headers: { Authorization: getAuthHeader() } }
+        );
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+        const data = await res.json();
+        const categories =
+          (data?.organisationUnitGroups || [])
+            .filter((g: any) => ALLOWED_CATEGORY_GROUP_IDS.has(g.id))
+            .map((g: any) => ({
+              id: g.id,
+              name: g.displayName || g.name,
+            })) || [];
+
+        if (categories.length) {
+          setCategoryList(categories);
+          return;
+        }
+        const fallback = deriveFromLocal();
+        setCategoryList(
+          fallback.length ? fallback : [{ id: "default", name: "General" }]
+        );
+      } catch (err) {
+        console.warn("Failed to fetch categories, using local fallback", err);
+        const fallback = deriveFromLocal();
+        setCategoryList(
+          fallback.length ? fallback : [{ id: "default", name: "General" }]
+        );
+      }
+    };
+
+    fetchCategories();
+  }, [inspection, isOnline, ALLOWED_CATEGORY_GROUP_IDS]);
+
+  React.useEffect(() => {
+    if (categoryList.length && !categoryList.some((c) => c.id === activeCategoryId)) {
+      setActiveCategoryId(categoryList[0].id);
+    }
+  }, [categoryList, activeCategoryId]);
+
+  const activeFormData: InspectionFormData | undefined = React.useMemo(() => {
+    if (!inspection) return undefined;
+    if (inspection.formDataByCategory && inspection.formDataByCategory[activeCategoryId]) {
+      return inspection.formDataByCategory[activeCategoryId].formData;
+    }
+    return inspection.formData;
+  }, [inspection, activeCategoryId]);
+
+  const activeCategorySyncStatus =
+    inspection?.categorySyncStatus?.[activeCategoryId] || inspection?.syncStatus;
+  const activeCategoryEventId =
+    inspection?.categoryEventIds?.[activeCategoryId] || inspection?.dhis2EventId;
+
+  const summary = React.useMemo(
+    () =>
+      inspection && activeFormData
+        ? buildObtainedInspectionData(inspection, activeFormData)
+        : null,
+    [inspection, activeFormData]
+  );
+
+  return {
+    inspection,
+    summary,
+    categoryList,
+    activeCategoryId,
+    setActiveCategoryId,
+    activeCategorySyncStatus,
+    activeCategoryEventId,
+    status,
+    error,
+  };
+};
