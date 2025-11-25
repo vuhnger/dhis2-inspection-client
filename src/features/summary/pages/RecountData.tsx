@@ -613,13 +613,6 @@ const RecountDataScreen: React.FC = () => {
                 status: buildStatus(prev.chairs, currentForm.chairs),
             },
             {
-                item: "Total students",
-                previous: prev.totalStudents,
-                recount: currentForm.totalStudents,
-                inputValue: String(currentForm.totalStudents ?? 0),
-                status: buildStatus(prev.totalStudents, currentForm.totalStudents),
-            },
-            {
                 item: "Male students",
                 previous: prev.maleStudents,
                 recount: currentForm.maleStudents,
