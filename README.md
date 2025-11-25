@@ -46,6 +46,9 @@ Our app uses a **feature-based architecture** with React TypeScript:
 
 The offline-first approach stores all inspections locally in IndexedDB, then syncs to DHIS2 when online using the new Tracker API with proper data element mapping.
 
+## Future work/missing functionality
+In the future, being able to capture more data would improve functionality. Additionally, we would like to implement React cross-platform solutions (React Native) to create a dedicated mobile app, which would be more suitable for tablet based inspections in the field.
+
 ### Quick Start for Developers
 
 - Run `yarn start`, log in (`in5320 / P1@tform`), and create inspections offline; they are stored in IndexedDB.
