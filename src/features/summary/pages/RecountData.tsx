@@ -1,6 +1,6 @@
 import i18n from '@dhis2/d2-i18n'
 import { Button, TextArea } from "@dhis2/ui";
-import { Info, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Info, TrendingUp, TrendingDown, Minus, CheckCircle } from "lucide-react";
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -434,7 +434,7 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
                 <div className={styles.saveButtonWrapper}>
                     {saved ? (
                         <div className={styles.saveSuccessPill}>
-                            <CheckCircle2
+                            <CheckCircle
                                 size={16}
                                 className={styles.saveSuccessIcon}
                             />
