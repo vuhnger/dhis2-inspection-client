@@ -370,6 +370,10 @@
     gap: 16px;
 }
 
+.inspectionCardOverdue {
+    background: #FFF1F0;
+}
+
 .inspectionCardCompleted {
     padding: 20px;
     background: #DDDDDD;
