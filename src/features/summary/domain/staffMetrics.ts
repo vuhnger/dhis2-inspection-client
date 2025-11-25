@@ -1,6 +1,6 @@
-import type { ObtainedInspectionData } from "../hooks/useInspection";
 import { evaluateMetric } from "../EvaluationHelpers";
 import type { MetricCardProps } from "../components/MetricCard/MetricCard";
+import type { ObtainedInspectionData } from "../hooks/useInspection";
 export function buildStaffMetrics(
   summary: ObtainedInspectionData
 ): MetricCardProps[] {

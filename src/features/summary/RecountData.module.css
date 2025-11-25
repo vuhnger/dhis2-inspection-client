@@ -134,19 +134,19 @@
   justify-content: center;
 }
 
-.statusOk {
+.statusUp {
   background: var(--colors-green050, #e5f4ec);
   color: var(--colors-green700, #0f9d58);
 }
 
-.statusWarning {
-  background: var(--colors-yellow050, #fff7e0);
-  color: var(--colors-yellow700, #f59e0b);
-}
-
-.statusError {
+.statusDown {
   background: var(--colors-red050, #fde7e9);
   color: var(--colors-red700, #ea4335);
+}
+
+.statusNeutral {
+  background: var(--colors-blue050, #e5f0ff);
+  color: var(--colors-blue700, #2563eb);
 }
 
 

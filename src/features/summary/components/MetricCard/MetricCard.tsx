@@ -1,11 +1,11 @@
-import React from "react";
-import styles from "./MetricCard.module.css";
 import {
   Check,
   X,
   AlertCircle,
-  TrendingUp,
 } from "lucide-react";
+import React from "react";
+
+import styles from "./MetricCard.module.css";
 
 export type MetricVisualStatus = "success" | "warning" | "error" | "info";
 
@@ -22,6 +22,12 @@ const MetricCard: React.FC<MetricCardProps> = ({
   status,
   statusText,
 }) => {
+  const NeutralIcon = () => (
+    <div className={`${styles.statusIcon} ${styles.statusInfo}`}>
+      <AlertCircle size={18} />
+    </div>
+  );
+
   const renderStatusIcon = () => {
     switch (status) {
       case "success":
@@ -44,11 +50,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
         );
       case "info":
       default:
-        return (
-          <div className={`${styles.statusIcon} ${styles.statusInfo}`}>
-            <TrendingUp size={18} />
-          </div>
-        );
+        return <NeutralIcon />;
     }
   };
 

@@ -1,7 +1,9 @@
 import * as React from "react";
 import { useParams } from "react-router-dom";
+
 import { getInspectionById } from "../../../shared/db";
 import { getApiBase, getAuthHeader } from "../../../shared/utils/auth";
+
 import type { Inspection, InspectionFormData, SyncStatus } from "../../../shared/types/inspection";
 
 export type InspectionFetchStatus = "loading" | "success" | "error";
@@ -79,7 +81,7 @@ export function mapProgressTagToMetricStatus(
       };
     case PROGRESS_TAGS.ABOVE_REQUIREMENT.id:
       return {
-        status: "info",
+        status: "success",
         statusText: "Above requirement",
       };
     case PROGRESS_TAGS.MEETS_REQUIREMENT.id:

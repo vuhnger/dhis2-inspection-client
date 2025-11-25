@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { Inspection, CreateInspectionInput, UpdateInspectionInput } from '../types/inspection'
+
 import * as db from '../db/indexedDB'
 import { INSPECTIONS_CHANGED_EVENT } from '../db/indexedDB'
+
+import type { Inspection, CreateInspectionInput, UpdateInspectionInput } from '../types/inspection'
 
 export function useInspections() {
     const [inspections, setInspections] = useState<Inspection[]>([])

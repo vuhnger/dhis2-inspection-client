@@ -1,5 +1,5 @@
-import React from 'react'
 import { Provider } from '@dhis2/app-runtime'
+import React from 'react'
 
 import './locales'
 import AppShell from './app/AppShell'

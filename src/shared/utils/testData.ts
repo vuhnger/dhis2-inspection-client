@@ -1,4 +1,5 @@
 import { createInspection } from '../db/indexedDB'
+
 import type { CreateInspectionInput } from '../types/inspection'
 
 export async function createSampleInspection(

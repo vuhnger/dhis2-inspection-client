@@ -6,9 +6,11 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useInspection } from '../../../shared/hooks/useInspections'
 import { useSync } from '../../../shared/hooks/useSync'
 import { getApiBase, getAuthHeader } from '../../../shared/utils/auth'
-import type { SyncStatus } from '../../../shared/types/inspection'
 
 import classes from './InspectionOverview.module.css'
+
+import type { SyncStatus } from '../../../shared/types/inspection'
+
 
 type Category = 'resources' | 'staff' | 'students' | 'facilities'
 const ALLOWED_CATEGORY_GROUP_IDS = new Set([

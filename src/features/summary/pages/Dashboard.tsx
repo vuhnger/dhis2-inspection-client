@@ -1,12 +1,13 @@
 import React from "react";
-import TopHeader from "../components/TopHeader/TopHeader";
-import SummarySection from "../components/SummarySection/SummarySection";
+
 import MetricCard from "../components/MetricCard/MetricCard";
-import { useInspectionSummary } from "../hooks/useInspection";
-import { buildResourceMetrics } from "../domain/resourceMetrics";
-import { buildStudentMetrics } from "../domain/studentMetrics";
-import { buildStaffMetrics } from "../domain/staffMetrics";
+import SummarySection from "../components/SummarySection/SummarySection";
+import TopHeader from "../components/TopHeader/TopHeader";
 import styles from "../Dashboard.module.css";
+import { buildResourceMetrics } from "../domain/resourceMetrics";
+import { buildStaffMetrics } from "../domain/staffMetrics";
+import { buildStudentMetrics } from "../domain/studentMetrics";
+import { useInspectionSummary } from "../hooks/useInspection";
 
 const SummaryScreen: React.FC = () => {
   const {
