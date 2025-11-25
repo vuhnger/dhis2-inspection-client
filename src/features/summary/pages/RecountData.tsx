@@ -1,19 +1,13 @@
-import React, { useState, useEffect } from "react";
-import {
-    Info,
-    CheckCircle2,
-    XCircle,
-    AlertTriangle,
-} from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import { Info, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import styles from "../RecountData.module.css";
 import { Button, TextArea } from "@dhis2/ui";
 
 import TopHeader from "../components/TopHeader/TopHeader";
-import LevelSelector from "../components/LevelSelector/LevelSelector";
 
-import { getInspectionById } from "../../../shared/db";
-import type { Inspection } from "../../../shared/types/inspection";
+import { getAllInspections, getInspectionById } from "../../../shared/db";
+import type { Inspection, InspectionFormData } from "../../../shared/types/inspection";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                              */
@@ -25,14 +19,19 @@ interface ResourceRowProps {
     item: string;
     previous: number;
     recount: number;
+    inputValue: string;
+    error?: string;
     status: RowStatus;
-    onRecountChange: (newRecount: number) => void;
+    onRecountChange: (raw: string) => void;
+    onRecountBlur: () => void;
 }
 
 interface ResourceItem {
     item: string;
     previous: number;
     recount: number;
+    inputValue: string;
+    error?: string;
     status: RowStatus;
 }
 
@@ -58,6 +57,43 @@ interface CategoryMeta {
 /* ------------------------------------------------------------------ */
 /* Category helpers                                                   */
 /* ------------------------------------------------------------------ */
+const ALLOWED_CATEGORY_GROUP_IDS = new Set([
+    "ib40OsG9QAI", // LBE
+    "SPCm0Ts3SLR", // UBE
+    "sSgWDKuCrmi", // ECD
+    "UzSEGuwAfyX", // Tertiary
+]);
+
+const DEFAULT_FORM: InspectionFormData = {
+    textbooks: 0,
+    chairs: 0,
+    testFieldNotes: "",
+    totalStudents: "0",
+    maleStudents: "0",
+    femaleStudents: "0",
+    staffCount: "0",
+    classroomCount: "0",
+};
+
+type NormalizedForm = {
+    textbooks: number;
+    chairs: number;
+    totalStudents: number;
+    maleStudents: number;
+    femaleStudents: number;
+    staffCount: number;
+    classroomCount: number;
+};
+
+const normalizeForm = (data?: InspectionFormData | null): NormalizedForm => ({
+    textbooks: Number(data?.textbooks ?? 0),
+    chairs: Number(data?.chairs ?? 0),
+    totalStudents: Number((data as any)?.totalStudents ?? 0),
+    maleStudents: Number((data as any)?.maleStudents ?? 0),
+    femaleStudents: Number((data as any)?.femaleStudents ?? 0),
+    staffCount: Number((data as any)?.staffCount ?? 0),
+    classroomCount: Number((data as any)?.classroomCount ?? 0),
+});
 
 const CATEGORY_DISPLAY_NAME: Record<CategoryCode, string> = {
     LBE: "LBE",
@@ -90,7 +126,11 @@ function buildCategoriesFromInspection(inspection: Inspection): CategoryMeta[] {
         formDataByCategory,
         categorySyncStatus,
         categoryEventIds,
+        orgUnitCategories,
     } = inspection as any;
+
+    const allowedCategories =
+        orgUnitCategories?.filter((c: any) => ALLOWED_CATEGORY_GROUP_IDS.has(c.id)) || [];
 
     // No per-category data => single GENERAL bucket
     if (!formDataByCategory || Object.keys(formDataByCategory).length === 0) {
@@ -119,10 +159,15 @@ function buildCategoriesFromInspection(inspection: Inspection): CategoryMeta[] {
                     ? (upperKey as CategoryCode)
                     : "GENERAL";
 
+            const nameFromOrgUnit = allowedCategories.find(
+                (cat: any) => cat.id === key
+            )?.name;
+
             return {
                 id: key,
                 code,
                 displayName:
+                    nameFromOrgUnit ??
                     CATEGORY_DISPLAY_NAME[code] ??
                     CATEGORY_DISPLAY_NAME.GENERAL,
                 source: "per-category",
@@ -223,8 +268,11 @@ const ResourceRow: React.FC<ResourceRowProps> = ({
     item,
     previous,
     recount,
+    inputValue,
+    error,
     status,
     onRecountChange,
+    onRecountBlur,
 }) => {
     const rawDiff =
         previous > 0 ? ((recount - previous) / previous) * 100 : 0; // %
@@ -251,17 +299,11 @@ const ResourceRow: React.FC<ResourceRowProps> = ({
                 <input
                     type="number"
                     className={styles.recountInput}
-                    value={Number.isNaN(recount) ? "" : recount}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        const val = e.target.value;
-                        if (val === "") {
-                            onRecountChange(NaN);
-                            return;
-                        }
-                        const num = Number(val);
-                        if (!Number.isNaN(num)) onRecountChange(num);
-                    }}
+                    value={inputValue}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => onRecountChange(e.target.value)}
+                    onBlur={onRecountBlur}
                 />
+                {error ? <div className={styles.inputError}>{error}</div> : null}
             </td>
 
             <td className={`${styles.numberCell} ${diffClass}`}>
@@ -294,20 +336,61 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
         setSaved(false);
     }, [data]);
 
-    const handleRecountChange = (index: number, newRecount: number) => {
+    const validateInput = (raw: string, row: ResourceItem) => {
+        // Allow empty while typing; treat as invalid for save
+        if (raw.trim() === "") {
+            return { inputValue: "", recount: row.recount, error: "Enter a non-negative whole number" };
+        }
+
+        // Reject decimals or non-numeric characters
+        if (!/^-?\d+$/.test(raw.trim())) {
+            return { inputValue: raw, recount: row.recount, error: "Enter a non-negative whole number" };
+        }
+
+        const parsed = parseInt(raw.trim(), 10);
+        if (Number.isNaN(parsed)) {
+            return { inputValue: raw, recount: row.recount, error: "Enter a non-negative whole number" };
+        }
+
+        // Clamp negatives to 0 on blur; while typing we flag error but keep last valid value
+        if (parsed < 0) {
+            return { inputValue: raw, recount: row.recount, error: "Enter a non-negative whole number" };
+        }
+
+        return { inputValue: raw, recount: parsed, error: undefined };
+    };
+
+    const handleRecountChange = (index: number, raw: string) => {
         setRows((prev) =>
             prev.map((row, i) => {
                 if (i !== index) return row;
 
-                const prevVal = row.previous;
+                const { inputValue, recount, error } = validateInput(raw, row);
                 const percentDiff =
-                    prevVal > 0 ? ((newRecount - prevVal) / prevVal) * 100 : 0;
+                    row.previous > 0 ? ((recount - row.previous) / row.previous) * 100 : 0;
                 const status = getStatusFromPercentDiff(percentDiff);
 
-                return { ...row, recount: newRecount, status };
+                return { ...row, inputValue, recount, status, error };
             })
         );
         setSaved(false);
+    };
+
+    const handleRecountBlur = (index: number) => {
+        setRows((prev) =>
+            prev.map((row, i) => {
+                if (i !== index) return row;
+
+                // On blur, if invalid or empty/negative, clamp to 0
+                if (row.error) {
+                    const percentDiff =
+                        row.previous > 0 ? ((0 - row.previous) / row.previous) * 100 : 0;
+                    const status = getStatusFromPercentDiff(percentDiff);
+                    return { ...row, inputValue: "0", recount: 0, error: undefined, status };
+                }
+                return row;
+            })
+        );
     };
 
     const handleSave = () => {
@@ -318,8 +401,18 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
             return;
         }
 
+        const hasErrors = rows.some(
+            (r) => r.error || r.inputValue.trim() === ""
+        );
+        if (hasErrors) {
+            setSaved(false);
+            return;
+        }
+
         setSaved(true);
     };
+
+    const hasInvalidRows = rows.some((r) => r.error || r.inputValue.trim() === "");
 
     return (
         <>
@@ -341,9 +434,8 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
                             <ResourceRow
                                 key={resource.item}
                                 {...resource}
-                                onRecountChange={(newVal) =>
-                                    handleRecountChange(index, newVal)
-                                }
+                                onRecountChange={(newVal) => handleRecountChange(index, newVal)}
+                                onRecountBlur={() => handleRecountBlur(index)}
                             />
                         ))}
                     </tbody>
@@ -382,6 +474,7 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
                             primary
                             className={styles.roundSaveButton}
                             onClick={handleSave}
+                            disabled={hasInvalidRows}
                         >
                             Save recount
                         </Button>
@@ -396,10 +489,43 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
 /* Fetch inspection + per-category data                               */
 /* ------------------------------------------------------------------ */
 
+const findPreviousInspection = async (
+    current: Inspection
+): Promise<Inspection | null> => {
+    const all = await getAllInspections();
+    const currentDate = new Date(current.eventDate).getTime();
+
+    const candidates = all.filter(
+        (ins) =>
+            ins.id !== current.id &&
+            ins.orgUnit === current.orgUnit &&
+            ins.status === "completed"
+    );
+
+    if (candidates.length === 0) return null;
+
+    // Prefer inspections before the current one; otherwise pick the most recent overall
+    const earlier = candidates.filter(
+        (ins) => new Date(ins.eventDate).getTime() < currentDate
+    );
+
+    const sortByDate = (arr: Inspection[]) =>
+        arr.sort(
+            (a, b) =>
+                new Date(b.eventDate).getTime() -
+                new Date(a.eventDate).getTime()
+        );
+
+    const pool = earlier.length > 0 ? earlier : candidates;
+    const sorted = sortByDate(pool);
+    return sorted[0] ?? null;
+};
+
 const RecountDataScreen: React.FC = () => {
     const { id } = useParams<{ id: string }>();
 
     const [inspection, setInspection] = useState<Inspection | null>(null);
+    const [previousInspection, setPreviousInspection] = useState<Inspection | null>(null);
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -437,6 +563,14 @@ const RecountDataScreen: React.FC = () => {
                     if (cats.length > 0) {
                         setActiveCategoryId(cats[0].id);
                     }
+
+                    // Resolve previous inspection for comparison
+                    findPreviousInspection(result)
+                        .then(setPreviousInspection)
+                        .catch((err) => {
+                            console.warn("Unable to resolve previous inspection", err);
+                            setPreviousInspection(null);
+                        });
                 }
             })
             .catch((err: unknown) => {
@@ -448,10 +582,93 @@ const RecountDataScreen: React.FC = () => {
                 if (isMounted) setLoading(false);
             });
 
-        return () => {
-            isMounted = false;
-        };
-    }, [id]);
+    return () => {
+        isMounted = false;
+    };
+}, [id]);
+
+    // Determine the active category and its form data
+    const activeCategory =
+        categories.find((c) => c.id === activeCategoryId) ?? categories[0];
+
+    const formData = inspection?.formData;
+    const formDataByCategory = (inspection as any)?.formDataByCategory;
+
+    const currentForm: NormalizedForm = useMemo(() => {
+        const categoryEntry = formDataByCategory?.[activeCategory?.id];
+        const raw = categoryEntry?.formData ?? formData ?? DEFAULT_FORM;
+        return normalizeForm(raw);
+    }, [activeCategory?.id, formData, formDataByCategory]);
+
+    const previousForm: NormalizedForm | null = useMemo(() => {
+        if (!previousInspection) return null;
+        const prevEntry = previousInspection.formDataByCategory?.[activeCategory?.id];
+        const raw = prevEntry?.formData ?? previousInspection.formData ?? DEFAULT_FORM;
+        return normalizeForm(raw);
+    }, [activeCategory?.id, previousInspection]);
+
+    const resourceData: ResourceItem[] = useMemo(() => {
+        const prev = previousForm ?? normalizeForm(DEFAULT_FORM);
+        const buildStatus = (prevVal: number, currVal: number) =>
+            getStatusFromPercentDiff(prevVal > 0 ? ((currVal - prevVal) / prevVal) * 100 : 0);
+
+        return [
+            {
+                item: "Textbooks",
+                previous: prev.textbooks,
+                recount: currentForm.textbooks,
+                inputValue: String(currentForm.textbooks ?? 0),
+                status: buildStatus(prev.textbooks, currentForm.textbooks),
+            },
+            {
+                item: "Chairs",
+                previous: prev.chairs,
+                recount: currentForm.chairs,
+                inputValue: String(currentForm.chairs ?? 0),
+                status: buildStatus(prev.chairs, currentForm.chairs),
+            },
+            {
+                item: "Total students",
+                previous: prev.totalStudents,
+                recount: currentForm.totalStudents,
+                inputValue: String(currentForm.totalStudents ?? 0),
+                status: buildStatus(prev.totalStudents, currentForm.totalStudents),
+            },
+            {
+                item: "Male students",
+                previous: prev.maleStudents,
+                recount: currentForm.maleStudents,
+                inputValue: String(currentForm.maleStudents ?? 0),
+                status: buildStatus(prev.maleStudents, currentForm.maleStudents),
+            },
+            {
+                item: "Female students",
+                previous: prev.femaleStudents,
+                recount: currentForm.femaleStudents,
+                inputValue: String(currentForm.femaleStudents ?? 0),
+                status: buildStatus(prev.femaleStudents, currentForm.femaleStudents),
+            },
+            {
+                item: "Staff count",
+                previous: prev.staffCount,
+                recount: currentForm.staffCount,
+                inputValue: String(currentForm.staffCount ?? 0),
+                status: buildStatus(prev.staffCount, currentForm.staffCount),
+            },
+            {
+                item: "Classrooms",
+                previous: prev.classroomCount,
+                recount: currentForm.classroomCount,
+                inputValue: String(currentForm.classroomCount ?? 0),
+                status: buildStatus(prev.classroomCount, currentForm.classroomCount),
+            },
+        ];
+    }, [currentForm, previousForm]);
+
+    const syncLabel =
+        activeCategory?.fromServer || activeCategory?.syncStatus === "SERVER"
+            ? "From server"
+            : activeCategory?.syncStatus || "";
 
     if (loading) {
         return (
@@ -477,43 +694,6 @@ const RecountDataScreen: React.FC = () => {
             </div>
         );
     }
-
-    // Determine the active category and its form data
-    const activeCategory =
-        categories.find((c) => c.id === activeCategoryId) ?? categories[0];
-
-    const { formData, formDataByCategory } = inspection as any;
-
-    const currentFormData =
-        formDataByCategory && activeCategory
-            ? formDataByCategory[activeCategory.id] ?? formData
-            : formData;
-
-    const resourceData: ResourceItem[] = [
-        {
-            item: "Textbooks",
-            previous: currentFormData.textbooks,
-            recount: currentFormData.textbooks,
-            status: "ok",
-        },
-        {
-            item: "Chairs",
-            previous: currentFormData.chairs,
-            recount: currentFormData.chairs,
-            status: "ok",
-        },
-        {
-            item: "Teachers",
-            previous: Number(currentFormData.staffCount ?? 0),
-            recount: Number(currentFormData.staffCount ?? 0),
-            status: "ok",
-        },
-    ];
-
-    const syncLabel =
-        activeCategory?.fromServer || activeCategory?.syncStatus === "SERVER"
-            ? "From server"
-            : activeCategory?.syncStatus || "";
 
     return (
         <div className={styles.dashboardContainer}>
@@ -568,6 +748,12 @@ const RecountDataScreen: React.FC = () => {
                         inspectionDate={displayDate}
                         activeCategoryId={activeCategoryId}
                     />
+
+                    {!previousInspection && (
+                        <div className={styles.noPrevious}>
+                            No previous inspection found for comparison.
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
