@@ -80,8 +80,12 @@
   background: var(--colors-grey050, #f5f6fa);
   border-radius: 10px;
   padding: 6px 12px;
-  min-width: 64px;
   display: inline-block;
+}
+
+.valueChip,
+.recountInput {
+  max-width: 52px;
 }
 
 .recountInput {
@@ -89,12 +93,12 @@
   border-radius: 10px;
   border: 1px solid var(--colors-grey400, #e5e7eb);
   padding: 6px 12px;
-  min-width: 64px;
   text-align: center;
   font-size: 14px;
   outline: none;
   color: var(--colors-grey900, #111827);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box; 
 }
 
 .recountInput:focus {
