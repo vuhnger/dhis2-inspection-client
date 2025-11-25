@@ -134,10 +134,10 @@
 }
 
 .tabActive {
-  background: #2563eb;
-  border-color: #2563eb;
-  color: #ffffff;
-  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.4);
+    background: #4A6FF3;  
+    border-color: #4A6FF3;
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(74, 111, 243, 0.35);
 }
 
 .summaryContainer {
@@ -168,4 +168,11 @@
   color: #111827;
   padding: 2px 8px;
   border-radius: 999px;
+}
+
+.levelLabel {
+    font-size: 12px;
+    font-weight: 600;
+    color: #111827;
+    margin: 8px 0 4px;
 }
