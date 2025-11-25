@@ -464,14 +464,16 @@ const InspectionHomePage: React.FC = () => {
                     <div className={classes.inspectionCards}>
                         {(showAllUpcoming ? upcomingInspections : upcomingInspections.slice(0, 3)).map((inspection) => {
                             const { days, isPast } = getDaysRelative(inspection.eventDate)
-                            const relativeLabel = formatRelativeDays(days, isPast)
+                            const relativeLabel = isPast
+                                ? i18n.t('Due {{count}} days ago', { count: days })
+                                : formatRelativeDays(days, isPast)
                             const isSynced = inspection.syncStatus === 'synced'
                             const isServer = inspection.source === 'server'
 
                             return (
                                 <div
                                     key={inspection.id}
-                                    className={classes.inspectionCard}
+                                    className={`${classes.inspectionCard} ${isPast ? classes.inspectionCardOverdue : ''}`}
                                     onClick={() => navigate(`/inspection/${inspection.id}`)}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' || e.key === ' ') {
