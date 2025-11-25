@@ -613,13 +613,6 @@ const RecountDataScreen: React.FC = () => {
                 status: buildStatus(prev.chairs, currentForm.chairs),
             },
             {
-                item: "Total students",
-                previous: prev.totalStudents,
-                recount: currentForm.totalStudents,
-                inputValue: String(currentForm.totalStudents ?? 0),
-                status: buildStatus(prev.totalStudents, currentForm.totalStudents),
-            },
-            {
                 item: "Male students",
                 previous: prev.maleStudents,
                 recount: currentForm.maleStudents,
@@ -695,21 +688,25 @@ const RecountDataScreen: React.FC = () => {
 
             <div className={styles.categoryStatusRow}>
                 {activeCategory && (
-                    <div className={styles.categoryStatusChip}>
-                        <span className={styles.categoryStatusCategory}>
-                            {activeCategory.displayName}
-                        </span>
-                        {syncLabel && (
-                            <span className={styles.categoryStatusLabel}>
-                                {syncLabel}
+                    <>
+                        <div className={styles.levelLabel}>Level</div>
+
+                        <div className={styles.categoryStatusChip}>
+                            <span className={styles.categoryStatusCategory}>
+                                {activeCategory.displayName}
                             </span>
-                        )}
-                        {activeCategory.eventId && (
-                            <span className={styles.categoryStatusEvent}>
-                                • {activeCategory.eventId}
-                            </span>
-                        )}
-                    </div>
+                            {syncLabel && (
+                                <span className={styles.categoryStatusLabel}>
+                                    {syncLabel}
+                                </span>
+                            )}
+                            {activeCategory.eventId && (
+                                <span className={styles.categoryStatusEvent}>
+                                    • {activeCategory.eventId}
+                                </span>
+                            )}
+                        </div>
+                    </>
                 )}
             </div>
 

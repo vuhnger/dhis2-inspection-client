@@ -386,3 +386,10 @@
   font-size: 12px;
   color: var(--colors-grey700, #374151);
 }
+
+.levelLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--colors-grey900, #111827);
+  margin-bottom: 4px;
+}
