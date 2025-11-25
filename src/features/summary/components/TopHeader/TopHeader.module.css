@@ -278,3 +278,30 @@
     vertical-align: middle;
     opacity: 0.75;
 }
+
+.inlineInfoIcon {
+    margin-left: 6px;
+    vertical-align: middle;
+    opacity: 0.75;
+    cursor: pointer;
+}
+
+.headerInfoOverlay {
+    position: fixed;
+    top: 140px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 420px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: #111827;
+    color: #f9fafb;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+    z-index: 1300;
+}
+
+.headerInfoText {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+}

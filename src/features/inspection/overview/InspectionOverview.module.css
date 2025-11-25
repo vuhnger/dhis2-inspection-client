@@ -218,7 +218,7 @@
 }
 
 .categoryIcon svg {
-  transform: scale(1.25);
+  transform: scale(1);
   transform-origin: center;
 }
 
@@ -306,6 +306,10 @@
   background: var(--dhis2-grey-900);
   color: var(--dhis2-white);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: scale(1.25);
+}
+
+.categoryButton.active .categoryIcon svg {
   transform: scale(1.25);
 }
 
@@ -572,23 +576,39 @@
   z-index: 100;
   display: flex;
   justify-content: space-between;
-  gap: var(--dhis2-space-12);
+  align-items: center;
+  gap: 16px;
   background-color: #E2F2FF;
 }
 
+.navLeft {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.navRight {
+  display: flex;
+  margin-left: auto;
+  align-items: center;
+}
+
 .navigationButtons button {
-  flex: 1;
-  min-height: 48px;
+  flex: 0 0 auto;
+  min-height: 40px;
+  min-width: 150px;
   font-size: 14px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .navigationButtons > div {
-  flex: 1;
+  flex: 0 0 auto;
 }
 
 .buttonWrapper {
-  flex: 1;
+  flex: 0 0 auto;
+  min-width: 150px;
   display: flex;
 }
 
@@ -602,9 +622,9 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding: 10px 24px 10px 16px;
+  padding: 10px 20px;
   gap: 8px;
-  width: 168px;
+  width: auto;
   height: 40px;
   border-radius: 100px !important;
   border: none !important;
@@ -617,6 +637,8 @@
   font-size: 14px;
   line-height: 20px;
   letter-spacing: 0.1px;
+  background: #1D2B36;
+  color: #F1F9FF;
 }
 
 .previousButton {
@@ -653,6 +675,30 @@
 .nextButton {
   background: #1D2B36 !important;
   color: #F1F9FF !important;
+}
+
+.completeButton {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+  gap: 8px;
+  width: auto;
+  height: 40px;
+  border-radius: 100px !important;
+  border: none !important;
+  box-shadow: none;
+  transition: background 150ms ease, color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+  isolation: isolate;
+  font-family: 'Roboto', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.1px;
+  background: #007DEB !important;
+  color: #FFFFFF !important;
 }
 
 .nextButton:hover {

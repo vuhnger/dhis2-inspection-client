@@ -1,6 +1,7 @@
 import { Edit3, Check, FileText, RotateCcw, Home, Info} from "lucide-react";
 import React from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { Layer } from "@dhis2/ui";
 
 import styles from "./TopHeader.module.css";
 
@@ -35,8 +36,7 @@ const TopHeader: React.FC<HeaderProps> = ({
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
 
-  const inferredActiveTab: "current" | "recount" =
-    location.pathname.includes("/RecountData") ? "recount" : "current";
+  const inferredActiveTab: "current" | "recount" = location.pathname.includes("/RecountData") ? "recount" : "current";
 
   const currentActiveTab = activeTab ?? inferredActiveTab;
 
@@ -55,6 +55,8 @@ const TopHeader: React.FC<HeaderProps> = ({
   const [isEditing, setIsEditing] = React.useState(false);
   const [draftSchoolName, setDraftSchoolName] = React.useState(schoolName);
   const [draftDate, setDraftDate] = React.useState(inspectionDate);
+
+  const [showHeaderInfo, setShowHeaderInfo] = React.useState(false);
 
   React.useEffect(() => {
     if (!isEditing) {
@@ -97,8 +99,14 @@ const TopHeader: React.FC<HeaderProps> = ({
                 {schoolName}
 
                 {currentActiveTab === "recount" && (
-                  <Info size={18} className={styles.inlineInfoIcon} />
-                )}
+                  <Info
+                      size={18}
+                      className={styles.inlineInfoIcon}
+                      onClick={() => setShowHeaderInfo(true)}
+                      role="button"
+                      aria-label="Recount information"
+                  />
+              )}
               </span>
             </h1>
               <p className={styles.dateRow}>Date: {inspectionDate}</p>
@@ -173,6 +181,22 @@ const TopHeader: React.FC<HeaderProps> = ({
           </span>
         </button>
       </div>
+        
+
+      {showHeaderInfo && (
+      <Layer translucent onClick={() => setShowHeaderInfo(false)}>
+          <div
+              className={styles.headerInfoOverlay}
+              onClick={(e) => e.stopPropagation()}
+          >
+              <p className={styles.headerInfoText}>
+                  For the recount, please contact the teacher or principal
+                  for the official numbers.
+              </p>
+          </div>
+      </Layer>
+  )}
+
     </header>
   );
 };

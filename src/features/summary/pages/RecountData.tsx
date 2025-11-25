@@ -613,13 +613,6 @@ const RecountDataScreen: React.FC = () => {
                 status: buildStatus(prev.chairs, currentForm.chairs),
             },
             {
-                item: "Total students",
-                previous: prev.totalStudents,
-                recount: currentForm.totalStudents,
-                inputValue: String(currentForm.totalStudents ?? 0),
-                status: buildStatus(prev.totalStudents, currentForm.totalStudents),
-            },
-            {
                 item: "Male students",
                 previous: prev.maleStudents,
                 recount: currentForm.maleStudents,
@@ -721,7 +714,6 @@ const RecountDataScreen: React.FC = () => {
                 <div className={styles.contentInner}>
                     <div className={styles.recountHeaderRow}>
                         <h2 className={styles.recountTitle}>Resources</h2>
-                        <Info size={16} className={styles.infoIcon} />
                     </div>
 
                     <CategoryTabs
