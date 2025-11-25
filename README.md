@@ -43,6 +43,14 @@ School inspectors work in areas with poor internet connection. Our app works com
 - Hit the sync badge to push unsynced locals to DHIS2; the app then automatically pulls remote events and stores them locally (`source: server`), so the home lists show both your and others’ synced inspections. You can also tap “Refresh from server” to pull without pushing.
 - See [docs/sync-implementation-example.md](./docs/sync-implementation-example.md) for code details, and `scripts/sync-check.js` for a console helper to compare local vs remote.
 
+## On our DHIS2 instance
+
+**Deployed App**: [https://research.im.dhis2.org/in5320g16/apps/in5320-group-16](https://research.im.dhis2.org/in5320g16/apps/in5320-group-16)
+
+Login with these credentials:
+- **Username**: `in5320`
+- **Password**: `P1@tform`
+
 ## Technical Details
 
 More detailed documentation is available in the [`docs/`](./docs/) folder for developers who want to understand the technical implementation.
