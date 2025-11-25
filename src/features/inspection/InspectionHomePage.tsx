@@ -58,12 +58,20 @@ const InspectionHomePage: React.FC = () => {
             }
         }
 
+        if (localInspections.length === 0) {
+            return {
+                background: '#F3F4F6',
+                color: '#4B5563',
+                border: '1px solid #E5E7EB',
+            }
+        }
+
         return {
             background: '#D1FAE5',
             color: '#047857',
             border: '1px solid #6EE7B7',
         }
-    }, [effectiveHasUnsynced, isSyncing])
+    }, [effectiveHasUnsynced, isSyncing, localInspections.length])
 
     React.useEffect(() => {
         const handleOnline = () => setIsOnline(true)
@@ -218,6 +226,9 @@ const InspectionHomePage: React.FC = () => {
         try {
             await clearAllInspections()
             await refetchInspections()
+            // Force a slight delay to ensure the refetch completes before checking sync status
+            await new Promise(resolve => setTimeout(resolve, 100))
+            await checkUnsyncedStatus()
             setIsConfirmClearOpen(false)
         } catch (error) {
             console.error('Failed to clear data:', error)
@@ -289,13 +300,13 @@ const InspectionHomePage: React.FC = () => {
                             className={classes.syncBadge}
                             style={{
                                 ...syncBadgeColors,
-                                cursor: canTriggerSync ? 'pointer' : 'default',
+                                cursor: isOnline && !isSyncing && !remoteLoading ? 'pointer' : 'default',
                             }}
-                            onClick={canTriggerSync ? handleSyncAndPull : undefined}
-                            role={canTriggerSync ? 'button' : undefined}
-                            tabIndex={canTriggerSync ? 0 : undefined}
+                            onClick={isOnline && !isSyncing && !remoteLoading ? handleSyncAndPull : undefined}
+                            role={isOnline && !isSyncing && !remoteLoading ? 'button' : undefined}
+                            tabIndex={isOnline && !isSyncing && !remoteLoading ? 0 : undefined}
                             onKeyDown={(event) => {
-                                if (!canTriggerSync) {
+                                if (!isOnline || isSyncing || remoteLoading) {
                                     return
                                 }
                                 if (event.key === 'Enter' || event.key === ' ') {
@@ -305,28 +316,30 @@ const InspectionHomePage: React.FC = () => {
                             }}
                             aria-live="polite"
                         >
-                            {isSyncing ? (
+                            {isSyncing || remoteLoading ? (
                                 <>
                                     <svg
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    style={{ animation: 'spin 1s linear infinite' }}
-                                >
-                                    <path
-                                        d="M12 4V1L8 5L12 9V6C15.31 6 18 8.69 18 12C18 13.01 17.75 13.97 17.3 14.8L18.76 16.26C19.54 15.03 20 13.57 20 12C20 7.58 16.42 4 12 4ZM12 18C8.69 18 6 15.31 6 12C6 10.99 6.25 10.03 6.7 9.2L5.24 7.74C4.46 8.97 4 10.43 4 12C4 16.42 7.58 20 12 20V23L16 19L12 15V18Z"
-                                        fill="currentColor"
-                                    />
-                                </svg>
-                                    <span>{i18n.t('Syncing...')}</span>
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        style={{ animation: 'spin 1s linear infinite' }}
+                                    >
+                                        <path
+                                            d="M12 4V1L8 5L12 9V6C15.31 6 18 8.69 18 12C18 13.01 17.75 13.97 17.3 14.8L18.76 16.26C19.54 15.03 20 13.57 20 12C20 7.58 16.42 4 12 4ZM12 18C8.69 18 6 15.31 6 12C6 10.99 6.25 10.03 6.7 9.2L5.24 7.74C4.46 8.97 4 10.43 4 12C4 16.42 7.58 20 12 20V23L16 19L12 15V18Z"
+                                            fill="currentColor"
+                                        />
+                                    </svg>
+                                    <span style={{ marginLeft: '8px', fontWeight: '500' }}>
+                                        {isSyncing ? i18n.t('Syncing...') : i18n.t('Refreshing...')}
+                                    </span>
                                 </>
                             ) : effectiveHasUnsynced ? (
                                 <>
                                     <svg
-                                        width="24"
-                                        height="24"
+                                        width="20"
+                                        height="20"
                                         viewBox="0 0 24 24"
                                         fill="none"
                                         xmlns="http://www.w3.org/2000/svg"
@@ -336,18 +349,15 @@ const InspectionHomePage: React.FC = () => {
                                             fill="currentColor"
                                         />
                                     </svg>
-                                    <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-                                        <span>{i18n.t('Not synced')}</span>
-                                        <small style={{ fontSize: '0.7rem', opacity: 0.9 }}>
-                                            {isOnline ? i18n.t('Tap to sync') : i18n.t('Connect to sync')}
-                                        </small>
-                                    </div>
+                                    <span style={{ marginLeft: '8px', fontWeight: '500' }}>
+                                        {isOnline ? i18n.t('Sync & Refresh') : i18n.t('Offline')}
+                                    </span>
                                 </>
-                            ) : (
+                            ) : localInspections.length === 0 ? (
                                 <>
                                     <svg
-                                        width="24"
-                                        height="24"
+                                        width="20"
+                                        height="20"
                                         viewBox="0 0 24 24"
                                         fill="none"
                                         xmlns="http://www.w3.org/2000/svg"
@@ -357,23 +367,33 @@ const InspectionHomePage: React.FC = () => {
                                             fill="currentColor"
                                         />
                                     </svg>
-                                    <span>{i18n.t('Synced')}</span>
+                                    <span style={{ marginLeft: '8px', fontWeight: '500' }}>
+                                        {isOnline ? i18n.t('Refresh') : i18n.t('Offline')}
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    <svg
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <path
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            fill="none"
+                                        />
+                                    </svg>
+                                    <span style={{ marginLeft: '8px', fontWeight: '500' }}>
+                                        {i18n.t('Up to date')}
+                                    </span>
                                 </>
                             )}
-                        </div>
-                        <div className={classes.pullInfo}>
-                            <button
-                                className={classes.pullButton}
-                                onClick={pullRemote}
-                                disabled={remoteLoading || !isOnline}
-                            >
-                                {remoteLoading ? i18n.t('Pulling...') : i18n.t('Refresh from server')}
-                            </button>
-                            <small>
-                                {remoteError
-                                    ? i18n.t('Pull failed: {{error}}', { error: remoteError })
-                                    : i18n.t('Last pull: {{time}}', { time: lastPulledLabel })}
-                            </small>
                         </div>
                         <button
                             className={classes.clearDataButton}
@@ -464,14 +484,16 @@ const InspectionHomePage: React.FC = () => {
                     <div className={classes.inspectionCards}>
                         {(showAllUpcoming ? upcomingInspections : upcomingInspections.slice(0, 3)).map((inspection) => {
                             const { days, isPast } = getDaysRelative(inspection.eventDate)
-                            const relativeLabel = formatRelativeDays(days, isPast)
+                            const relativeLabel = isPast
+                                ? i18n.t('Due {{count}} days ago', { count: days })
+                                : formatRelativeDays(days, isPast)
                             const isSynced = inspection.syncStatus === 'synced'
                             const isServer = inspection.source === 'server'
 
                             return (
                                 <div
                                     key={inspection.id}
-                                    className={classes.inspectionCard}
+                                    className={`${classes.inspectionCard} ${isPast ? classes.inspectionCardOverdue : ''}`}
                                     onClick={() => navigate(`/inspection/${inspection.id}`)}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' || e.key === ' ') {
