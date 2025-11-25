@@ -60,11 +60,11 @@ const CATEGORY_FIELDS: Record<Category, Array<keyof FormState>> = {
 const DEFAULT_FORM: FormState = {
     textbooks: 0,
     chairs: 0,
-    totalStudents: '',
-    maleStudents: '',
-    femaleStudents: '',
-    staffCount: '',
-    classroomCount: '',
+    totalStudents: 0,
+    maleStudents: 0,
+    femaleStudents: 0,
+    staffCount: 0,
+    classroomCount: 0,
     testFieldNotes: '',
 }
 
@@ -241,19 +241,19 @@ const InspectionOverview: React.FC = () => {
         }
 
         if (category === 'students') {
-            if (!state.totalStudents) {
+            if (state.totalStudents === '' || state.totalStudents === null || state.totalStudents === undefined) {
                 nextErrors.totalStudents = i18n.t('Total student count is required')
             } else if (Number(state.totalStudents) < 0) {
                 nextErrors.totalStudents = i18n.t('Enter a non-negative number')
             }
 
-            if (!state.maleStudents) {
+            if (state.maleStudents === '' || state.maleStudents === null || state.maleStudents === undefined) {
                 nextErrors.maleStudents = i18n.t('Male student count is required')
             } else if (Number(state.maleStudents) < 0) {
                 nextErrors.maleStudents = i18n.t('Enter a non-negative number')
             }
 
-            if (!state.femaleStudents) {
+            if (state.femaleStudents === '' || state.femaleStudents === null || state.femaleStudents === undefined) {
                 nextErrors.femaleStudents = i18n.t('Female student count is required')
             } else if (Number(state.femaleStudents) < 0) {
                 nextErrors.femaleStudents = i18n.t('Enter a non-negative number')
@@ -271,7 +271,7 @@ const InspectionOverview: React.FC = () => {
         }
 
         if (category === 'staff') {
-            if (!state.staffCount) {
+            if (state.staffCount === '' || state.staffCount === null || state.staffCount === undefined) {
                 nextErrors.staffCount = i18n.t('Staff count is required')
             } else if (Number(state.staffCount) < 0) {
                 nextErrors.staffCount = i18n.t('Enter a non-negative number')
@@ -279,7 +279,7 @@ const InspectionOverview: React.FC = () => {
         }
 
         if (category === 'facilities') {
-            if (!state.classroomCount) {
+            if (state.classroomCount === '' || state.classroomCount === null || state.classroomCount === undefined) {
                 nextErrors.classroomCount = i18n.t('Classroom count is required')
             } else if (Number(state.classroomCount) < 0) {
                 nextErrors.classroomCount = i18n.t('Enter a non-negative number')
