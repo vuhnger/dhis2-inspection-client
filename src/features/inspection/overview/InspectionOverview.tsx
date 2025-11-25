@@ -876,7 +876,7 @@ const InspectionOverview: React.FC = () => {
             className={`${classes.previousButton} ${classes.summaryButton}`}
             onClick={handleToggleSummary}
         >
-            {showSummary ? i18n.t('Hide summary') : i18n.t('See summary')}
+            {showSummary ? i18n.t('Hide summary') : i18n.t('Submit')}
         </Button>
     )
 
@@ -1198,7 +1198,7 @@ const InspectionOverview: React.FC = () => {
                                     onClick={handleSeeSubmittedInspection}
                                     className={classes.summaryButton}
                                 >
-                                    {i18n.t('See summary')}
+                                    {i18n.t('Submit')}
                                 </Button>
                                 <Button 
                                     onClick={handleDiscardInspection}
