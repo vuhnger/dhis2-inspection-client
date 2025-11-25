@@ -188,6 +188,13 @@ const InspectionHomePage: React.FC = () => {
         }
     }
 
+    const formatRelativeDays = (days: number, isPast: boolean): string => {
+        if (days === 0) {
+            return i18n.t('Today')
+        }
+        return isPast ? i18n.t('{{count}} days ago', { count: days }) : i18n.t('In {{count}} days', { count: days })
+    }
+
     const formatDate = (dateString: string): string => {
         const date = new Date(dateString)
         const base = date.toLocaleDateString('en-GB', {
@@ -456,7 +463,8 @@ const InspectionHomePage: React.FC = () => {
 
                     <div className={classes.inspectionCards}>
                         {(showAllUpcoming ? upcomingInspections : upcomingInspections.slice(0, 3)).map((inspection) => {
-                            const { days } = getDaysRelative(inspection.eventDate)
+                            const { days, isPast } = getDaysRelative(inspection.eventDate)
+                            const relativeLabel = formatRelativeDays(days, isPast)
                             const isSynced = inspection.syncStatus === 'synced'
                             const isServer = inspection.source === 'server'
 
@@ -518,7 +526,7 @@ const InspectionHomePage: React.FC = () => {
                                                     fill="currentColor"
                                                 />
                                             </svg>
-                                            In {days} days
+                                            {relativeLabel}
                                         </div>
                                     </div>
                                 </div>
@@ -547,7 +555,8 @@ const InspectionHomePage: React.FC = () => {
 
                     <div className={classes.inspectionCards}>
                         {(showAllCompleted ? finishedInspections : finishedInspections.slice(0, 3)).map((inspection) => {
-                            const { days } = getDaysRelative(inspection.eventDate)
+                            const { days, isPast } = getDaysRelative(inspection.eventDate)
+                            const relativeLabel = formatRelativeDays(days, isPast)
                             const isSynced = inspection.syncStatus === 'synced'
                             const isServer = inspection.source === 'server'
 
@@ -609,7 +618,7 @@ const InspectionHomePage: React.FC = () => {
                                                     fill="currentColor"
                                                 />
                                             </svg>
-                                            {days} days ago
+                                            {relativeLabel}
                                         </div>
                                     </div>
                                 </div>
