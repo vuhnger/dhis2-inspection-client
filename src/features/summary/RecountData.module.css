@@ -175,10 +175,19 @@
   color: var(--colors-blue600, #2563eb);
 }
 
+.notesTextArea {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
 .notesTextArea textarea {
-  background: #ffffff !important; 
-  border-radius: 16px; 
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  border: none !important;      
+  outline: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
 }
 
 .saveButtonWrapper {
