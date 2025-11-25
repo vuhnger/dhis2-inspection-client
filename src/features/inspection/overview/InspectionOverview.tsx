@@ -33,6 +33,7 @@ type FormState = {
     textbooks: number | string
     chairs: number | string
 
+    totalStudents: string | number
     maleStudents: string | number
     femaleStudents: string | number
 
@@ -649,7 +650,19 @@ const InspectionOverview: React.FC = () => {
             case 'students':
                 return (
                     <div className={classes.formFields}>
-                        {}
+                        <div className={classes.counterField}>
+                            <label className={classes.counterLabel}>{i18n.t('Total Students')}</label>
+                            <div className={classes.counterControl}>
+                                <input
+                                    type="number"
+                                    className={`${classes.counterInput} ${classes.readOnlyInput}`}
+                                    value={form.totalStudents}
+                                    readOnly
+                                    aria-readonly="true"
+                                />
+                            </div>
+                        </div>
+
                         <div className={classes.counterField}>
                             <label className={classes.counterLabel}>{i18n.t('Male Students')}</label>
                             <div className={classes.counterControl}>

@@ -513,6 +513,11 @@
   font-weight: 500;
 }
 
+.readOnlyInput {
+  background: #E5E7EB;
+  pointer-events: none;
+}
+
 .counterInput:focus {
   outline: none;
   background: #FFFFFF;
