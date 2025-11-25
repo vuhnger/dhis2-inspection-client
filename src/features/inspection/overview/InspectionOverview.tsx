@@ -1053,7 +1053,7 @@ const InspectionOverview: React.FC = () => {
                         className={classes.previousButton}
                         onClick={() => setSelectedCategory(previousCategory)}
                     >
-                        {i18n.t('Previous: {{category}}', { category: CATEGORY_LABELS[previousCategory] })}
+                        {i18n.t('← Previous: {{category}}', { category: CATEGORY_LABELS[previousCategory] })}
                     </Button>
                 ) : (
                     <div />
@@ -1065,7 +1065,7 @@ const InspectionOverview: React.FC = () => {
                         onClick={handleNextCategory}
                         disabled={!currentCategoryValid}
                     >
-                        {i18n.t('Next: {{category}}', { category: CATEGORY_LABELS[nextCategory] })}
+                        {i18n.t('Next: {{category}} →', { category: CATEGORY_LABELS[nextCategory] })}
                     </Button>
                 ) : (
                     <>
