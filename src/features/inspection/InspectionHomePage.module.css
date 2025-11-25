@@ -424,6 +424,17 @@
     margin: 0;
 }
 
+.cardTime {
+    font-size: 0.9rem;
+    color: #1e293b;
+    margin: 0;
+}
+
+.cardTime::before {
+    content: 'Scheduled time: ';
+    color: #64748b;
+}
+
 .cardSchool {
     font-size: 0.9rem;
     color: #1e293b;
