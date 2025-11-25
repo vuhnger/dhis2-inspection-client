@@ -717,7 +717,6 @@ const RecountDataScreen: React.FC = () => {
                 <div className={styles.contentInner}>
                     <div className={styles.recountHeaderRow}>
                         <h2 className={styles.recountTitle}>Resources</h2>
-                        <Info size={16} className={styles.infoIcon} />
                     </div>
 
                     <CategoryTabs
