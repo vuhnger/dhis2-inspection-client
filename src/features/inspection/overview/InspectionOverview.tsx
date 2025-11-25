@@ -70,6 +70,23 @@ const DEFAULT_FORM: FormState = {
 
 type CategoryMeta = { id: string; name: string }
 
+const normalizeForm = (form: Partial<FormState> | undefined): FormState => {
+    const toNumberOrZero = (value: any) => {
+        const num = Number(value)
+        return Number.isFinite(num) ? num : 0
+    }
+    return {
+        textbooks: toNumberOrZero(form?.textbooks),
+        chairs: toNumberOrZero(form?.chairs),
+        totalStudents: toNumberOrZero(form?.totalStudents),
+        maleStudents: toNumberOrZero(form?.maleStudents),
+        femaleStudents: toNumberOrZero(form?.femaleStudents),
+        staffCount: toNumberOrZero(form?.staffCount),
+        classroomCount: toNumberOrZero(form?.classroomCount),
+        testFieldNotes: form?.testFieldNotes ?? '',
+    }
+}
+
 const InspectionOverview: React.FC = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
@@ -116,11 +133,12 @@ const InspectionOverview: React.FC = () => {
             const fallbackForm = inspection.formData || DEFAULT_FORM
 
             categoryList.forEach((cat) => {
-                next[cat.id] =
+                next[cat.id] = normalizeForm(
                     prev[cat.id] ||
                     sourceMap[cat.id]?.formData ||
                     // If only a single category and we have legacy formData, reuse it
                     (categoryList.length === 1 ? fallbackForm : DEFAULT_FORM)
+                )
             })
 
             return next
