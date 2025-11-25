@@ -501,6 +501,19 @@ const InspectionHomePage: React.FC = () => {
                                     </div>
                                     <div className={classes.cardRight}>
                                         <div className={classes.daysIndicator}>
+                                            <svg
+                                                width="12"
+                                                height="13"
+                                                viewBox="0 0 15 17"
+                                                fill="none"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                style={{ marginRight: 6, flexShrink: 0 }}
+                                            >
+                                                <path
+                                                    d="M13.3333 1.66667H12.5V0H10.8333V1.66667H4.16667V0H2.5V1.66667H1.66667C0.741667 1.66667 0.00833333 2.41667 0.00833333 3.33333L0 15C0 15.9167 0.741667 16.6667 1.66667 16.6667H13.3333C14.25 16.6667 15 15.9167 15 15V3.33333C15 2.41667 14.25 1.66667 13.3333 1.66667ZM13.3333 15H1.66667V6.66667H13.3333V15ZM13.3333 5H1.66667V3.33333H13.3333V5ZM7.5 9.16667H11.6667V13.3333H7.5V9.16667Z"
+                                                    fill="currentColor"
+                                                />
+                                            </svg>
                                             In {days} days
                                         </div>
                                     </div>
@@ -579,6 +592,19 @@ const InspectionHomePage: React.FC = () => {
                                     </div>
                                     <div className={classes.cardRight}>
                                         <div className={classes.daysAgo}>
+                                            <svg
+                                                width="12"
+                                                height="13"
+                                                viewBox="0 0 15 17"
+                                                fill="none"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                style={{ marginRight: 6, flexShrink: 0 }}
+                                            >
+                                                <path
+                                                    d="M13.3333 1.66667H12.5V0H10.8333V1.66667H4.16667V0H2.5V1.66667H1.66667C0.741667 1.66667 0.00833333 2.41667 0.00833333 3.33333L0 15C0 15.9167 0.741667 16.6667 1.66667 16.6667H13.3333C14.25 16.6667 15 15.9167 15 15V3.33333C15 2.41667 14.25 1.66667 13.3333 1.66667ZM13.3333 15H1.66667V6.66667H13.3333V15ZM13.3333 5H1.66667V3.33333H13.3333V5ZM7.5 9.16667H11.6667V13.3333H7.5V9.16667Z"
+                                                    fill="currentColor"
+                                                />
+                                            </svg>
                                             {days} days ago
                                         </div>
                                     </div>
