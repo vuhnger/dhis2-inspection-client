@@ -1,6 +1,6 @@
 import i18n from '@dhis2/d2-i18n'
 import { Button, TextArea } from "@dhis2/ui";
-import { Info, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Info, TrendingUp, TrendingDown, Minus, CheckCircle } from "lucide-react";
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -434,7 +434,7 @@ const ResourceRecountTable: React.FC<ResourceRecountTableProps> = ({
                 <div className={styles.saveButtonWrapper}>
                     {saved ? (
                         <div className={styles.saveSuccessPill}>
-                            <CheckCircle2
+                            <CheckCircle
                                 size={16}
                                 className={styles.saveSuccessIcon}
                             />
@@ -613,13 +613,6 @@ const RecountDataScreen: React.FC = () => {
                 status: buildStatus(prev.chairs, currentForm.chairs),
             },
             {
-                item: "Total students",
-                previous: prev.totalStudents,
-                recount: currentForm.totalStudents,
-                inputValue: String(currentForm.totalStudents ?? 0),
-                status: buildStatus(prev.totalStudents, currentForm.totalStudents),
-            },
-            {
                 item: "Male students",
                 previous: prev.maleStudents,
                 recount: currentForm.maleStudents,
@@ -695,21 +688,25 @@ const RecountDataScreen: React.FC = () => {
 
             <div className={styles.categoryStatusRow}>
                 {activeCategory && (
-                    <div className={styles.categoryStatusChip}>
-                        <span className={styles.categoryStatusCategory}>
-                            {activeCategory.displayName}
-                        </span>
-                        {syncLabel && (
-                            <span className={styles.categoryStatusLabel}>
-                                {syncLabel}
+                    <>
+                        <div className={styles.levelLabel}>Level</div>
+
+                        <div className={styles.categoryStatusChip}>
+                            <span className={styles.categoryStatusCategory}>
+                                {activeCategory.displayName}
                             </span>
-                        )}
-                        {activeCategory.eventId && (
-                            <span className={styles.categoryStatusEvent}>
-                                • {activeCategory.eventId}
-                            </span>
-                        )}
-                    </div>
+                            {syncLabel && (
+                                <span className={styles.categoryStatusLabel}>
+                                    {syncLabel}
+                                </span>
+                            )}
+                            {activeCategory.eventId && (
+                                <span className={styles.categoryStatusEvent}>
+                                    • {activeCategory.eventId}
+                                </span>
+                            )}
+                        </div>
+                    </>
                 )}
             </div>
 

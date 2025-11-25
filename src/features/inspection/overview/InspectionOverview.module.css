@@ -63,6 +63,12 @@
   flex-wrap: wrap;
 }
 
+.headerRight {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .headerInfo {
   display: flex;
   flex-direction: column;
@@ -92,6 +98,30 @@
   box-shadow: 0 4px 8px rgba(15, 61, 34, 0.2);
   align-self: flex-start;
   white-space: nowrap;
+}
+
+.profileIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #0f172a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.profileIcon:hover {
+  background: #f3f4f6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.profileIcon:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
 }
 
 .syncedIcon {
@@ -147,10 +177,6 @@
   color: #4B5563;
 }
 
-.syncMetaStatus {
-  font-weight: 600;
-}
-
 .syncMetaSource {
   background: #E5E7EB;
   color: #111827;
@@ -178,8 +204,8 @@
 }
 
 .categoryIcon {
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   background: var(--dhis2-white);
   display: flex;
@@ -191,14 +217,19 @@
   position: relative;
 }
 
+.categoryIcon svg {
+  transform: scale(1.25);
+  transform-origin: center;
+}
+
 .staffLogo {
   position: absolute;
-  left: 12.5%;
-  right: 12.5%;
-  top: 8.33%;
-  bottom: 8.33%;
-  width: 75%;
-  height: 83.34%;
+  left: 20.83%;
+  right: 20.83%;
+  top: 12.5%;
+  bottom: 12.5%;
+  width: 58.34%;
+  height: 75%;
 }
 
 .staffLogo path {
@@ -541,23 +572,39 @@
   z-index: 100;
   display: flex;
   justify-content: space-between;
-  gap: var(--dhis2-space-12);
+  align-items: center;
+  gap: 16px;
   background-color: #E2F2FF;
 }
 
+.navLeft {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.navRight {
+  display: flex;
+  margin-left: auto;
+  align-items: center;
+}
+
 .navigationButtons button {
-  flex: 1;
-  min-height: 48px;
+  flex: 0 0 auto;
+  min-height: 40px;
+  min-width: 150px;
   font-size: 14px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .navigationButtons > div {
-  flex: 1;
+  flex: 0 0 auto;
 }
 
 .buttonWrapper {
-  flex: 1;
+  flex: 0 0 auto;
+  min-width: 150px;
   display: flex;
 }
 
@@ -571,9 +618,9 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding: 10px 24px 10px 16px;
+  padding: 10px 20px;
   gap: 8px;
-  width: 168px;
+  width: auto;
   height: 40px;
   border-radius: 100px !important;
   border: none !important;
@@ -586,6 +633,8 @@
   font-size: 14px;
   line-height: 20px;
   letter-spacing: 0.1px;
+  background: #1D2B36;
+  color: #F1F9FF;
 }
 
 .previousButton {
@@ -622,6 +671,30 @@
 .nextButton {
   background: #1D2B36 !important;
   color: #F1F9FF !important;
+}
+
+.completeButton {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+  gap: 8px;
+  width: auto;
+  height: 40px;
+  border-radius: 100px !important;
+  border: none !important;
+  box-shadow: none;
+  transition: background 150ms ease, color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+  isolation: isolate;
+  font-family: 'Roboto', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.1px;
+  background: #007DEB !important;
+  color: #FFFFFF !important;
 }
 
 .nextButton:hover {

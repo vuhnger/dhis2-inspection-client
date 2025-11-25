@@ -33,7 +33,6 @@ type FormState = {
     textbooks: number | string
     chairs: number | string
 
-    totalStudents: string | number
     maleStudents: string | number
     femaleStudents: string | number
 
@@ -46,7 +45,7 @@ type FormState = {
 
 const CATEGORY_FIELDS: Record<Category, Array<keyof FormState>> = {
     resources: ['textbooks', 'chairs'],
-    students: ['totalStudents', 'maleStudents', 'femaleStudents'],
+    students: ['maleStudents', 'femaleStudents'],
     staff: ['staffCount'],
     facilities: ['classroomCount'],
 }
@@ -69,12 +68,15 @@ const normalizeForm = (form: Partial<FormState> | undefined): FormState => {
         const num = Number(value)
         return Number.isFinite(num) ? num : 0
     }
+    const male = toNumberOrZero(form?.maleStudents)
+    const female = toNumberOrZero(form?.femaleStudents)
+    const total = male + female
     return {
         textbooks: toNumberOrZero(form?.textbooks),
         chairs: toNumberOrZero(form?.chairs),
-        totalStudents: toNumberOrZero(form?.totalStudents),
-        maleStudents: toNumberOrZero(form?.maleStudents),
-        femaleStudents: toNumberOrZero(form?.femaleStudents),
+        totalStudents: total,
+        maleStudents: male,
+        femaleStudents: female,
         staffCount: toNumberOrZero(form?.staffCount),
         classroomCount: toNumberOrZero(form?.classroomCount),
         testFieldNotes: form?.testFieldNotes ?? '',
@@ -244,12 +246,6 @@ const InspectionOverview: React.FC = () => {
         }
 
         if (category === 'students') {
-            if (state.totalStudents === '' || state.totalStudents === null || state.totalStudents === undefined) {
-                nextErrors.totalStudents = i18n.t('Total student count is required')
-            } else if (Number(state.totalStudents) < 0) {
-                nextErrors.totalStudents = i18n.t('Enter a non-negative number')
-            }
-
             if (state.maleStudents === '' || state.maleStudents === null || state.maleStudents === undefined) {
                 nextErrors.maleStudents = i18n.t('Male student count is required')
             } else if (Number(state.maleStudents) < 0) {
@@ -260,16 +256,6 @@ const InspectionOverview: React.FC = () => {
                 nextErrors.femaleStudents = i18n.t('Female student count is required')
             } else if (Number(state.femaleStudents) < 0) {
                 nextErrors.femaleStudents = i18n.t('Enter a non-negative number')
-            }
-
-            const total = Number(state.totalStudents)
-            const male = Number(state.maleStudents)
-            const female = Number(state.femaleStudents)
-
-            if (total > 0 && male + female > total) {
-                nextErrors.totalStudents = i18n.t(
-                    'Total students cannot be less than male + female students'
-                )
             }
         }
 
@@ -320,11 +306,13 @@ const InspectionOverview: React.FC = () => {
             setCategoryForms((prev) => {
                 const prevForm = prev[categoryId] || DEFAULT_FORM
                 const nextForm = updater(prevForm)
-                const nextForms = { ...prev, [categoryId]: nextForm }
+                const computedTotal = Number(nextForm.maleStudents || 0) + Number(nextForm.femaleStudents || 0)
+                const normalizedNextForm = { ...nextForm, totalStudents: computedTotal }
+                const nextForms = { ...prev, [categoryId]: normalizedNextForm }
 
                 setCategoryErrors((prevErrors) => ({
                     ...prevErrors,
-                    [categoryId]: validateAll(nextForm),
+                    [categoryId]: validateAll(normalizedNextForm),
                 }))
 
                 if (inspection) {
@@ -349,7 +337,7 @@ const InspectionOverview: React.FC = () => {
                     })
 
                     updateInspection({
-                        formData: nextForm,
+                        formData: normalizedNextForm,
                         formDataByCategory,
                         categorySyncStatus,
                         status: 'in_progress',
@@ -664,39 +652,6 @@ const InspectionOverview: React.FC = () => {
                     <div className={classes.formFields}>
                         {}
                         <div className={classes.counterField}>
-                            <label className={classes.counterLabel}>{i18n.t('Total Students')}</label>
-                            <div className={classes.counterControl}>
-                                <button
-                                    type="button"
-                                    className={classes.counterButton}
-                                    onClick={() => handleDecrement('totalStudents')}
-                                    aria-label={i18n.t('Decrease total students')}
-                                >
-                                    −
-                                </button>
-                                <input
-                                    type="number"
-                                    className={classes.counterInput}
-                                    value={form.totalStudents}
-                                    onChange={handleCounterChange('totalStudents')}
-                                    min="0"
-                                />
-                                <button
-                                    type="button"
-                                    className={classes.counterButton}
-                                    onClick={() => handleIncrement('totalStudents')}
-                                    aria-label={i18n.t('Increase total students')}
-                                >
-                                    +
-                                </button>
-                            </div>
-                            {errors.totalStudents && (
-                                <span className={classes.errorText}>{errors.totalStudents}</span>
-                            )}
-                        </div>
-
-                        {}
-                        <div className={classes.counterField}>
                             <label className={classes.counterLabel}>{i18n.t('Male Students')}</label>
                             <div className={classes.counterControl}>
                                 <button
@@ -861,21 +816,11 @@ const InspectionOverview: React.FC = () => {
         )
     }
 
-    const summaryButton = (
-        <Button
-            className={`${classes.previousButton} ${classes.summaryButton}`}
-            onClick={handleToggleSummary}
-        >
-            {showSummary ? i18n.t('Hide summary') : i18n.t('Submit')}
-        </Button>
-    )
-
     const submitButton = (
         <Button
-            className={classes.nextButton}
+            className={classes.completeButton}
             onClick={handleCompleteInspection}
             disabled={submitDisabled}
-            style={{ backgroundColor: '#F1F9FF' }}
         >
             {i18n.t('Complete inspection')}
         </Button>
@@ -894,30 +839,27 @@ const InspectionOverview: React.FC = () => {
                         </p>
                     </div>
 
-                    <span
-                        className={classes.syncedBadge}
-                        style={{
-                            backgroundColor: isSynced ? undefined : '#E5E7EB',
-                            color: isSynced ? undefined : '#374151',
-                        }}
-                    >
-                        <svg
-                            className={classes.syncedIcon}
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            role="img"
-                            aria-hidden="true"
-                        >
-                            <path
-                                d="M19.5 14.98C19.48 14.98 19.47 14.98 19.45 14.99C19.2 13.3 17.76 12 16 12C14.6 12 13.4 12.83 12.84 14.02C11.26 14.1 10 15.4 10 17C10 18.66 11.34 20 13 20L19.5 19.98C20.88 19.98 22 18.86 22 17.48C22 16.1 20.88 14.98 19.5 14.98ZM19.51 18H13C12.45 18 12 17.55 12 17C12 16.45 12.45 16 13 16H14.25V15.75C14.25 14.78 15.03 14 16 14C16.97 14 17.75 14.78 17.75 15.75V17C17.75 17 19.5 17 19.51 17C19.79 17 20.01 17.22 20.01 17.5C20 17.77 19.78 18 19.51 18ZM8 4.26V6.35C5.67 7.18 4 9.39 4 12C4 13.77 4.78 15.34 6 16.44V14H8V20H2V18H4.73C3.06 16.54 2 14.4 2 12C2 8.27 4.55 5.15 8 4.26ZM18 6H15.27C16.7 7.26 17.68 9.01 17.93 11H15.91C15.68 9.64 14.98 8.45 14 7.56V10H12V4H18V6Z"
-                                fill="currentColor"
-                            />
-                        </svg>
-                        <span>{isSynced ? i18n.t('Synced') : i18n.t('Not synced')}</span>
-                    </span>
+                    <div className={classes.headerRight}>
+                        <button type="button" className={classes.profileIcon} aria-label={i18n.t('User profile')}>
+                            <svg
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
+                                    fill="currentColor"
+                                />
+                                <path
+                                    d="M4 20C4 16.6863 6.68629 14 10 14H14C17.3137 14 20 16.6863 20 20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V20Z"
+                                    fill="currentColor"
+                                />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <div className={classes.schoolInfoDropdown}>
@@ -934,19 +876,6 @@ const InspectionOverview: React.FC = () => {
                                 {cat.name}
                             </button>
                         ))}
-                    </div>
-                    <div className={classes.syncMeta}>
-                        <span className={classes.syncMetaStatus}>
-                            {i18n.t('Status')}: {activeCategorySyncStatus || i18n.t('Unknown')}
-                        </span>
-                        {activeCategoryEventId ? (
-                            <span className={classes.syncMetaEvent}>
-                                {i18n.t('Event ID')}: {activeCategoryEventId}
-                            </span>
-                        ) : null}
-                        {inspection?.source === 'server' ? (
-                            <span className={classes.syncMetaSource}>{i18n.t('From server')}</span>
-                        ) : null}
                     </div>
                 </div>
 
@@ -1107,79 +1036,72 @@ const InspectionOverview: React.FC = () => {
             </div>
 
             <div className={classes.navigationButtons}>
-                {previousCategory ? (
-                    <Button
-                        className={classes.previousButton}
-                        onClick={() => setSelectedCategory(previousCategory)}
-                    >
-                        {i18n.t('Previous: {{category}}', { category: CATEGORY_LABELS[previousCategory] })}
-                    </Button>
-                ) : (
-                    <div />
-                )}
+                <div className={classes.navLeft}>
+                    {previousCategory ? (
+                        <Button
+                            className={classes.previousButton}
+                            onClick={() => setSelectedCategory(previousCategory)}
+                        >
+                            {i18n.t('← Previous: {{category}}', { category: CATEGORY_LABELS[previousCategory] })}
+                        </Button>
+                    ) : null}
 
-                {nextCategory ? (
+                    {nextCategory ? (
+                        <Button
+                            className={classes.nextButton}
+                            onClick={handleNextCategory}
+                            disabled={!currentCategoryValid}
+                        >
+                            {i18n.t('Next: {{category}} →', { category: CATEGORY_LABELS[nextCategory] })}
+                        </Button>
+                    ) : null}
+                </div>
+
+                <div className={classes.navRight}>
+                    {submitDisabled ? (
+                        <Tooltip
+                            content={
+                                missingFieldsText
+                                    ? i18n.t('Missing: {{fields}}', { fields: missingFieldsText })
+                                    : i18n.t('Please fill the required fields before submitting.')
+                            }
+                            placement="top"
+                        >
+                            <span className={classes.buttonWrapper}>{submitButton}</span>
+                        </Tooltip>
+                    ) : (
+                        <span className={classes.buttonWrapper}>{submitButton}</span>
+                    )}
+                </div>
+
+                {inspection?.status === 'completed' && inspection?.syncStatus !== 'synced' && (
                     <Button
                         className={classes.nextButton}
-                        onClick={handleNextCategory}
-                        disabled={!currentCategoryValid}
+                        onClick={async () => {
+                            await triggerSync()
+                        }}
+                        disabled={!isOnline || isSyncing}
+                        loading={isSyncing}
                     >
-                        {i18n.t('Next: {{category}}', { category: CATEGORY_LABELS[nextCategory] })}
+                        {isSyncing
+                            ? i18n.t('Syncing...')
+                            : isOnline
+                            ? i18n.t('Sync to DHIS2')
+                            : i18n.t('Offline - Cannot Sync')}
                     </Button>
-                ) : (
-                    <>
-                        <span className={classes.buttonWrapper}>{summaryButton}</span>
-                        {submitDisabled ? (
-                            <Tooltip
-                                content={
-                                    missingFieldsText
-                                        ? i18n.t('Missing: {{fields}}', { fields: missingFieldsText })
-                                        : i18n.t('Please fill the required fields before submitting.')
-                                }
-                                placement="top"
-                            >
-                                <span className={classes.buttonWrapper}>{submitButton}</span>
-                            </Tooltip>
-                        ) : (
-                            <span className={classes.buttonWrapper}>{submitButton}</span>
-                        )}
-                        {inspection?.status === 'completed' && inspection?.syncStatus !== 'synced' && (
-                            <Button
-                                className={classes.nextButton}
-                                onClick={async () => {
-                                    await triggerSync()
-                                }}
-                                disabled={!isOnline || isSyncing}
-                                loading={isSyncing}
-                            >
-                                {isSyncing
-                                    ? i18n.t('Syncing...')
-                                    : isOnline
-                                    ? i18n.t('Sync to DHIS2')
-                                    : i18n.t('Offline - Cannot Sync')}
-                            </Button>
-                        )}
-                        {syncError && (
-                            <NoticeBox error title={i18n.t('Sync Error')}>
-                                {syncError}
-                            </NoticeBox>
-                        )}
-                    </>
+                )}
+                {syncError && (
+                    <NoticeBox error title={i18n.t('Sync Error')}>
+                        {syncError}
+                    </NoticeBox>
                 )}
             </div>
 
             {}
             {showCompleteModal && (
                 <>
-                    <div 
-                        className={classes.bottomSheetOverlay}
-                        onClick={() => setShowCompleteModal(false)}
-                    />
                     <div className={classes.bottomSheetShell}>
                         <div className={classes.bottomSheetContent}>
-                            <h2 className={classes.bottomSheetTitle}>
-                                {i18n.t('Complete inspection')}
-                            </h2>
                             <p className={classes.bottomSheetText}>
                                 {i18n.t('What would you like to do with this inspection?')}
                             </p>
