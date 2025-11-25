@@ -5,10 +5,6 @@ import InspectionHomePage from '../features/inspection/InspectionHomePage'
 import classes from './AppShell.module.css'
 import { routes } from './routes'
 
-/**
- * Main application shell - wires up all feature routes
- * Designed for tablet-optimized offline-first school inspection workflow
- */
 const AppShell: React.FC = () => {
     const DefaultRouteComponent = routes[0]?.component ?? InspectionHomePage
 

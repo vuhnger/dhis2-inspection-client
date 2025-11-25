@@ -3,7 +3,7 @@ import styles from "./SummarySection.module.css";
 
 interface SummarySectionProps {
   title: string;
-  children: React.ReactNode; // MetricCards
+  children: React.ReactNode;
 }
 
 const SummarySection: React.FC<SummarySectionProps> = ({ title, children }) => {

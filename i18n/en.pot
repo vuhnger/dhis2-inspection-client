@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-25T12:12:46.348Z\n"
-"PO-Revision-Date: 2025-11-25T12:12:46.348Z\n"
+"POT-Creation-Date: 2025-11-25T15:38:13.833Z\n"
+"PO-Revision-Date: 2025-11-25T15:38:13.833Z\n"
 
 msgid "Never pulled"
 msgstr "Never pulled"
@@ -55,6 +55,12 @@ msgstr "Cancel"
 
 msgid "Reset Data"
 msgstr "Reset Data"
+
+msgid "Inspection discarded"
+msgstr "Inspection discarded"
+
+msgid "Undo"
+msgstr "Undo"
 
 msgid "School type"
 msgstr "School type"
@@ -161,8 +167,8 @@ msgstr "The requested inspection could not be found."
 msgid "Hide summary"
 msgstr "Hide summary"
 
-msgid "See summary"
-msgstr "See summary"
+msgid "Submit"
+msgstr "Submit"
 
 msgid "Complete inspection"
 msgstr "Complete inspection"
@@ -200,14 +206,17 @@ msgstr "Additional notes"
 msgid "Validation Required"
 msgstr "Validation Required"
 
-msgid "Please complete all categories before submitting."
-msgstr "Please complete all categories before submitting."
+msgid "Category"
+msgstr "Category"
 
 msgid "Report Submitted"
 msgstr "Report Submitted"
 
 msgid "Your inspection report has been submitted successfully."
 msgstr "Your inspection report has been submitted successfully."
+
+msgid "Please fill the required fields before submitting."
+msgstr "Please fill the required fields before submitting."
 
 msgid "Sync to DHIS2"
 msgstr "Sync to DHIS2"
@@ -224,10 +233,14 @@ msgstr "What would you like to do with this inspection?"
 msgid "Discard"
 msgstr "Discard"
 
-msgctxt "Application title"
-msgid "__MANIFEST_APP_TITLE"
-msgstr "in5320-group-16"
+msgid "Are you sure you want to exit?"
+msgstr "Are you sure you want to exit?"
 
-msgctxt "Application description"
-msgid "__MANIFEST_APP_DESCRIPTION"
-msgstr ""
+msgid "Any unsaved data will be lost."
+msgstr "Any unsaved data will be lost."
+
+msgid "Yes"
+msgstr "Yes"
+
+msgid "No"
+msgstr "No"

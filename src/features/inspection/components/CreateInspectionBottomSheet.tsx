@@ -26,7 +26,6 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
     const { orgUnits, loading: orgUnitsLoading } = useAccessibleOrgUnits();
     const navigate = useNavigate();
 
-    // Handle escape key
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
             if (e.key === 'Escape' && isOpen) {
@@ -37,7 +36,6 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
         return () => document.removeEventListener('keydown', handleEscape);
     }, [isOpen, onClose]);
 
-    // Prevent body scroll when open
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -97,10 +95,10 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
             const inspectionInput = {
                 orgUnit: selectedSchool.id,
                 orgUnitName: selectedSchool.name,
-                eventDate: eventDate + 'T' + startTime + ':00', // ISO 8601 format
+                eventDate: eventDate + 'T' + startTime + ':00',
                 scheduledStartTime: startTime,
                 scheduledEndTime: endTime,
-                status: 'scheduled' as const, // Create as scheduled for upcoming inspections
+                status: 'scheduled' as const,
                 formData: {
                     textbooks: 0,
                     desks: 0,
@@ -116,12 +114,10 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
 
             const newInspection = await createInspection(inspectionInput);
 
-            // Reset form
             resetForm();
             onSuccess();
             onClose();
             
-            // Navigate to the newly created inspection
             if (newInspection && newInspection.id) {
                 navigate(`/inspection/${newInspection.id}`);
             }
@@ -153,7 +149,6 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
 
     return (
         <>
-            {/* Overlay */}
             <div
                 className={`${styles.overlay} ${isOpen ? styles.open : ''}`}
                 role="button"
@@ -168,9 +163,7 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
                 }}
             />
 
-            {/* Bottom Sheet */}
             <div className={`${styles.bottomSheet} ${isOpen ? styles.open : ''}`}>
-                {/* Drag Handle */}
                 <div className={styles.dragHandle} />
 
                 <div className={styles.headerBar}>
@@ -181,7 +174,6 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
                     </button>
                 </div>
 
-                {/* Content */}
                 <div className={styles.content}>
                     <div className={styles.formGroup}>
                         <SingleSelectField
@@ -243,7 +235,6 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
                     </div>
                 </div>
 
-                {/* Footer */}
                 <div className={styles.footer}>
                     <Button 
                         onClick={handleDiscard} 

@@ -1,7 +1,3 @@
-/**
- * Shared helpers for DHIS2 auth and API base construction.
- * Defaults are hardcoded for the IN5320 dev backend; override via env.
- */
 export function getAuthHeader(): string {
     const username = process.env.REACT_APP_DHIS2_USERNAME || 'in5320'
     const password = process.env.REACT_APP_DHIS2_PASSWORD || 'P1@tform'

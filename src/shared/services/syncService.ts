@@ -1,14 +1,9 @@
-/**
- * Sync Service - Handles synchronization of local inspections to DHIS2
- */
-
-import { updateInspection, getInspectionsBySyncStatus, getAllInspections, saveInspection } from '../db/indexedDB'
 import { DHIS2_PROGRAM_STAGE_UID, DHIS2_PROGRAM_UID } from '../config/dhis2'
+import { updateInspection, getInspectionsBySyncStatus, getAllInspections } from '../db/indexedDB'
 import { getAuthHeader, getApiBase } from '../utils/auth'
 
 import type { Inspection, InspectionFormData, SyncStatus } from '../types/inspection'
 
-// Define the engine type based on useDataEngine return type
 type DataEngine = {
     mutate: (mutation: {
         resource: string
@@ -19,43 +14,26 @@ type DataEngine = {
     query: (query: unknown) => Promise<any>
 }
 
-/**
- * Map inspection form data to DHIS2 data elements
- * Based on data-mappings.json
- */
 const DATA_ELEMENT_MAP = {
-    textbooks: 'xiaOnejpgdY', // CHK English Textbooks
-    desks: '', // NOT FOUND in DHIS2 - will be skipped during sync
-    chairs: 'mAtab30vU5g', // Number of Chairs
-    totalStudents: 'EaWxWo27lm3', // Total Students
-    maleStudents: 'h4XENZX2UMf', // Male Students
-    femaleStudents: 'DM707Od7el4', // Female Students
-    staffCount: 'ooYtEgJUuRM', // Staff Count
-    classroomCount: 'ya5SyA5hej4', // CHK number of classrooms
-    testFieldNotes: 'KrijJzaqMAU', // Inspection Notes
+    textbooks: 'xiaOnejpgdY',
+    desks: '',
+    chairs: 'mAtab30vU5g',
+    totalStudents: 'EaWxWo27lm3',
+    maleStudents: 'h4XENZX2UMf',
+    femaleStudents: 'DM707Od7el4',
+    staffCount: 'ooYtEgJUuRM',
+    classroomCount: 'ya5SyA5hej4',
+    testFieldNotes: 'KrijJzaqMAU',
 }
-const DATA_ELEMENT_FIELD_MAP = Object.entries(DATA_ELEMENT_MAP).reduce<
-    Record<string, keyof InspectionFormData>
->((acc, [field, id]) => {
-    if (id) {
-        acc[id] = field as keyof InspectionFormData
-    }
-    return acc
-}, {})
 
-/**
- * Convert local inspection to DHIS2 event payload
- */
 function inspectionToDHIS2Event(
     inspection: Inspection,
     options?: { formDataOverride?: InspectionFormData; dhis2EventIdOverride?: string; categoryLabel?: string }
 ) {
     const dataValues = []
 
-    // Add data values from form data
     const formData = options?.formDataOverride || inspection.formData
 
-    // Textbooks
     if (formData.textbooks !== 0 && DATA_ELEMENT_MAP.textbooks) {
         dataValues.push({
             dataElement: DATA_ELEMENT_MAP.textbooks,
@@ -63,10 +41,6 @@ function inspectionToDHIS2Event(
         })
     }
 
-    // Desks - SKIP because not found in DHIS2
-    // if (formData.desks !== 0 && DATA_ELEMENT_MAP.desks) { ... }
-
-    // Chairs
     if (formData.chairs !== 0 && DATA_ELEMENT_MAP.chairs) {
         dataValues.push({
             dataElement: DATA_ELEMENT_MAP.chairs,
@@ -74,7 +48,6 @@ function inspectionToDHIS2Event(
         })
     }
 
-    // Total Students
     if (formData.totalStudents && DATA_ELEMENT_MAP.totalStudents) {
         dataValues.push({
             dataElement: DATA_ELEMENT_MAP.totalStudents,
@@ -82,7 +55,6 @@ function inspectionToDHIS2Event(
         })
     }
 
-    // Male Students
     if (formData.maleStudents && DATA_ELEMENT_MAP.maleStudents) {
         dataValues.push({
             dataElement: DATA_ELEMENT_MAP.maleStudents,
@@ -90,7 +62,6 @@ function inspectionToDHIS2Event(
         })
     }
 
-    // Female Students
     if (formData.femaleStudents && DATA_ELEMENT_MAP.femaleStudents) {
         dataValues.push({
             dataElement: DATA_ELEMENT_MAP.femaleStudents,
@@ -98,7 +69,6 @@ function inspectionToDHIS2Event(
         })
     }
 
-    // Staff Count
     if (formData.staffCount && DATA_ELEMENT_MAP.staffCount) {
         dataValues.push({
             dataElement: DATA_ELEMENT_MAP.staffCount,
@@ -106,7 +76,6 @@ function inspectionToDHIS2Event(
         })
     }
 
-    // Classroom Count
     if (formData.classroomCount && DATA_ELEMENT_MAP.classroomCount) {
         dataValues.push({
             dataElement: DATA_ELEMENT_MAP.classroomCount,
@@ -114,7 +83,6 @@ function inspectionToDHIS2Event(
         })
     }
 
-    // Notes
     const notesValue = options?.categoryLabel
         ? `${options.categoryLabel}${formData.testFieldNotes ? ` - ${formData.testFieldNotes}` : ''}`
         : formData.testFieldNotes
@@ -125,9 +93,6 @@ function inspectionToDHIS2Event(
         })
     }
 
-    // Map status - DHIS2 event program status values
-    // Note: SCHEDULE is for scheduled events, but DHIS2 might require ACTIVE or COMPLETED
-    // For now, we'll use ACTIVE for scheduled/in_progress, COMPLETED for completed
     const statusMap = {
         scheduled: 'ACTIVE',
         in_progress: 'ACTIVE',
@@ -138,7 +103,7 @@ function inspectionToDHIS2Event(
         program: DHIS2_PROGRAM_UID,
         programStage: DHIS2_PROGRAM_STAGE_UID,
         orgUnit: inspection.orgUnit,
-        occurredAt: inspection.eventDate.split('T')[0], // YYYY-MM-DD format (Tracker API uses occurredAt)
+        occurredAt: inspection.eventDate.split('T')[0],
         status: statusMap[inspection.status],
         dataValues,
     }
@@ -151,9 +116,6 @@ function inspectionToDHIS2Event(
     return payload
 }
 
-/**
- * Sync a single inspection to DHIS2
- */
 export async function syncInspectionToDHIS2(
     inspection: Inspection,
     engine: DataEngine,
@@ -174,16 +136,10 @@ export async function syncInspectionToDHIS2(
             payload: eventPayload,
         })
 
-        // Use DHIS2 App Runtime engine to make the mutation
-        // App Runtime automatically prepends /api/ to the resource
-        // New Tracker API (v2.36+): Use '/api/tracker' endpoint with events wrapped in array
-        // This replaces the old /api/events endpoint
         const trackerPayload = {
             events: [eventPayload],
         }
 
-        // Use direct fetch() instead of DataEngine to properly include Authorization header
-        // DataEngine's mutate() doesn't support custom headers
         const url = `${getApiBase()}/tracker?async=false`
         const fetchResponse = await fetch(url, {
             method: 'POST',
@@ -225,12 +181,9 @@ export async function syncInspectionToDHIS2(
 
         console.log('DHIS2 sync response:', response)
 
-        // Check if the response contains the event ID
-        // New tracker API response structure
         let eventId = options?.dhis2EventIdOverride || inspection.dhis2EventId
 
         if (!isUpdate) {
-            // Try multiple possible response paths for new tracker API
             eventId =
                 response?.bundleReport?.typeReportMap?.EVENT?.objectReports?.[0]?.uid ??
                 response?.response?.bundleReport?.typeReportMap?.EVENT?.objectReports?.[0]?.uid ??
@@ -256,11 +209,9 @@ export async function syncInspectionToDHIS2(
     } catch (error) {
         console.error('Failed to sync inspection to DHIS2:', error)
 
-        // Try to extract DHIS2 error details
         let errorMessage = 'Unknown error'
         if (error instanceof Error) {
             errorMessage = error.message
-            // Log the full error message to see DHIS2's response
             console.error('Sync error details:', error.message)
         }
 
@@ -277,9 +228,6 @@ export async function syncInspectionToDHIS2(
     }
 }
 
-/**
- * Sync all unsynced inspections to DHIS2
- */
 const computeSyncStatus = (statusMap: Record<string, SyncStatus>): SyncStatus => {
     const values = Object.values(statusMap)
     if (values.includes('sync_failed')) return 'sync_failed'
@@ -396,12 +344,8 @@ export async function syncAllInspections(engine: DataEngine): Promise<{
     }
 }
 
-/**
- * Check if there are any unsynced inspections
- */
 export async function hasUnsyncedInspections(): Promise<boolean> {
     try {
-        // Treat missing syncStatus as unsynced to be safe
         const [unsynced, failed, all] = await Promise.all([
             getInspectionsBySyncStatus('not_synced'),
             getInspectionsBySyncStatus('sync_failed'),
