@@ -11,9 +11,10 @@ interface Props {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    mode?: "start" | "schedule";
 }
 
-export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Props) => {
+export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess, mode = "start" }: Props) => {
     const [selectedOrgUnit, setSelectedOrgUnit] = useState('');
     const [eventDate, setEventDate] = useState('');
     const [startTime, setStartTime] = useState('16:00');
@@ -81,7 +82,7 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleStartInspection = async () => {
+    const handleSubmit = async () => {
         if (!validateForm()) return;
 
         setIsCreating(true);
@@ -98,7 +99,7 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
                 eventDate: eventDate + 'T' + startTime + ':00',
                 scheduledStartTime: startTime,
                 scheduledEndTime: endTime,
-                status: 'scheduled' as const,
+                status: mode === "schedule" ? 'scheduled' as const : 'in_progress' as const,
                 formData: {
                     textbooks: 0,
                     desks: 0,
@@ -118,12 +119,12 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
             onSuccess();
             onClose();
             
-            if (newInspection && newInspection.id) {
+            if (mode === "start" && newInspection && newInspection.id) {
                 navigate(`/inspection/${newInspection.id}`);
             }
         } catch (error) {
             console.error('Error creating inspection:', error);
-            setErrors({ submit: 'Failed to start inspection. Please try again.' });
+            setErrors({ submit: mode === "schedule" ? 'Failed to schedule inspection. Please try again.' : 'Failed to start inspection. Please try again.' });
         } finally {
             setIsCreating(false);
         }
@@ -250,13 +251,13 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess }: Prop
                         Discard
                     </Button>
                     <Button
-                        onClick={handleStartInspection}
+                        onClick={handleSubmit}
                         loading={isCreating}
                         disabled={isCreating}
                         className={styles.startButton}
                         style={{ backgroundColor: '#1D2B36', color: '#F1F5F9', border: 'none' }}
                     >
-                        Start Inspection
+                        {mode === "schedule" ? "Schedule inspection" : "Start inspection"}
                     </Button>
                 </div>
             </div>

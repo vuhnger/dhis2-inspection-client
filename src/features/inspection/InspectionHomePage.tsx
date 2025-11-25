@@ -30,6 +30,8 @@ const InspectionHomePage: React.FC = () => {
     const [showAllUpcoming, setShowAllUpcoming] = React.useState(false)
     const [showAllCompleted, setShowAllCompleted] = React.useState(false)
     const [showDiscardToast, setShowDiscardToast] = React.useState(false)
+    const [isFabMenuOpen, setIsFabMenuOpen] = React.useState(false)
+    const [createMode, setCreateMode] = React.useState<"start" | "schedule">("start")
     const [discardedInspectionInfo, setDiscardedInspectionInfo] = React.useState<{id: string, name: string} | null>(null)
     const loading = remoteLoading
     const localHasUnsynced = React.useMemo(
@@ -617,13 +619,75 @@ const InspectionHomePage: React.FC = () => {
                 </section>
             </main>
 
-            <button className={classes.fab} onClick={() => setIsCreateModalOpen(true)}>
+            <button
+                className={classes.fab}
+                onClick={() => setIsFabMenuOpen((prev) => !prev)}
+                aria-haspopup="menu"
+                aria-expanded={isFabMenuOpen}
+            >
                 <span className={classes.fabIcon}>+</span>
             </button>
+
+            {isFabMenuOpen && (
+                <div
+                    className={classes.fabMenu}
+                    role="menu"
+                    aria-label={i18n.t('Inspection actions')}
+                    style={{
+                        bottom: 40 + 112 / 2 - 56 / 2,
+                        right: 40 + 72 + 16,
+                    }}
+                >
+                    <div className={classes.fabMenuList}>
+                        <button
+                            type="button"
+                            className={classes.fabMenuItem}
+                            role="menuitem"
+                            onClick={() => {
+                                setIsFabMenuOpen(false)
+                                setCreateMode("start")
+                                setIsCreateModalOpen(true)
+                            }}
+                        >
+                            <svg
+                                className={classes.fabMenuIcon}
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path d="M4.6 2.04C4.73 2.01 4.86 2 5 2H12V4H5V20H19V12H21V20C21 21.1 20.1 22 19 22H5C4.86 22 4.73 21.99 4.6 21.97C4.21 21.89 3.86 21.69 3.59 21.42C3.41 21.23 3.26 21.02 3.16 20.78C3.06 20.54 3 20.27 3 20V4C3 3.72 3.06 3.46 3.16 3.23C3.26 2.99 3.41 2.77 3.59 2.59C3.86 2.32 4.21 2.12 4.6 2.04Z" fill="#007DEB"/>
+                                <path d="M17.5809 3.09773L18.3583 2.32029C18.7854 1.89324 19.4752 1.89324 19.9023 2.32029L20.6797 3.09773C21.1068 3.52478 21.1068 4.21462 20.6797 4.64167L19.9023 5.41912L17.5809 3.09773ZM16.8034 3.87518L11 9.67864V12H13.3214L19.1248 6.19656L16.8034 3.87518Z" fill="#007DEB"/>
+                            </svg>
+                            <span className={classes.fabMenuLabel}>{i18n.t('New inspection')}</span>
+                        </button>
+                        <button
+                            type="button"
+                            className={classes.fabMenuItem}
+                            role="menuitem"
+                            onClick={() => {
+                                setIsFabMenuOpen(false)
+                                setCreateMode("schedule")
+                                setIsCreateModalOpen(true)
+                            }}
+                        >
+                            <svg
+                                className={classes.fabMenuIcon}
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path d="M19 4H18V2H16V4H8V2H6V4H5C3.89 4 3.01 4.9 3.01 6L3 20C3 21.1 3.89 22 5 22H19C20.1 22 21 21.1 21 20V6C21 4.9 20.1 4 19 4ZM19 20H5V10H19V20ZM19 8H5V6H19V8ZM12 13H17V18H12V13Z" fill="#007DEB"/>
+                            </svg>
+                            <span className={classes.fabMenuLabel}>{i18n.t('Schedule inspection')}</span>
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <CreateInspectionBottomSheet
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
+                mode={createMode}
                 onSuccess={async () => {
                     await refetchInspections()
                     if (isOnline) {
