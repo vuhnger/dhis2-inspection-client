@@ -57,6 +57,8 @@ const SummaryScreen: React.FC = () => {
 
       <div className={styles.content}>
         {categoryList.length > 0 && (
+          <>
+          <div className={styles.levelLabel}>Level</div>
           <div className={styles.tabRow}>
             {categoryList.map((cat) => (
               <button
@@ -71,6 +73,7 @@ const SummaryScreen: React.FC = () => {
               </button>
             ))}
           </div>
+          </>
         )}
 
         <div className={styles.syncMeta}>
