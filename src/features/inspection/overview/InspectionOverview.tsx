@@ -1129,35 +1129,39 @@ const InspectionOverview: React.FC = () => {
                 )}
             </div>
 
-            {/* Complete Inspection Modal */}
-            <Modal 
-                hide={!showCompleteModal} 
-                onClose={() => setShowCompleteModal(false)} 
-                position="bottom"
-                large
-            >
-                <ModalTitle>{i18n.t('Complete inspection')}</ModalTitle>
-                <ModalContent>
-                    <p>{i18n.t('What would you like to do with this inspection?')}</p>
-                </ModalContent>
-                <ModalActions>
-                    <ButtonStrip>
-                        <Button 
-                            onClick={handleSeeSubmittedInspection}
-                            primary
-                            style={{ backgroundColor: '#4285f4', color: 'white' }}
-                        >
-                            {i18n.t('See summary')}
-                        </Button>
-                        <Button 
-                            onClick={handleDiscardInspection}
-                            secondary
-                        >
-                            {i18n.t('Discard')}
-                        </Button>
-                    </ButtonStrip>
-                </ModalActions>
-            </Modal>
+            {/* Complete Inspection Bottom Sheet */}
+            {showCompleteModal && (
+                <>
+                    <div 
+                        className={classes.bottomSheetOverlay}
+                        onClick={() => setShowCompleteModal(false)}
+                    />
+                    <div className={classes.bottomSheetShell}>
+                        <div className={classes.bottomSheetContent}>
+                            <h2 className={classes.bottomSheetTitle}>
+                                {i18n.t('Complete inspection')}
+                            </h2>
+                            <p className={classes.bottomSheetText}>
+                                {i18n.t('What would you like to do with this inspection?')}
+                            </p>
+                            <div className={classes.bottomSheetButtons}>
+                                <Button 
+                                    onClick={handleSeeSubmittedInspection}
+                                    className={classes.summaryButton}
+                                >
+                                    {i18n.t('See summary')}
+                                </Button>
+                                <Button 
+                                    onClick={handleDiscardInspection}
+                                    className={classes.discardButton}
+                                >
+                                    {i18n.t('Discard')}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
         </section>
     )
 }

@@ -635,6 +635,126 @@
   cursor: not-allowed;
 }
 
+/* Bottom Sheet Styles */
+.bottomSheetOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.bottomSheetShell {
+  /* Auto layout */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 24px 0px;
+  gap: 24px;
+  isolation: isolate;
+
+  width: 100vw;
+  height: 280px;
+
+  background: #FFFFFF;
+  border-radius: 28px 28px 0px 0px;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+
+  /* Positioning */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1001;
+}
+
+.bottomSheetContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 24px;
+  gap: 24px;
+  width: 100%;
+}
+
+.bottomSheetTitle {
+  font-family: 'Roboto', sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 24px;
+  text-align: center;
+  color: #000000;
+  margin: 0;
+}
+
+.bottomSheetText {
+  font-family: 'Roboto', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  color: #6B7280;
+  margin: 0;
+}
+
+.bottomSheetButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.summaryButton {
+  width: 100%;
+  height: 48px;
+  background: #4285F4 !important;
+  color: #FFFFFF !important;
+  border-radius: 24px !important;
+  border: none !important;
+  font-family: 'Roboto', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.summaryButton:hover {
+  background: #3367D6 !important;
+}
+
+.discardButton {
+  width: 100%;
+  height: 48px;
+  background: transparent !important;
+  color: #4285F4 !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 24px !important;
+  font-family: 'Roboto', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.discardButton:hover {
+  background: #F9FAFB !important;
+  border-color: #D1D5DB !important;
+}
+
 @media (min-width: 641px) {
   .page {
     max-width: 768px;
@@ -646,6 +766,13 @@
     box-shadow: none;
     max-width: 768px;
     margin: 0 auto;
-    background-color: ;
+    background-color: #E2F2FF;
+  }
+
+  .bottomSheetShell {
+    width: 100vw;
+    left: 0;
+    right: 0;
+    transform: none;
   }
 }
