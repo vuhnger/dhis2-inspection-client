@@ -894,30 +894,27 @@ const InspectionOverview: React.FC = () => {
                         </p>
                     </div>
 
-                    <span
-                        className={classes.syncedBadge}
-                        style={{
-                            backgroundColor: isSynced ? undefined : '#E5E7EB',
-                            color: isSynced ? undefined : '#374151',
-                        }}
-                    >
-                        <svg
-                            className={classes.syncedIcon}
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            role="img"
-                            aria-hidden="true"
-                        >
-                            <path
-                                d="M19.5 14.98C19.48 14.98 19.47 14.98 19.45 14.99C19.2 13.3 17.76 12 16 12C14.6 12 13.4 12.83 12.84 14.02C11.26 14.1 10 15.4 10 17C10 18.66 11.34 20 13 20L19.5 19.98C20.88 19.98 22 18.86 22 17.48C22 16.1 20.88 14.98 19.5 14.98ZM19.51 18H13C12.45 18 12 17.55 12 17C12 16.45 12.45 16 13 16H14.25V15.75C14.25 14.78 15.03 14 16 14C16.97 14 17.75 14.78 17.75 15.75V17C17.75 17 19.5 17 19.51 17C19.79 17 20.01 17.22 20.01 17.5C20 17.77 19.78 18 19.51 18ZM8 4.26V6.35C5.67 7.18 4 9.39 4 12C4 13.77 4.78 15.34 6 16.44V14H8V20H2V18H4.73C3.06 16.54 2 14.4 2 12C2 8.27 4.55 5.15 8 4.26ZM18 6H15.27C16.7 7.26 17.68 9.01 17.93 11H15.91C15.68 9.64 14.98 8.45 14 7.56V10H12V4H18V6Z"
-                                fill="currentColor"
-                            />
-                        </svg>
-                        <span>{isSynced ? i18n.t('Synced') : i18n.t('Not synced')}</span>
-                    </span>
+                    <div className={classes.headerRight}>
+                        <button type="button" className={classes.profileIcon} aria-label={i18n.t('User profile')}>
+                            <svg
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
+                                    fill="currentColor"
+                                />
+                                <path
+                                    d="M4 20C4 16.6863 6.68629 14 10 14H14C17.3137 14 20 16.6863 20 20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V20Z"
+                                    fill="currentColor"
+                                />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <div className={classes.schoolInfoDropdown}>
@@ -935,19 +932,6 @@ const InspectionOverview: React.FC = () => {
                             </button>
                         ))}
                     </div>
-                    <div className={classes.syncMeta}>
-                        <span className={classes.syncMetaStatus}>
-                            {i18n.t('Status')}: {activeCategorySyncStatus || i18n.t('Unknown')}
-                        </span>
-                        {activeCategoryEventId ? (
-                            <span className={classes.syncMetaEvent}>
-                                {i18n.t('Event ID')}: {activeCategoryEventId}
-                            </span>
-                        ) : null}
-                        {inspection?.source === 'server' ? (
-                            <span className={classes.syncMetaSource}>{i18n.t('From server')}</span>
-                        ) : null}
-                    </div>
                 </div>
 
                 <div className={classes.categories}>
@@ -960,8 +944,8 @@ const InspectionOverview: React.FC = () => {
                         aria-label={i18n.t('Staff')}
                     >
                         <div className={classes.categoryIcon}>
-                            <svg className={classes.staffLogo} width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M19 4H14.82C14.4 2.84 13.3 2 12 2C10.7 2 9.6 2.84 9.18 4H5C3.9 4 3 4.9 3 6V20C3 21.1 3.9 22 5 22H19C20.1 22 21 21.1 21 20V6C21 4.9 20.1 4 19 4ZM12 3.75C12.22 3.75 12.41 3.85 12.55 4C12.67 4.13 12.75 4.31 12.75 4.5C12.75 4.91 12.41 5.25 12 5.25C11.59 5.25 11.25 4.91 11.25 4.5C11.25 4.31 11.33 4.13 11.45 4C11.59 3.85 11.78 3.75 12 3.75ZM19 20H5V6H19V20ZM12 7C10.35 7 9 8.35 9 10C9 11.65 10.35 13 12 13C13.65 13 15 11.65 15 10C15 8.35 13.65 7 12 7ZM12 11C11.45 11 11 10.55 11 10C11 9.45 11.45 9 12 9C12.55 9 13 9.45 13 10C13 10.55 12.55 11 12 11ZM6 17.47V19H18V17.47C18 14.97 14.03 13.89 12 13.89C9.97 13.89 6 14.96 6 17.47ZM8.31 17C9 16.44 10.69 15.88 12 15.88C13.31 15.88 15.01 16.44 15.69 17H8.31Z" fill="black"/>
+                            <svg className={classes.staffLogo} width="91" height="91" viewBox="0 0 91 91" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M71.7374 15.1026H55.9552C54.3695 10.7228 50.2163 7.55127 45.3079 7.55127C40.3996 7.55127 36.2464 10.7228 34.6606 15.1026H18.8784C14.7252 15.1026 11.3271 18.5006 11.3271 22.6538V75.5128C11.3271 79.666 14.7252 83.0641 18.8784 83.0641H71.7374C75.8906 83.0641 79.2887 79.666 79.2887 75.5128V22.6538C79.2887 18.5006 75.8906 15.1026 71.7374 15.1026ZM45.3079 14.1586C46.1386 14.1586 46.8559 14.5362 47.3845 15.1026C47.8376 15.5934 48.1397 16.273 48.1397 16.9904C48.1397 18.5384 46.8559 19.8221 45.3079 19.8221C43.7599 19.8221 42.4762 18.5384 42.4762 16.9904C42.4762 16.273 42.7782 15.5934 43.2313 15.1026C43.7599 14.5362 44.4773 14.1586 45.3079 14.1586ZM71.7374 75.5128H18.8784V22.6538H71.7374V75.5128ZM45.3079 26.4295C39.0781 26.4295 33.981 31.5266 33.981 37.7564C33.981 43.9862 39.0781 49.0833 45.3079 49.0833C51.5377 49.0833 56.6348 43.9862 56.6348 37.7564C56.6348 31.5266 51.5377 26.4295 45.3079 26.4295ZM45.3079 41.532C43.2313 41.532 41.5323 39.833 41.5323 37.7564C41.5323 35.6798 43.2313 33.9808 45.3079 33.9808C47.3845 33.9808 49.0836 35.6798 49.0836 37.7564C49.0836 39.833 47.3845 41.532 45.3079 41.532ZM22.6541 65.9604V71.7372H67.9618V65.9604C67.9618 56.5213 52.9725 52.4436 45.3079 52.4436C37.6434 52.4436 22.6541 56.4836 22.6541 65.9604ZM31.3758 64.1859C33.981 62.0715 40.3618 59.9572 45.3079 59.9572C50.254 59.9572 56.6726 62.0715 59.24 64.1859H31.3758Z" fill="#007DEB"/>
                             </svg>
                         </div>
                         <span className={classes.categoryLabel}>{i18n.t('Staff')}</span>
