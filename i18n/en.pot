@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-25T11:46:52.319Z\n"
-"PO-Revision-Date: 2025-11-25T11:46:52.319Z\n"
+"POT-Creation-Date: 2025-11-25T12:12:46.348Z\n"
+"PO-Revision-Date: 2025-11-25T12:12:46.348Z\n"
 
 msgid "Never pulled"
 msgstr "Never pulled"
@@ -223,3 +223,11 @@ msgstr "What would you like to do with this inspection?"
 
 msgid "Discard"
 msgstr "Discard"
+
+msgctxt "Application title"
+msgid "__MANIFEST_APP_TITLE"
+msgstr "in5320-group-16"
+
+msgctxt "Application description"
+msgid "__MANIFEST_APP_DESCRIPTION"
+msgstr ""

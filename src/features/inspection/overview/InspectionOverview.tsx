@@ -391,17 +391,8 @@ const InspectionOverview: React.FC = () => {
         return isCategoryComplete(selectedCategory, form)
     }, [activeCategoryId, categoryForms, isCategoryComplete, selectedCategory])
 
-    // Check if all categories are complete
-    const allFormsComplete = React.useMemo(() => {
-        const categoriesList: Category[] = ['resources', 'students', 'staff', 'facilities']
-        return (
-            categoryList.every((cat) => {
-                const form = categoryForms[cat.id] || DEFAULT_FORM
-                return categoriesList.every((category) => isCategoryComplete(category, form))
-            }) && categoryList.length > 0
-        )
-    }, [categoryForms, categoryList, isCategoryComplete])
-    const submitDisabled = !allFormsComplete
+    // Submit is enabled when the active category is valid
+    const submitDisabled = !currentCategoryValid
     const currentCategoryIndex = CATEGORY_ORDER.indexOf(selectedCategory)
     const previousCategory = currentCategoryIndex > 0 ? CATEGORY_ORDER[currentCategoryIndex - 1] : null
     const nextCategory = currentCategoryIndex < CATEGORY_ORDER.length - 1 ? CATEGORY_ORDER[currentCategoryIndex + 1] : null
@@ -454,6 +445,10 @@ const InspectionOverview: React.FC = () => {
         inspection?.categorySyncStatus?.[activeCategoryId] || inspection?.syncStatus
     const activeCategoryEventId =
         inspection?.categoryEventIds?.[activeCategoryId] || inspection?.dhis2EventId
+    const missingFieldsText = React.useMemo(() => {
+        const missing = Object.keys(errors || {}).filter((key) => (errors as any)?.[key])
+        return missing.join(', ')
+    }, [errors])
 
     const handleCompleteInspection = () => {
         setShowCompleteModal(true)
@@ -463,14 +458,12 @@ const InspectionOverview: React.FC = () => {
         const nextErrors: Record<string, Partial<Record<keyof FormState, string>>> = {}
         let hasErrors = false
 
-        categoryList.forEach((cat) => {
-            const form = categoryForms[cat.id] || DEFAULT_FORM
-            const errors = validateAll(form)
-            if (Object.keys(errors).length > 0) {
-                hasErrors = true
-            }
-            nextErrors[cat.id] = errors
-        })
+        const activeForm = categoryForms[activeCategoryId] || DEFAULT_FORM
+        const errors = validateAll(activeForm)
+        if (Object.keys(errors).length > 0) {
+            hasErrors = true
+        }
+        nextErrors[activeCategoryId] = errors
 
         setCategoryErrors(nextErrors)
         setWasSubmitted(true)
@@ -487,20 +480,19 @@ const InspectionOverview: React.FC = () => {
             > = {}
             const categorySyncStatus: Record<string, SyncStatus> = {}
 
-            categoryList.forEach((cat) => {
-                const form = categoryForms[cat.id] || DEFAULT_FORM
-                const existing = inspection?.formDataByCategory?.[cat.id]
-                const existingEvent = inspection?.categoryEventIds?.[cat.id] || existing?.dhis2EventId
+            const form = categoryForms[activeCategoryId] || DEFAULT_FORM
+            const existing = inspection?.formDataByCategory?.[activeCategoryId]
+            const existingEvent =
+                inspection?.categoryEventIds?.[activeCategoryId] || existing?.dhis2EventId
 
-                formDataByCategory[cat.id] = {
-                    formData: form,
-                    dhis2EventId: existingEvent,
-                    syncStatus: 'not_synced',
-                }
-                categorySyncStatus[cat.id] = 'not_synced'
-            })
+            formDataByCategory[activeCategoryId] = {
+                formData: form,
+                dhis2EventId: existingEvent,
+                syncStatus: 'not_synced',
+            }
+            categorySyncStatus[activeCategoryId] = 'not_synced'
 
-            const firstForm = categoryForms[categoryList[0]?.id] || DEFAULT_FORM
+            const firstForm = form
 
             await updateInspection({
                 formData: firstForm,
@@ -1100,7 +1092,20 @@ const InspectionOverview: React.FC = () => {
 
                 {wasSubmitted && !submissionSucceeded ? (
                     <NoticeBox warning title={i18n.t('Validation Required')}>
-                        {i18n.t('Please complete all categories before submitting.')}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            <span>{i18n.t('Please fill the required fields before submitting:')}</span>
+                            {Object.entries(categoryErrors).map(([catId, errMap]) => {
+                                const missing = Object.keys(errMap || {}).filter((key) => errMap?.[key as keyof FormState])
+                                if (!missing.length) return null
+                                const catName =
+                                    categoryList.find((c) => c.id === catId)?.name || catId || i18n.t('Category')
+                                return (
+                                    <span key={catId}>
+                                        {catName}: {missing.join(', ')}
+                                    </span>
+                                )
+                            })}
+                        </div>
                     </NoticeBox>
                 ) : null}
 
@@ -1136,7 +1141,11 @@ const InspectionOverview: React.FC = () => {
                         <span className={classes.buttonWrapper}>{summaryButton}</span>
                         {submitDisabled ? (
                             <Tooltip
-                                content={i18n.t('Please complete all categories before submitting.')}
+                                content={
+                                    missingFieldsText
+                                        ? i18n.t('Missing: {{fields}}', { fields: missingFieldsText })
+                                        : i18n.t('Please fill the required fields before submitting.')
+                                }
                                 placement="top"
                             >
                                 <span className={classes.buttonWrapper}>{submitButton}</span>
