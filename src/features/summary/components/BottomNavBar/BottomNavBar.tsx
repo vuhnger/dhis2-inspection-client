@@ -1,6 +1,7 @@
+import { FileText, Edit3 } from "lucide-react";
 import React from "react";
 import { useNavigate, useLocation, useParams, } from "react-router-dom";
-import { FileText, Edit3 } from "lucide-react";
+
 import styles from "./BottomNavBar.module.css";
 
 const BottomNavBar: React.FC = () => {

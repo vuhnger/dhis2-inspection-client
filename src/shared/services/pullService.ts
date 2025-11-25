@@ -1,5 +1,6 @@
-import { getApiBase, getAuthHeader } from '../utils/auth'
 import { getAllInspections, saveInspection, updateInspection } from '../db/indexedDB'
+import { getApiBase, getAuthHeader } from '../utils/auth'
+
 import type { Inspection, InspectionFormData } from '../types/inspection'
 
 const DHIS_STATUS_MAP: Record<string, Inspection['status']> = {

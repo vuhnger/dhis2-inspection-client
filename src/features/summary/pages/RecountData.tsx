@@ -1,20 +1,22 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { Info, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
-import styles from "../RecountData.module.css";
-import { Button, TextArea } from "@dhis2/ui";
 import i18n from '@dhis2/d2-i18n'
-
-import TopHeader from "../components/TopHeader/TopHeader";
+import { Button, TextArea } from "@dhis2/ui";
+import { Info, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { getAllInspections, getInspectionById } from "../../../shared/db";
+import TopHeader from "../components/TopHeader/TopHeader";
+import styles from "../RecountData.module.css";
+
+
+
 import type { Inspection, InspectionFormData } from "../../../shared/types/inspection";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                              */
 /* ------------------------------------------------------------------ */
 
-type RowStatus = "ok" | "warning" | "error";
+type RowStatus = "up" | "down" | "neutral";
 
 interface ResourceRowProps {
     item: string;
@@ -195,29 +197,29 @@ function buildCategoriesFromInspection(inspection: Inspection): CategoryMeta[] {
 /* ------------------------------------------------------------------ */
 
 function getStatusFromPercentDiff(percentDiff: number): RowStatus {
-    if (percentDiff <= -20) return "error"; // big drop
-    if (percentDiff < 0) return "warning"; // small drop
-    return "ok"; // same or increase
+    if (percentDiff > 0) return "up";
+    if (percentDiff < 0) return "down";
+    return "neutral";
 }
 
 const getStatusIcon = (status: RowStatus) => {
     switch (status) {
-        case "ok":
+        case "up":
             return (
-                <div className={`${styles.statusIcon} ${styles.statusOk}`}>
-                    <CheckCircle2 size={16} />
+                <div className={`${styles.statusIcon} ${styles.statusUp}`}>
+                    <TrendingUp size={16} />
                 </div>
             );
-        case "warning":
+        case "down":
             return (
-                <div className={`${styles.statusIcon} ${styles.statusWarning}`}>
-                    <AlertTriangle size={16} />
+                <div className={`${styles.statusIcon} ${styles.statusDown}`}>
+                    <TrendingDown size={16} />
                 </div>
             );
-        case "error":
+        case "neutral":
             return (
-                <div className={`${styles.statusIcon} ${styles.statusError}`}>
-                    <XCircle size={16} />
+                <div className={`${styles.statusIcon} ${styles.statusNeutral}`}>
+                    <Minus size={16} />
                 </div>
             );
         default:

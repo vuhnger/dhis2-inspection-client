@@ -1,5 +1,5 @@
-import React from 'react'
 import { Provider } from '@dhis2/app-runtime'
+import React from 'react'
 
 // './locales' will be populated after running start or build scripts
 import './locales'

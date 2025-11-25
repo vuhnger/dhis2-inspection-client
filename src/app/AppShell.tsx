@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 import InspectionHomePage from '../features/inspection/InspectionHomePage'
+
 import classes from './AppShell.module.css'
 import { routes } from './routes'
 

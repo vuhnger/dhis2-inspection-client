@@ -1,6 +1,7 @@
-import type { ObtainedInspectionData } from "../hooks/useInspection";
-import type { MetricCardProps } from "../components/MetricCard/MetricCard";
 import { evaluateMetric } from "../EvaluationHelpers";
+
+import type { MetricCardProps } from "../components/MetricCard/MetricCard";
+import type { ObtainedInspectionData } from "../hooks/useInspection";
 
 
 function getPercentDiff(current: number, previous?: number): number {

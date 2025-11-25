@@ -4,6 +4,7 @@
  */
 
 import { createInspection } from '../db/indexedDB'
+
 import type { CreateInspectionInput } from '../types/inspection'
 
 /**

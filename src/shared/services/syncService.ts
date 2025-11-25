@@ -2,8 +2,8 @@
  * Sync Service - Handles synchronization of local inspections to DHIS2
  */
 
-import { updateInspection, getInspectionsBySyncStatus, getAllInspections, saveInspection } from '../db/indexedDB'
 import { DHIS2_PROGRAM_STAGE_UID, DHIS2_PROGRAM_UID } from '../config/dhis2'
+import { updateInspection, getInspectionsBySyncStatus, getAllInspections, saveInspection } from '../db/indexedDB'
 import { getAuthHeader, getApiBase } from '../utils/auth'
 
 import type { Inspection, InspectionFormData, SyncStatus } from '../types/inspection'
