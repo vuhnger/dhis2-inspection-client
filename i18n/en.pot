@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-12-03T12:23:28.705Z\n"
-"PO-Revision-Date: 2025-12-03T12:23:28.706Z\n"
+"POT-Creation-Date: 2025-12-03T13:19:52.864Z\n"
+"PO-Revision-Date: 2025-12-03T13:19:52.864Z\n"
 
 msgid "Today"
 msgstr "Today"
@@ -76,6 +76,9 @@ msgstr "Inspection discarded"
 
 msgid "Undo"
 msgstr "Undo"
+
+msgid "Cannot start future inspection"
+msgstr "Cannot start future inspection"
 
 msgid "School type"
 msgstr "School type"

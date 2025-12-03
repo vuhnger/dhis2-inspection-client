@@ -33,6 +33,7 @@ const InspectionHomePage: React.FC = () => {
     const [isFabMenuOpen, setIsFabMenuOpen] = React.useState(false)
     const [createMode, setCreateMode] = React.useState<"start" | "schedule">("start")
     const [discardedInspectionInfo, setDiscardedInspectionInfo] = React.useState<{id: string, name: string} | null>(null)
+    const [showFutureWarning, setShowFutureWarning] = React.useState(false)
     const loading = remoteLoading
     const localHasUnsynced = React.useMemo(
         () => localInspections.some((inspection) => inspection.syncStatus !== 'synced'),
@@ -111,6 +112,16 @@ const InspectionHomePage: React.FC = () => {
             return () => clearTimeout(timer)
         }
     }, [showDiscardToast])
+
+    React.useEffect(() => {
+        if (showFutureWarning) {
+            const timer = setTimeout(() => {
+                setShowFutureWarning(false)
+            }, 4000)
+            
+            return () => clearTimeout(timer)
+        }
+    }, [showFutureWarning])
 
     const pullRemote = React.useCallback(async () => {
         if (!isOnline) {
@@ -194,6 +205,20 @@ const InspectionHomePage: React.FC = () => {
             days: Math.abs(diffDays),
             isPast: diffDays < 0,
         }
+    }
+
+    const isInspectionToday = (dateString: string): boolean => {
+        const eventDate = new Date(dateString)
+        const today = new Date()
+        return eventDate.toDateString() === today.toDateString()
+    }
+
+    const handleInspectionCardClick = (inspection: any) => {
+        if (!isInspectionToday(inspection.eventDate)) {
+            setShowFutureWarning(true)
+            return
+        }
+        navigate(`/inspection/${inspection.id}`)
     }
 
     const formatRelativeDays = (days: number, isPast: boolean): string => {
@@ -494,16 +519,16 @@ const InspectionHomePage: React.FC = () => {
                                 <div
                                     key={inspection.id}
                                     className={`${classes.inspectionCard} ${isPast ? classes.inspectionCardOverdue : ''}`}
-                                    onClick={() => navigate(`/inspection/${inspection.id}`)}
+                                    onClick={() => handleInspectionCardClick(inspection)}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' || e.key === ' ') {
                                             e.preventDefault()
-                                            navigate(`/inspection/${inspection.id}`)
+                                            handleInspectionCardClick(inspection)
                                         }
                                     }}
                                     role="button"
                                     tabIndex={0}
-                                    style={{ cursor: 'pointer' }}
+                                    style={{ cursor: isInspectionToday(inspection.eventDate) ? 'pointer' : 'not-allowed' }}
                                 >
                                     <div className={classes.cardLeft}>
                                         <div className={classes.avatarCircle}>LH</div>
@@ -764,6 +789,14 @@ const InspectionHomePage: React.FC = () => {
                     >
                         {i18n.t('Undo')}
                     </button>
+                </div>
+            )}
+
+            {showFutureWarning && (
+                <div className={classes.discardToast} style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FCA5A5', textAlign: 'center', justifyContent: 'center' }}>
+                    <span className={classes.toastMessage} style={{ whiteSpace: 'normal' }}>
+                        {i18n.t('Cannot start future inspection')}
+                    </span>
                 </div>
             )}
         </div>
