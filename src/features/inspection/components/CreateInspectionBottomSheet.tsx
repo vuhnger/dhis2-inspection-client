@@ -28,6 +28,16 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess, mode =
     const { orgUnits, loading: orgUnitsLoading } = useAccessibleOrgUnits();
     const navigate = useNavigate();
 
+    // Check if selected date is today
+    const isDateToday = (dateString: string): boolean => {
+        if (!dateString) return false;
+        const selectedDate = new Date(dateString);
+        const today = new Date();
+        return selectedDate.toDateString() === today.toDateString();
+    };
+
+    const canStartInspection = isDateToday(eventDate);
+
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
             if (e.key === 'Escape' && isOpen) {
@@ -65,6 +75,11 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess, mode =
             if (selectedDate < today) {
                 newErrors.eventDate = 'Date cannot be in the past';
             }
+        }
+
+        // Additional validation for starting inspections
+        if (mode === "start" && eventDate && !isDateToday(eventDate)) {
+            newErrors.eventDate = 'You can only start inspections scheduled for today';
         }
 
         if (!startTime) {
@@ -223,6 +238,12 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess, mode =
                             />
                         </div>
 
+                        {mode === "start" && eventDate && !canStartInspection && (
+                            <div className={styles.infoBox} style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FCA5A5' }}>
+                                You can only start inspections scheduled for today. To work with future dates, use "Schedule inspection" instead.
+                            </div>
+                        )}
+
                         {errors.submit && (
                             <div className={styles.infoBox} style={{ background: '#fee', color: '#c33' }}>
                                 {errors.submit}
@@ -257,9 +278,15 @@ export const CreateInspectionBottomSheet = ({ isOpen, onClose, onSuccess, mode =
                             }
                         }}
                         loading={isCreating}
-                        disabled={isCreating}
+                        disabled={isCreating || (mode === "start" && !canStartInspection)}
                         className={styles.startButton}
-                        style={{ backgroundColor: '#1D2B36', color: '#F1F5F9', border: 'none' }}
+                        style={{ 
+                            backgroundColor: mode === "start" && !canStartInspection ? '#DC2626' : '#1D2B36', 
+                            color: '#F1F5F9', 
+                            border: 'none',
+                            opacity: mode === "start" && !canStartInspection ? 0.7 : 1,
+                            cursor: mode === "start" && !canStartInspection ? 'not-allowed' : 'pointer'
+                        }}
                     >
                         {mode === "schedule" ? "Schedule inspection" : "Start inspection"}
                     </Button>

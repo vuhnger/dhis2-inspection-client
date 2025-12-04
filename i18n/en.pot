@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2025-11-25T18:03:37.662Z\n"
-"PO-Revision-Date: 2025-11-25T18:03:37.662Z\n"
+"POT-Creation-Date: 2025-12-03T13:19:52.864Z\n"
+"PO-Revision-Date: 2025-12-03T13:19:52.864Z\n"
 
 msgid "Today"
 msgstr "Today"
@@ -17,29 +17,32 @@ msgstr "Never pulled"
 msgid "Syncing..."
 msgstr "Syncing..."
 
-msgid "Not synced"
-msgstr "Not synced"
+msgid "Refreshing..."
+msgstr "Refreshing..."
 
-msgid "Tap to sync"
-msgstr "Tap to sync"
+msgid "Sync & Refresh"
+msgstr "Sync & Refresh"
 
-msgid "Connect to sync"
-msgstr "Connect to sync"
+msgid "Offline"
+msgstr "Offline"
 
-msgid "Synced"
-msgstr "Synced"
+msgid "Refresh"
+msgstr "Refresh"
 
-msgid "Pulling..."
-msgstr "Pulling..."
-
-msgid "Refresh from server"
-msgstr "Refresh from server"
+msgid "Up to date"
+msgstr "Up to date"
 
 msgid "Reset all local data"
 msgstr "Reset all local data"
 
 msgid "No upcoming inspections scheduled"
 msgstr "No upcoming inspections scheduled"
+
+msgid "Synced"
+msgstr "Synced"
+
+msgid "Not synced"
+msgstr "Not synced"
 
 msgid "From server"
 msgstr "From server"
@@ -74,23 +77,20 @@ msgstr "Inspection discarded"
 msgid "Undo"
 msgstr "Undo"
 
+msgid "Cannot start future inspection"
+msgstr "Cannot start future inspection"
+
 msgid "School type"
 msgstr "School type"
 
 msgid "Enter a non-negative number"
 msgstr "Enter a non-negative number"
 
-msgid "Total student count is required"
-msgstr "Total student count is required"
-
 msgid "Male student count is required"
 msgstr "Male student count is required"
 
 msgid "Female student count is required"
 msgstr "Female student count is required"
-
-msgid "Total students cannot be less than male + female students"
-msgstr "Total students cannot be less than male + female students"
 
 msgid "Staff count is required"
 msgstr "Staff count is required"
@@ -116,23 +116,14 @@ msgstr "Decrease chairs"
 msgid "Increase chairs"
 msgstr "Increase chairs"
 
-msgid "Test field"
-msgstr "Test field"
-
-msgid "Optional"
-msgstr "Optional"
+msgid "Inspection note"
+msgstr "Inspection note"
 
 msgid "Additional notes on resources"
 msgstr "Additional notes on resources"
 
 msgid "Total Students"
 msgstr "Total Students"
-
-msgid "Decrease total students"
-msgstr "Decrease total students"
-
-msgid "Increase total students"
-msgstr "Increase total students"
 
 msgid "Male Students"
 msgstr "Male Students"
@@ -176,23 +167,11 @@ msgstr "Inspection not found"
 msgid "The requested inspection could not be found."
 msgstr "The requested inspection could not be found."
 
-msgid "Hide summary"
-msgstr "Hide summary"
-
-msgid "Submit"
-msgstr "Submit"
-
 msgid "Complete inspection"
 msgstr "Complete inspection"
 
-msgid "Status"
-msgstr "Status"
-
-msgid "Unknown"
-msgstr "Unknown"
-
-msgid "Event ID"
-msgstr "Event ID"
+msgid "User profile"
+msgstr "User profile"
 
 msgid "Staff"
 msgstr "Staff"
@@ -241,6 +220,9 @@ msgstr "Sync Error"
 
 msgid "What would you like to do with this inspection?"
 msgstr "What would you like to do with this inspection?"
+
+msgid "Submit"
+msgstr "Submit"
 
 msgid "Discard"
 msgstr "Discard"
