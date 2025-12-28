@@ -60,8 +60,8 @@ In the future, being able to capture more data would improve functionality. Addi
 **Deployed App**: [https://research.im.dhis2.org/in5320g16/apps/in5320-group-16](https://research.im.dhis2.org/in5320g16/apps/in5320-group-16)
 
 Login with these credentials:
-- **Username**: `in5320`
-- **Password**: `P1@tform`
+- **Username**: `<your-username>`
+- **Password**: `<your-password>`
 
 ## Technical Details
 
